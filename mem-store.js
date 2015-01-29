@@ -1,77 +1,22 @@
-/* Copyright (c) 2010-2014 Richard Rodger, MIT License */
+/* Copyright (c) 2010-2015 Richard Rodger, MIT License */
+/* jshint node:true, asi:true, eqnull:true */
 "use strict";
 
 
-/* Copyright (c) 2010-2013 Richard Rodger */
-"use strict"
-
-
-var _       = require('underscore')
+var _       = require('lodash')
 var fs      = require('fs')
-
-
-
-function list(si,entmap,qent,q,cb) {
-  var list = []
-
-  var canon = qent.canon$({object:true})
-  var base = canon.base
-  var name = canon.name
-
-  var entset = entmap[base] ? entmap[base][name] : null ;
-    
-  if( entset ) {
-    _.keys(entset).forEach(function(id){
-      var ent = entset[id]
-      
-      for(var p in q) {
-        if( !~p.indexOf('$') && q[p] != ent[p] ) {
-          return
-        }
-      }
-      
-      ent = qent.make$(ent)
-
-      list.push(ent)
-    })
-  }
-
-  // sort first
-  if( q.sort$ ) {
-    for( var sf in q.sort$ ) break;
-    var sd = q.sort$[sf] < 0 ? -1 : 1
-
-    list = list.sort(function(a,b){
-      return sd * ( a[sf] < b[sf] ? -1 : a[sf] === b[sf] ? 0 : 1 )
-    })
-  }
-
-
-  if( q.skip$ ) {
-    list = list.slice(q.skip$)
-  }
-
-  if( q.limit$ ) {
-    list = list.slice(0,q.limit$)
-  }
-
-  
-  cb.call(si,null,list)
-}
-
 
 
 module.exports = function(options) {
   var seneca = this
 
   options = seneca.util.deepextend({
-    prefix:'/mem-store',
-    web:{dump:false}
+    prefix: '/mem-store',
+    web:    {dump:false}
   },options)
 
 
   var desc
-
 
   var entmap = {}
 
@@ -99,10 +44,13 @@ module.exports = function(options) {
           do_save(id)
         }
         else {
-          this.act({role:'util', cmd:'generate_id', name:name, base:base, zone:zone }, function(err,id){
-            if( err ) return cb(err);
-            do_save(id)
-          })
+          this.act(
+            {role:'util', cmd:'generate_id', 
+             name:name, base:base, zone:zone }, 
+            function(err,id){
+              if( err ) return cb(err);
+              do_save(id)
+            })
         }
       }
       else do_save();
@@ -135,9 +83,10 @@ module.exports = function(options) {
       var qent = args.qent
       var q    = args.q
 
-      list(this,entmap,qent,q,function(err,list){
+      listents(this,entmap,qent,q,function(err,list){
         var ent = list[0] || null
-        this.log.debug(function(){return['load',q,qent.canon$({string:1}),,ent,desc]})
+        this.log.debug(
+          function(){return['load',q,qent.canon$({string:1}),ent,desc]})
         cb(err, ent ? ent : null )
       })
     },
@@ -147,9 +96,10 @@ module.exports = function(options) {
       var qent = args.qent
       var q    = args.q
 
-      list(this,entmap,qent,q,function(err,list){
-        this.log.debug(function(){return['list',q,qent.canon$({string:1}),,list.length,list[0],desc]})
-        //list = _.map(list,function(data){ return qent.make$(data) })
+      listents(this,entmap,qent,q,function(err,list){
+        this.log.debug(
+          function(){return['list',q,qent.canon$({string:1}),
+                            list.length,list[0],desc]})
         cb(err, list)
       })
     },
@@ -164,7 +114,7 @@ module.exports = function(options) {
       var all  = q.all$ // default false
       var load  = _.isUndefined(q.load$) ? true : q.load$ // default true 
   
-      list(seneca,entmap,qent,q,function(err,list){
+      listents(seneca,entmap,qent,q,function(err,list){
         if( err ) return cb(err);
 
         list = all ? list : 0<list.length ? list.slice(0,1) : []
@@ -173,7 +123,9 @@ module.exports = function(options) {
           var canon = qent.canon$({object:true})
           
           delete entmap[canon.base][canon.name][ent.id]
-          seneca.log.debug(function(){return['remove/'+(all?'all':'one'),q,qent.canon$({string:1}),,ent,desc]})
+          seneca.log.debug(
+            function(){return['remove/'+(all?'all':'one'),q,
+                              qent.canon$({string:1}),ent,desc]})
         })
 
         var ent = all ? null : load ? list[0] || null : null
@@ -232,6 +184,7 @@ module.exports = function(options) {
     }
   })
 
+
   var service = null
   if( options.web.dump ) {
     seneca.act('role:web', {use:{
@@ -250,3 +203,51 @@ module.exports = function(options) {
   }
 }
 
+
+function listents(si,entmap,qent,q,cb) {
+  var list = []
+
+  var canon = qent.canon$({object:true})
+  var base = canon.base
+  var name = canon.name
+
+  var entset = entmap[base] ? entmap[base][name] : null ;
+    
+  if( entset ) {
+    _.keys(entset).forEach(function(id){
+      var ent = entset[id]
+      
+      for(var p in q) {
+        if( !~p.indexOf('$') && q[p] != ent[p] ) {
+          return
+        }
+      }
+      
+      ent = qent.make$(ent)
+
+      list.push(ent)
+    })
+  }
+
+  // sort first
+  if( q.sort$ ) {
+    for( var sf in q.sort$ ) break;
+    var sd = q.sort$[sf] < 0 ? -1 : 1
+
+    list = list.sort(function(a,b){
+      return sd * ( a[sf] < b[sf] ? -1 : a[sf] === b[sf] ? 0 : 1 )
+    })
+  }
+
+
+  if( q.skip$ ) {
+    list = list.slice(q.skip$)
+  }
+
+  if( q.limit$ ) {
+    list = list.slice(0,q.limit$)
+  }
+
+  
+  cb.call(si,null,list)
+}

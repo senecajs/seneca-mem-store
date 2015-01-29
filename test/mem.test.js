@@ -8,7 +8,7 @@ var seneca = require('seneca')
 var shared = require('seneca-store-test')
 
 
-var si = seneca()
+var si = seneca({log:'silent'})
 si.use('../mem-store.js')
 
 si.__testcount = 0

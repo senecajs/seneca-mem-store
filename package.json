@@ -1,10 +1,11 @@
 {
   "name": "seneca-mem-store",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Seneca in-memory data storage plugin.",
   "main": "mem-store.js",
   "scripts": {
-    "test": "./test.sh"
+    "test": "./test.sh",
+    "build": "./build.sh"
   },
   "repository": {
     "type": "git",
@@ -24,11 +25,13 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "underscore": "~1.6.0"
+    "lodash": "~2.4.1"
   },
   "devDependencies": {
-    "mocha": "~1.20.1",
-    "seneca-store-test": "~0.2.1"
+    "docco": "~0.6.3",
+    "jshint": "~2.6.0",
+    "mocha": "~2.1.0",
+    "seneca-store-test": "~0.2.2"
   },
   "files": [
     "LICENSE.txt",

@@ -20,9 +20,16 @@ This plugin is included with the main seneca module.
 If you're using this module, feel free to contact me on twitter if you
 have any questions! :) [@rjrodger](http://twitter.com/rjrodger)
 
-Current Version: 0.1.1
+Current Version: 0.2.0
 
-Tested on: Node 0.10.29, Seneca 0.5.19
+Tested on: Node 0.10.36, Seneca 0.6.0
+
+[![Gitter chat](https://badges.gitter.im/rjrodger/seneca-mem-store.png)](https://gitter.im/rjrodger/seneca-mem-store)
+
+[![Build Status](https://travis-ci.org/rjrodger/seneca-mem-store.png?branch=master)](https://travis-ci.org/rjrodger/seneca-mem-store)
+
+[Annotated Source Code](http://rjrodger.github.io/seneca-mem-store/doc/mem-store.html).
+
 
 
 
