@@ -29,7 +29,7 @@ module.exports = function(options) {
       var si = this
       var ent = args.ent
 
-      var create = !ent.id
+      var create = (null == ent.id)
 
       var canon = ent.canon$({object:true})
       var zone   = canon.zone
@@ -38,10 +38,10 @@ module.exports = function(options) {
 
   
       if( create ) {
-        if( ent.id$ ) {
+        if( null != ent.id$ ) {
           var id = ent.id$
           delete ent.id$
-          do_save(id)
+          do_save(id,true)
         }
         else {
           this.act(
@@ -49,16 +49,16 @@ module.exports = function(options) {
              name:name, base:base, zone:zone }, 
             function(err,id){
               if( err ) return cb(err);
-              do_save(id)
+              do_save(id,true)
             })
         }
       }
       else do_save();
 
-      function do_save(id) {
+      function do_save(id,isnew) {
         var mement = ent.data$(true,'string')
 
-        if( id ) {
+        if( null != id ) {
           mement.id = id
         }
         
@@ -67,7 +67,13 @@ module.exports = function(options) {
         entmap[base] = entmap[base] || {}
         entmap[base][name] = entmap[base][name] || {}
 
-        var prev = entmap[base][name][mement.id] || {}
+        var prev = entmap[base][name][mement.id]
+        if(isnew && prev ) {
+          return cb(new Error("Entity of type "+ent.entity$+
+                              " with id = "+id+" already exists."))
+        }
+        else prev = {}
+
         entmap[base][name][mement.id] = _.extend(prev,mement)
   
         si.log.debug(function(){return[
@@ -185,16 +191,18 @@ module.exports = function(options) {
   })
 
 
-  var service = null
-  if( options.web.dump ) {
-    seneca.act('role:web', {use:{
-      prefix:options.prefix,
-      pin:{role:'mem-store',cmd:'*'},
-      map:{
-        dump:true
-      }
-    }})
-  }
+  this.add('init:mem-store',function(args,done){
+    if( options.web.dump ) {
+      seneca.act('role:web', {use:{
+        prefix:options.prefix,
+        pin:{role:'mem-store',cmd:'*'},
+        map:{
+          dump:true
+        }
+      }})
+    }
+    return done();
+  })
 
   
   return {
