@@ -35,11 +35,10 @@
 <span class="hljs-pi">"use strict"</span>;
 
 
-<span class="hljs-keyword">var</span> _       = <span class="hljs-built_in">require</span>(<span class="hljs-string">'lodash'</span>)
-<span class="hljs-keyword">var</span> fs      = <span class="hljs-built_in">require</span>(<span class="hljs-string">'fs'</span>)
+<span class="hljs-keyword">var</span> _  = <span class="hljs-built_in">require</span>(<span class="hljs-string">'lodash'</span>)
 
 
-<span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(options)</span> </span>{
+<span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">options</span>) </span>{
   <span class="hljs-keyword">var</span> seneca = <span class="hljs-keyword">this</span>
 
   options = seneca.util.deepextend({
@@ -47,26 +46,37 @@
     web:    {dump:<span class="hljs-literal">false</span>}
   },options)
 
-
   <span class="hljs-keyword">var</span> desc
+  <span class="hljs-keyword">var</span> entmap = {}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>Define the store using a description object.
+This is a convenience provided by seneca.store.init function.</p>
 
-  <span class="hljs-keyword">var</span> entmap = {}
-
-  <span class="hljs-keyword">var</span> store = {
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> store = {
 
     name: <span class="hljs-string">'mem-store'</span>,
 
-
-    save: <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(args,cb)</span></span>{
-      <span class="hljs-keyword">var</span> si = <span class="hljs-keyword">this</span>
+    save: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">args,cb</span>)</span>{
+      <span class="hljs-keyword">var</span> si  = <span class="hljs-keyword">this</span>
       <span class="hljs-keyword">var</span> ent = args.ent
 
       <span class="hljs-keyword">var</span> create = (<span class="hljs-literal">null</span> == ent.id)
 
       <span class="hljs-keyword">var</span> canon = ent.canon$({object:<span class="hljs-literal">true</span>})
-      <span class="hljs-keyword">var</span> zone   = canon.zone
-      <span class="hljs-keyword">var</span> base   = canon.base
-      <span class="hljs-keyword">var</span> name   = canon.name
+      <span class="hljs-keyword">var</span> zone  = canon.zone
+      <span class="hljs-keyword">var</span> base  = canon.base
+      <span class="hljs-keyword">var</span> name  = canon.name
 
   
       <span class="hljs-keyword">if</span>( create ) {
@@ -77,9 +87,9 @@
         }
         <span class="hljs-keyword">else</span> {
           <span class="hljs-keyword">this</span>.act(
-            {role:<span class="hljs-string">'util'</span>, cmd:<span class="hljs-string">'generate_id'</span>, 
+            {role:<span class="hljs-string">'basic'</span>, cmd:<span class="hljs-string">'generate_id'</span>, 
              name:name, base:base, zone:zone }, 
-            <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(err,id)</span></span>{
+            <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">err,id</span>)</span>{
               <span class="hljs-keyword">if</span>( err ) <span class="hljs-keyword">return</span> cb(err);
               do_save(id,<span class="hljs-literal">true</span>)
             })
@@ -87,7 +97,7 @@
       }
       <span class="hljs-keyword">else</span> do_save();
 
-      <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">do_save</span><span class="hljs-params">(id,isnew)</span> </span>{
+      <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">do_save</span>(<span class="hljs-params">id,isnew</span>) </span>{
         <span class="hljs-keyword">var</span> mement = ent.data$(<span class="hljs-literal">true</span>,<span class="hljs-string">'string'</span>)
 
         <span class="hljs-keyword">if</span>( <span class="hljs-literal">null</span> != id ) {
@@ -108,7 +118,7 @@
 
         entmap[base][name][mement.id] = _.extend(prev,mement)
   
-        si.log.debug(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span></span>{<span class="hljs-keyword">return</span>[
+        si.log.debug(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{<span class="hljs-keyword">return</span>[
           <span class="hljs-string">'save/'</span>+(create?<span class="hljs-string">'insert'</span>:<span class="hljs-string">'update'</span>),ent.canon$({string:<span class="hljs-number">1</span>}),mement,desc
         ]})
 
@@ -117,33 +127,33 @@
     },
 
 
-    load: <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(args,cb)</span></span>{
+    load: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">args,cb</span>)</span>{
       <span class="hljs-keyword">var</span> qent = args.qent
       <span class="hljs-keyword">var</span> q    = args.q
 
-      listents(<span class="hljs-keyword">this</span>,entmap,qent,q,<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(err,list)</span></span>{
+      listents(<span class="hljs-keyword">this</span>,entmap,qent,q,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">err,list</span>)</span>{
         <span class="hljs-keyword">var</span> ent = list[<span class="hljs-number">0</span>] || <span class="hljs-literal">null</span>
         <span class="hljs-keyword">this</span>.log.debug(
-          <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span></span>{<span class="hljs-keyword">return</span>[<span class="hljs-string">'load'</span>,q,qent.canon$({string:<span class="hljs-number">1</span>}),ent,desc]})
+          <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{<span class="hljs-keyword">return</span>[<span class="hljs-string">'load'</span>,q,qent.canon$({string:<span class="hljs-number">1</span>}),ent,desc]})
         cb(err, ent ? ent : <span class="hljs-literal">null</span> )
       })
     },
 
 
-    list: <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(args,cb)</span></span>{
+    list: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">args,cb</span>)</span>{
       <span class="hljs-keyword">var</span> qent = args.qent
       <span class="hljs-keyword">var</span> q    = args.q
 
-      listents(<span class="hljs-keyword">this</span>,entmap,qent,q,<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(err,list)</span></span>{
+      listents(<span class="hljs-keyword">this</span>,entmap,qent,q,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">err,list</span>)</span>{
         <span class="hljs-keyword">this</span>.log.debug(
-          <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span></span>{<span class="hljs-keyword">return</span>[<span class="hljs-string">'list'</span>,q,qent.canon$({string:<span class="hljs-number">1</span>}),
+          <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{<span class="hljs-keyword">return</span>[<span class="hljs-string">'list'</span>,q,qent.canon$({string:<span class="hljs-number">1</span>}),
                             list.length,list[<span class="hljs-number">0</span>],desc]})
         cb(err, list)
       })
     },
 
 
-    remove: <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(args,cb)</span></span>{
+    remove: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">args,cb</span>)</span>{
       <span class="hljs-keyword">var</span> seneca = <span class="hljs-keyword">this</span>
 
       <span class="hljs-keyword">var</span> qent = args.qent
@@ -152,17 +162,17 @@
       <span class="hljs-keyword">var</span> all  = q.all$ <span class="hljs-comment">// default false</span>
       <span class="hljs-keyword">var</span> load  = _.isUndefined(q.load$) ? <span class="hljs-literal">true</span> : q.load$ <span class="hljs-comment">// default true </span>
   
-      listents(seneca,entmap,qent,q,<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(err,list)</span></span>{
+      listents(seneca,entmap,qent,q,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">err,list</span>)</span>{
         <span class="hljs-keyword">if</span>( err ) <span class="hljs-keyword">return</span> cb(err);
 
         list = all ? list : <span class="hljs-number">0</span>&lt;list.length ? list.slice(<span class="hljs-number">0</span>,<span class="hljs-number">1</span>) : []
 
-        list.forEach(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(ent)</span></span>{
+        list.forEach(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">ent</span>)</span>{
           <span class="hljs-keyword">var</span> canon = qent.canon$({object:<span class="hljs-literal">true</span>})
           
           <span class="hljs-keyword">delete</span> entmap[canon.base][canon.name][ent.id]
           seneca.log.debug(
-            <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span></span>{<span class="hljs-keyword">return</span>[<span class="hljs-string">'remove/'</span>+(all?<span class="hljs-string">'all'</span>:<span class="hljs-string">'one'</span>),q,
+            <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{<span class="hljs-keyword">return</span>[<span class="hljs-string">'remove/'</span>+(all?<span class="hljs-string">'all'</span>:<span class="hljs-string">'one'</span>),q,
                               qent.canon$({string:<span class="hljs-number">1</span>}),ent,desc]})
         })
 
@@ -173,13 +183,13 @@
     },
 
 
-    close: <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(args,cb)</span></span>{
+    close: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">args,cb</span>)</span>{
       <span class="hljs-keyword">this</span>.log.debug(<span class="hljs-string">'close'</span>,desc)
       cb()
     },
 
 
-    native: <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(args,cb)</span></span>{
+    native: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">args,cb</span>)</span>{
       cb(<span class="hljs-literal">null</span>,entmap)
     }
   }
@@ -191,31 +201,20 @@
 
   options.idlen = options.idlen || <span class="hljs-number">6</span>
 
-  <span class="hljs-keyword">this</span>.add({role:store.name,cmd:<span class="hljs-string">'dump'</span>},<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(args,cb)</span></span>{
+  <span class="hljs-keyword">this</span>.add({role:store.name,cmd:<span class="hljs-string">'dump'</span>},<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">args,cb</span>)</span>{
     cb(<span class="hljs-literal">null</span>,entmap)
   })
 
-  <span class="hljs-keyword">this</span>.add({role:store.name,cmd:<span class="hljs-string">'export'</span>},<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(args,done)</span></span>{
+  <span class="hljs-keyword">this</span>.add({role:store.name,cmd:<span class="hljs-string">'export'</span>},<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">args,done</span>)</span>{
     <span class="hljs-keyword">var</span> entjson = <span class="hljs-built_in">JSON</span>.stringify(entmap)
-    fs.writeFile(args.file,entjson,<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(err)</span></span>{
-      done(err,{ok:!!err})
-    })
+    done(<span class="hljs-literal">null</span>,entjson)
   })
 
 
-  <span class="hljs-keyword">this</span>.add({role:store.name,cmd:<span class="hljs-string">'import'</span>},<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(args,done)</span></span>{
+  <span class="hljs-keyword">this</span>.add({role:store.name,cmd:<span class="hljs-string">'import'</span>},<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">args,done</span>)</span>{
     <span class="hljs-keyword">try</span> {
-      fs.readFile(args.file,<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(err,entjson)</span></span>{
-        <span class="hljs-keyword">if</span>( entjson ) {
-          <span class="hljs-keyword">try</span> {
-            entmap = <span class="hljs-built_in">JSON</span>.parse(entjson)
-            done(err,{ok:!!err})
-          }
-          <span class="hljs-keyword">catch</span>(e){
-            done(e)
-          }
-        }
-      })
+      entmap = <span class="hljs-built_in">JSON</span>.parse(args.json)
+      done()
     }
     <span class="hljs-keyword">catch</span>(e){
       done(e)
@@ -223,7 +222,7 @@
   })
 
 
-  <span class="hljs-keyword">this</span>.add(<span class="hljs-string">'init:mem-store'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(args,done)</span></span>{
+  <span class="hljs-keyword">this</span>.add(<span class="hljs-string">'init:mem-store'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">args,done</span>)</span>{
     <span class="hljs-keyword">if</span>( options.web.dump ) {
       seneca.act(<span class="hljs-string">'role:web'</span>, {use:{
         prefix:options.prefix,
@@ -238,13 +237,13 @@
 
   
   <span class="hljs-keyword">return</span> {
-    name:store.name,
-    tag:meta.tag
+    name: store.name,
+    tag:  meta.tag
   }
 }
 
 
-<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">listents</span><span class="hljs-params">(si,entmap,qent,q,cb)</span> </span>{
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">listents</span>(<span class="hljs-params">si,entmap,qent,q,cb</span>) </span>{
   <span class="hljs-keyword">var</span> list = []
 
   <span class="hljs-keyword">var</span> canon = qent.canon$({object:<span class="hljs-literal">true</span>})
@@ -254,7 +253,7 @@
   <span class="hljs-keyword">var</span> entset = entmap[base] ? entmap[base][name] : <span class="hljs-literal">null</span> ;
     
   <span class="hljs-keyword">if</span>( entset ) {
-    _.keys(entset).forEach(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(id)</span></span>{
+    _.keys(entset).forEach(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">id</span>)</span>{
       <span class="hljs-keyword">var</span> ent = entset[id]
       
       <span class="hljs-keyword">for</span>(<span class="hljs-keyword">var</span> p <span class="hljs-keyword">in</span> q) {
@@ -272,11 +271,11 @@
         </li>
         
         
-        <li id="section-2">
+        <li id="section-3">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-2">&#182;</a>
+                <a class="pilcrow" href="#section-3">&#182;</a>
               </div>
               <p>sort first</p>
 
@@ -286,7 +285,7 @@
     <span class="hljs-keyword">for</span>( <span class="hljs-keyword">var</span> sf <span class="hljs-keyword">in</span> q.sort$ ) <span class="hljs-keyword">break</span>;
     <span class="hljs-keyword">var</span> sd = q.sort$[sf] &lt; <span class="hljs-number">0</span> ? -<span class="hljs-number">1</span> : <span class="hljs-number">1</span>
 
-    list = list.sort(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(a,b)</span></span>{
+    list = list.sort(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">a,b</span>)</span>{
       <span class="hljs-keyword">return</span> sd * ( a[sf] &lt; b[sf] ? -<span class="hljs-number">1</span> : a[sf] === b[sf] ? <span class="hljs-number">0</span> : <span class="hljs-number">1</span> )
     })
   }

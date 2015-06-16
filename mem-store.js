@@ -3,8 +3,7 @@
 "use strict";
 
 
-var _       = require('lodash')
-var fs      = require('fs')
+var _  = require('lodash')
 
 
 module.exports = function(options) {
@@ -15,26 +14,25 @@ module.exports = function(options) {
     web:    {dump:false}
   },options)
 
-
   var desc
-
   var entmap = {}
 
+  // Define the store using a description object.
+  // This is a convenience provided by seneca.store.init function.
   var store = {
 
     name: 'mem-store',
 
-
     save: function(args,cb){
-      var si = this
+      var si  = this
       var ent = args.ent
 
       var create = (null == ent.id)
 
       var canon = ent.canon$({object:true})
-      var zone   = canon.zone
-      var base   = canon.base
-      var name   = canon.name
+      var zone  = canon.zone
+      var base  = canon.base
+      var name  = canon.name
 
   
       if( create ) {
@@ -45,7 +43,7 @@ module.exports = function(options) {
         }
         else {
           this.act(
-            {role:'util', cmd:'generate_id', 
+            {role:'basic', cmd:'generate_id', 
              name:name, base:base, zone:zone }, 
             function(err,id){
               if( err ) return cb(err);
@@ -165,25 +163,14 @@ module.exports = function(options) {
 
   this.add({role:store.name,cmd:'export'},function(args,done){
     var entjson = JSON.stringify(entmap)
-    fs.writeFile(args.file,entjson,function(err){
-      done(err,{ok:!!err})
-    })
+    done(null,entjson)
   })
 
 
   this.add({role:store.name,cmd:'import'},function(args,done){
     try {
-      fs.readFile(args.file,function(err,entjson){
-        if( entjson ) {
-          try {
-            entmap = JSON.parse(entjson)
-            done(err,{ok:!!err})
-          }
-          catch(e){
-            done(e)
-          }
-        }
-      })
+      entmap = JSON.parse(args.json)
+      done()
     }
     catch(e){
       done(e)
@@ -206,8 +193,8 @@ module.exports = function(options) {
 
   
   return {
-    name:store.name,
-    tag:meta.tag
+    name: store.name,
+    tag:  meta.tag
   }
 }
 
