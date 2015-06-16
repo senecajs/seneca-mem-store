@@ -19,7 +19,7 @@ This plugin is included with the main seneca module.
 
 ### Support
 
-Current Version: 0.3.0
+Current Version: 0.3.1
 
 Tested on: [Seneca](/rjrodger/seneca) 0.6.2
 
@@ -73,6 +73,7 @@ seneca.use( require('seneca-mem-store') )
 
 ## Releases
 
+   * 0.3.1: 2015-06-16: export action responds with object: {json: "..."}
    * 0.3.0: 2015-06-16: cmd:import/export no longer uses filesystem, just accepts/provides JSON string. Prep for Seneca 0.6.2.
 
 

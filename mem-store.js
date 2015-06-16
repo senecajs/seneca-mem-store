@@ -163,7 +163,7 @@ module.exports = function(options) {
 
   this.add({role:store.name,cmd:'export'},function(args,done){
     var entjson = JSON.stringify(entmap)
-    done(null,entjson)
+    done(null,{json:entjson})
   })
 
 
