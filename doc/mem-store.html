@@ -61,7 +61,7 @@
       <span class="hljs-keyword">var</span> si = <span class="hljs-keyword">this</span>
       <span class="hljs-keyword">var</span> ent = args.ent
 
-      <span class="hljs-keyword">var</span> create = !ent.id
+      <span class="hljs-keyword">var</span> create = (<span class="hljs-literal">null</span> == ent.id)
 
       <span class="hljs-keyword">var</span> canon = ent.canon$({object:<span class="hljs-literal">true</span>})
       <span class="hljs-keyword">var</span> zone   = canon.zone
@@ -70,10 +70,10 @@
 
   
       <span class="hljs-keyword">if</span>( create ) {
-        <span class="hljs-keyword">if</span>( ent.id$ ) {
+        <span class="hljs-keyword">if</span>( <span class="hljs-literal">null</span> != ent.id$ ) {
           <span class="hljs-keyword">var</span> id = ent.id$
           <span class="hljs-keyword">delete</span> ent.id$
-          do_save(id)
+          do_save(id,<span class="hljs-literal">true</span>)
         }
         <span class="hljs-keyword">else</span> {
           <span class="hljs-keyword">this</span>.act(
@@ -81,16 +81,16 @@
              name:name, base:base, zone:zone }, 
             <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(err,id)</span></span>{
               <span class="hljs-keyword">if</span>( err ) <span class="hljs-keyword">return</span> cb(err);
-              do_save(id)
+              do_save(id,<span class="hljs-literal">true</span>)
             })
         }
       }
       <span class="hljs-keyword">else</span> do_save();
 
-      <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">do_save</span><span class="hljs-params">(id)</span> </span>{
+      <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">do_save</span><span class="hljs-params">(id,isnew)</span> </span>{
         <span class="hljs-keyword">var</span> mement = ent.data$(<span class="hljs-literal">true</span>,<span class="hljs-string">'string'</span>)
 
-        <span class="hljs-keyword">if</span>( id ) {
+        <span class="hljs-keyword">if</span>( <span class="hljs-literal">null</span> != id ) {
           mement.id = id
         }
         
@@ -99,7 +99,13 @@
         entmap[base] = entmap[base] || {}
         entmap[base][name] = entmap[base][name] || {}
 
-        <span class="hljs-keyword">var</span> prev = entmap[base][name][mement.id] || {}
+        <span class="hljs-keyword">var</span> prev = entmap[base][name][mement.id]
+        <span class="hljs-keyword">if</span>(isnew &amp;&amp; prev ) {
+          <span class="hljs-keyword">return</span> cb(<span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">"Entity of type "</span>+ent.entity$+
+                              <span class="hljs-string">" with id = "</span>+id+<span class="hljs-string">" already exists."</span>))
+        }
+        <span class="hljs-keyword">else</span> prev = {}
+
         entmap[base][name][mement.id] = _.extend(prev,mement)
   
         si.log.debug(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span></span>{<span class="hljs-keyword">return</span>[
@@ -217,16 +223,18 @@
   })
 
 
-  <span class="hljs-keyword">var</span> service = <span class="hljs-literal">null</span>
-  <span class="hljs-keyword">if</span>( options.web.dump ) {
-    seneca.act(<span class="hljs-string">'role:web'</span>, {use:{
-      prefix:options.prefix,
-      pin:{role:<span class="hljs-string">'mem-store'</span>,cmd:<span class="hljs-string">'*'</span>},
-      map:{
-        dump:<span class="hljs-literal">true</span>
-      }
-    }})
-  }
+  <span class="hljs-keyword">this</span>.add(<span class="hljs-string">'init:mem-store'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(args,done)</span></span>{
+    <span class="hljs-keyword">if</span>( options.web.dump ) {
+      seneca.act(<span class="hljs-string">'role:web'</span>, {use:{
+        prefix:options.prefix,
+        pin:{role:<span class="hljs-string">'mem-store'</span>,cmd:<span class="hljs-string">'*'</span>},
+        map:{
+          dump:<span class="hljs-literal">true</span>
+        }
+      }})
+    }
+    <span class="hljs-keyword">return</span> done();
+  })
 
   
   <span class="hljs-keyword">return</span> {
