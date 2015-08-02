@@ -213,7 +213,9 @@ function listents(si,entmap,qent,q,cb) {
       var ent = entset[id]
       
       for(var p in q) {
-        if( !~p.indexOf('$') && q[p] != ent[p] ) {
+        if(p === 'ids' && q[p].indexOf(ent['id']) === -1){
+          return
+        }else if( p !== 'ids' && !~p.indexOf('$') && q[p] != ent[p] ) {
           return
         }
       }
