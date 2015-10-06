@@ -85,13 +85,13 @@ seneca.use( require('seneca-mem-store') )
    * 0.3.0: 2015-06-16: cmd:import/export no longer uses filesystem, just accepts/provides JSON string. Prep for Seneca 0.6.2.
 
 
-   [travis-badge]: https://travis-ci.org/senecajs/seneca-level-store.svg
-   [travis-url]: https://travis-ci.org/senecajs/seneca-level-store
+   [travis-badge]: https://travis-ci.org/rjrodger/seneca-mongo-store.svg
+   [travis-url]: https://travis-ci.org/rjrodger/seneca-mongo-store
    [gitter-badge]: https://badges.gitter.im/Join%20Chat.svg
    [gitter-url]: https://gitter.im/senecajs/seneca
    [standard-badge]: https://raw.githubusercontent.com/feross/standard/master/badge.png
    [standard-style]: https://github.com/feross/standard
 
    [Seneca.js]: https://www.npmjs.com/package/seneca
-   [github issue]: https://github.com/rjrodger/seneca-level-store/issues
+   [github issue]: https://github.com/rjrodger/seneca-mongo-store/issues
    [@senecajs]: http://twitter.com/senecajs
