@@ -29,6 +29,7 @@
   },
   "devDependencies": {
     "docco": "0.6.3",
+    "jshint": "^2.8.0",
     "lab": "^6.0.0",
     "mocha": "2.1.0",
     "mkdirp": "^0.5.1",
