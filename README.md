@@ -21,7 +21,7 @@ This plugin is included with the main seneca module.
 
 - __Version:__ 0.3.1
 - __Tested on:__ Seneca 0.6.2
-- __Node:__ `0.10, 0.11, 0.12, 4`
+- __Node:__ 0.10, 0.11, 0.12, 4
 
 [Annotated Source](http://rjrodger.github.io/seneca-mem-store/doc/mem-store.html)
 
