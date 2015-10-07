@@ -2,9 +2,15 @@
   "name": "seneca-mem-store",
   "version": "0.3.1",
   "description": "Seneca in-memory data storage plugin.",
-  "main": "mem-store.js",
+  "main": "lib/index.js",
+  "license": "MIT",
+  "author": "Richard Rodger (http://richardrodger.com)",
+  "contributors": [
+    "Richard Rodger (http://richardrodger.com)",
+    "Nicolas Herment"
+  ],
   "scripts": {
-    "test": "./test.sh",
+    "test": "lab test/*.test.js -r console -v -L",
     "build": "./build.sh"
   },
   "repository": {
@@ -18,24 +24,19 @@
     "mem",
     "memory"
   ],
-  "author": "Richard Rodger (http://richardrodger.com)",
-  "contributors": [
-    "Richard Rodger (http://richardrodger.com)",
-    "Nicolas Herment"
-  ],
-  "license": "MIT",
   "dependencies": {
-    "lodash": "2.4.2"
+    "lodash": "3.10.1"
   },
   "devDependencies": {
     "docco": "0.6.3",
-    "jshint": "2.6.3",
+    "eslint-config-standard": "^4.4.0",
+    "eslint-plugin-standard": "^1.3.1",
+    "jshint": "^2.8.0",
+    "lab": "^6.0.0",
     "mocha": "2.1.0",
-    "seneca-store-test": "0.2.2"
-  },
-  "files": [
-    "LICENSE.txt",
-    "README.md",
-    "mem-store.js"
-  ]
+    "mkdirp": "^0.5.1",
+    "osenv": "^0.1.3",
+    "seneca": "^0.7.1",
+    "seneca-store-test": "^1.0.0"
+  }
 }

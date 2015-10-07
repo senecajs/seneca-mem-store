@@ -32,7 +32,7 @@ Tested on: [Seneca](//github.com/rjrodger/seneca) 0.6.2
 
 
 
-Built and tested against versions: `0.10, 0.11, 0.12, iojs`
+Built and tested against versions: `0.10, 0.11, 0.12, 4`
 
 [Annotated Source](http://rjrodger.github.io/seneca-mem-store/doc/mem-store.html)
 
