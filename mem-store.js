@@ -82,7 +82,11 @@ module.exports = function (options) {
           return done(new Error('Entity of type ' + ent.entity$ + ' with id = ' + id + ' already exists.'))
         }
 
-        prev = entmap[base][name][mement.id] = _.cloneDeep(mement)
+        mement = _.cloneDeep(mement)
+        if (ent.merge$ !== false) {
+          mement = _.assign(prev || {}, mement)
+        }
+        prev = entmap[base][name][mement.id] = mement
 
         seneca.log.debug(function () {
           return ['save/' + (create ? 'insert' : 'update'), ent.canon$({string: 1}), mement, desc]
