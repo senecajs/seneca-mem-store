@@ -173,8 +173,8 @@ module.exports = function (options) {
       var q = msg.q
       var all = q.all$
 
-      // default true
-      var load = q.load$ !== false
+      // default false
+      var load = q.load$ === true
 
       listents(seneca, entmap, qent, q, function (err, list) {
         if (err) {
