@@ -14,16 +14,17 @@ useful for early development and unit testing. It also provides an
 example of a document-oriented storage plugin code-base.
 
 The Seneca framework provides an [ActiveRecord-style data storage API][].
-Each supported database has a plugin, such as this one, that provides 
+Each supported database has a plugin, such as this one, that provides
 the underlying Seneca plugin actions required for data persistence.
 
 This plugin is included with the main seneca module.
 
 - __Version:__ 0.3.1
-- __Tested on:__ Seneca 0.6.2
-- __Node:__ 0.10, 0.11, 0.12, 4
+- __Tested on:__ Seneca 0.7
+- __Node:__ 0.10, 0.12, 4
 
 seneca-mem-store's source can be read in an annotated fashion by,
+
 - running `npm run annotate`
 - viewing [online](http://rjrodger.github.io/seneca-mem-store/doc/mem-store.html).
 
@@ -72,8 +73,12 @@ npm run test
 ```
 
 ## Releases
-- 0.3.1: 2015-06-16: export action responds with object: {json: "..."}
-- 0.3.0: 2015-06-16: cmd:import/export no longer uses filesystem, just accepts/provides JSON string. Prep for Seneca 0.6.2.
+
+#### 0.3.1 - 2015-06-16
+-  export action responds with object: {json: "..."}
+
+#### 0.3.0 - 2015-06-16
+- cmd:import/export no longer uses filesystem, just accepts/provides JSON string. Prep for Seneca 0.6.2.
 
 ## Contributing
 The [Senecajs org][] encourages open participation. If you feel you can help in any way, be it with
@@ -93,5 +98,5 @@ Copyright Richard Rodger and other contributors 2015, Licensed under [MIT][].
 [gitter-url]: https://gitter.im/senecajs/seneca
 [standard-badge]: https://raw.githubusercontent.com/feross/standard/master/badge.png
 [standard-style]: https://github.com/feross/standard
-[github issue]: https://github.com/rjrodger/seneca-mem-store/issues
+[github issue]: https://github.com/senecajs/seneca-mem-store/issues
 [ActiveRecord-style data storage API]:http://senecajs.org/data-entities.html
