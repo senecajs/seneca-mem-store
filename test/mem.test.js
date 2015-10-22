@@ -34,6 +34,16 @@ describe('mem-store tests', function () {
     script: lab
   })
 
+  Shared.limitstest({
+    seneca: seneca,
+    script: lab
+  })
+
+  Shared.sorttest({
+    seneca: seneca,
+    script: lab
+  })
+
 
   it('export-native', function (done) {
     Assert.ok(seneca.export('mem-store/1/native'))
