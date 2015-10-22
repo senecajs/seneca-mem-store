@@ -19,12 +19,18 @@ var seneca = Seneca({
   log: 'silent',
   default_plugins: {'mem-store': false}
 })
-
 seneca.use({name: '..', tag: '1'})
+
+var senecaMerge = Seneca({
+  log: 'silent'
+})
+senecaMerge.use({name: '..', tag: '1', merge: false })
+
 
 describe('mem-store tests', function () {
   Shared.basictest({
     seneca: seneca,
+    senecaMerge: senecaMerge,
     script: lab
   })
 

@@ -82,8 +82,16 @@ module.exports = function (options) {
           return done(new Error('Entity of type ' + ent.entity$ + ' with id = ' + id + ' already exists.'))
         }
 
+        var shouldMerge = true
+        if (options.merge !== false && ent.merge$ === false) {
+          shouldMerge = false
+        }
+        if (options.merge === false && ent.merge$ !== true) {
+          shouldMerge = false
+        }
+
         mement = _.cloneDeep(mement)
-        if (ent.merge$ !== false) {
+        if (shouldMerge) {
           mement = _.assign(prev || {}, mement)
         }
         prev = entmap[base][name][mement.id] = mement
