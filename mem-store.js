@@ -79,12 +79,7 @@ module.exports = function (options) {
         prev = entmap[base][name][mement.id] = _.cloneDeep(mement)
 
         si.log.debug(function () {
-          return [
-            'save/' + (create ? 'insert' : 'update'),
-            ent.canon$({string: 1}),
-            mement,
-            desc
-          ]
+          return ['save/' + (create ? 'insert' : 'update'), ent.canon$({string: 1}), mement, desc]
         })
 
         cb(null, ent.make$(prev))
