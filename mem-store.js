@@ -294,18 +294,27 @@ function listents (seneca, entmap, qent, q, done) {
   var entset = entmap[base] ? entmap[base][name] : null
 
   if (entset) {
-    _.keys(entset).forEach(function (id) {
-      var ent = entset[id]
-
-      for (var p in q) {
-        if (!~p.indexOf('$') && q[p] !== ent[p]) {
-          return
+    if (_.isArray(q)) {
+      _.each(q, function (id) {
+        var ent = entset[id]
+        if (ent) {
+          ent = qent.make$(ent)
+          list.push(ent)
         }
-      }
-
-      ent = qent.make$(ent)
-      list.push(ent)
-    })
+      })
+    }
+    if (_.isObject(q)) {
+      _.keys(entset).forEach(function (id) {
+        var ent = entset[id]
+        for (var p in q) {
+          if (!~p.indexOf('$') && q[p] !== ent[p]) {
+            return
+          }
+        }
+        ent = qent.make$(ent)
+        list.push(ent)
+      })
+    }
   }
 
   // Always sort first, this is the 'expected' behaviour.
@@ -321,12 +330,12 @@ function listents (seneca, entmap, qent, q, done) {
   }
 
   // Skip before limiting.
-  if (q.skip$) {
+  if (q.skip$ && q.skip$ > 0) {
     list = list.slice(q.skip$)
   }
 
   // Limited the possibly sorted and skipped list.
-  if (q.limit$) {
+  if (q.limit$ && q.limit$ >= 0) {
     list = list.slice(0, q.limit$)
   }
 
