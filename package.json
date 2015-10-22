@@ -2,7 +2,7 @@
   "name": "seneca-mem-store",
   "version": "0.3.1",
   "description": "Seneca in-memory data storage plugin.",
-  "main": "lib/index.js",
+  "main": "mem-store.js",
   "license": "MIT",
   "author": "Richard Rodger (http://richardrodger.com)",
   "contributors": [
@@ -40,11 +40,11 @@
     "seneca-store-test": "^1.0.0"
   },
   "peerDependencies": {
-    "seneca": "0.7.x"
+    "seneca": "*"
   },
   "files": [
     "README.md",
     "LICENSE",
-    "lib"
+    "mem-store.js"
   ]
 }
