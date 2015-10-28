@@ -23,7 +23,11 @@ This plugin is included with the main seneca module.
 - __Tested on:__ Seneca 0.6.2
 - __Node:__ 0.10, 0.11, 0.12, 4
 
-[Annotated Source](http://rjrodger.github.io/seneca-mem-store/doc/mem-store.html)
+seneca-mem-store's source can be read in an annotated fashion by,
+- running `npm run annotate`
+- viewing [online](http://rjrodger.github.io/seneca-mem-store/doc/mem-store.html).
+
+The annotated source can be found locally at [./doc/seneca-mem-store.html]().
 
 If you're using this module, and need help, you can:
 
