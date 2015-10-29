@@ -87,8 +87,8 @@ Copyright Richard Rodger and other contributors 2015, Licensed under [MIT][].
 [Seneca.js]: https://www.npmjs.com/package/seneca
 [@senecajs]: http://twitter.com/senecajs
 [senecajs.org]: http://senecajs.org/
-[travis-badge]: https://travis-ci.org/rjrodger/seneca-mem-store.svg
-[travis-url]: https://travis-ci.org/rjrodger/seneca-mem-store
+[travis-badge]: https://travis-ci.org/senecajs/seneca-mem-store.svg
+[travis-url]: https://travis-ci.org/senecajs/seneca-mem-store
 [gitter-badge]: https://badges.gitter.im/Join%20Chat.svg
 [gitter-url]: https://gitter.im/senecajs/seneca
 [standard-badge]: https://raw.githubusercontent.com/feross/standard/master/badge.png
