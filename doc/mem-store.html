@@ -2,7 +2,7 @@
 
 <html>
 <head>
-  <title>index.js</title>
+  <title>mem-store.js</title>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
   <link rel="stylesheet" media="all" href="docco.css" />
@@ -15,7 +15,7 @@
         
           <li id="title">
               <div class="annotation">
-                  <h1>index.js</h1>
+                  <h1>mem-store.js</h1>
               </div>
           </li>
         
@@ -75,7 +75,7 @@ This is a convenience provided by seneca.store.init function.</p>
       <span class="hljs-keyword">var</span> base = canon.base
       <span class="hljs-keyword">var</span> name = canon.name
       <span class="hljs-keyword">if</span> (create) {
-        <span class="hljs-keyword">if</span> (ent.id$ != <span class="hljs-literal">null</span>) {
+        <span class="hljs-keyword">if</span> (ent.id$ !== <span class="hljs-literal">undefined</span>) {
           <span class="hljs-keyword">var</span> id = ent.id$
           <span class="hljs-keyword">delete</span> ent.id$
           do_save(id, <span class="hljs-literal">true</span>)
@@ -98,7 +98,7 @@ This is a convenience provided by seneca.store.init function.</p>
       }
       <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">do_save</span> (<span class="hljs-params">id, isnew</span>) </span>{
         <span class="hljs-keyword">var</span> mement = ent.data$(<span class="hljs-literal">true</span>, <span class="hljs-string">'string'</span>)
-        <span class="hljs-keyword">if</span> (id != <span class="hljs-literal">null</span>) {
+        <span class="hljs-keyword">if</span> (id !== <span class="hljs-literal">undefined</span>) {
           mement.id = id
         }
         mement.entity$ = ent.entity$
@@ -107,10 +107,8 @@ This is a convenience provided by seneca.store.init function.</p>
         <span class="hljs-keyword">var</span> prev = entmap[base][name][mement.id]
         <span class="hljs-keyword">if</span> (isnew &amp;&amp; prev) {
           <span class="hljs-keyword">return</span> cb(<span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Entity of type '</span> + ent.entity$ + <span class="hljs-string">' with id = '</span> + id + <span class="hljs-string">' already exists.'</span>))
-        } <span class="hljs-keyword">else</span> {
-          prev = {}
         }
-        entmap[base][name][mement.id] = _.extend(prev, mement)
+        prev = entmap[base][name][mement.id] = _.cloneDeep(mement)
         si.log.debug(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
           <span class="hljs-keyword">return</span> [
             <span class="hljs-string">'save/'</span> + (create ? <span class="hljs-string">'insert'</span> : <span class="hljs-string">'update'</span>),
@@ -121,7 +119,7 @@ This is a convenience provided by seneca.store.init function.</p>
             desc
           ]
         })
-        cb(<span class="hljs-literal">null</span>, ent.make$(mement))
+        cb(<span class="hljs-literal">null</span>, ent.make$(prev))
       }
     },
     load: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">args, cb</span>) </span>{
@@ -140,7 +138,7 @@ This is a convenience provided by seneca.store.init function.</p>
             desc
           ]
         })
-        cb(err, ent || <span class="hljs-literal">null</span>)
+        cb(err, ent)
       })
     },
     list: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">args, cb</span>) </span>{
@@ -177,30 +175,18 @@ This is a convenience provided by seneca.store.init function.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-3">&#182;</a>
               </div>
-              <p>default false</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">var</span> load = _.isUndefined(q.load$) ? <span class="hljs-literal">true</span> : q.load$</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-4">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-4">&#182;</a>
-              </div>
               <p>default true</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      listents(seneca, entmap, qent, q, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">err, list</span>) </span>{
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">var</span> load = q.load$ !== <span class="hljs-literal">false</span>
+
+      listents(seneca, entmap, qent, q, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">err, list</span>) </span>{
         <span class="hljs-keyword">if</span> (err) {
           <span class="hljs-keyword">return</span> cb(err)
         }
-        list = all ? list : list.length &gt; <span class="hljs-number">0</span> ? list.slice(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>) : []
+        list = list || []
+        list = all ? list : list.slice(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>)
         list.forEach(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">ent</span>) </span>{
           <span class="hljs-keyword">var</span> canon = qent.canon$({
             object: <span class="hljs-literal">true</span>
@@ -218,7 +204,7 @@ This is a convenience provided by seneca.store.init function.</p>
             ]
           })
         })
-        <span class="hljs-keyword">var</span> ent = all ? <span class="hljs-literal">null</span> : load ? list[<span class="hljs-number">0</span>] || <span class="hljs-literal">null</span> : <span class="hljs-literal">null</span>
+        <span class="hljs-keyword">var</span> ent = !all &amp;&amp; load &amp;&amp; list[<span class="hljs-number">0</span>] || <span class="hljs-literal">null</span>
         cb(<span class="hljs-literal">null</span>, ent)
       })
     },
@@ -305,11 +291,11 @@ This is a convenience provided by seneca.store.init function.</p>
         </li>
         
         
-        <li id="section-5">
+        <li id="section-4">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-5">&#182;</a>
+                <a class="pilcrow" href="#section-4">&#182;</a>
               </div>
               <p>sort first</p>
 

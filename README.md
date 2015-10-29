@@ -23,7 +23,11 @@ This plugin is included with the main seneca module.
 - __Tested on:__ Seneca 0.6.2
 - __Node:__ 0.10, 0.11, 0.12, 4
 
-[Annotated Source](http://rjrodger.github.io/seneca-mem-store/doc/mem-store.html)
+seneca-mem-store's source can be read in an annotated fashion by,
+- running `npm run annotate`
+- viewing [online](http://rjrodger.github.io/seneca-mem-store/doc/mem-store.html).
+
+The annotated source can be found locally at [./doc/seneca-mem-store.html]().
 
 If you're using this module, and need help, you can:
 
@@ -83,8 +87,8 @@ Copyright Richard Rodger and other contributors 2015, Licensed under [MIT][].
 [Seneca.js]: https://www.npmjs.com/package/seneca
 [@senecajs]: http://twitter.com/senecajs
 [senecajs.org]: http://senecajs.org/
-[travis-badge]: https://travis-ci.org/rjrodger/seneca-mem-store.svg
-[travis-url]: https://travis-ci.org/rjrodger/seneca-mem-store
+[travis-badge]: https://travis-ci.org/senecajs/seneca-mem-store.svg
+[travis-url]: https://travis-ci.org/senecajs/seneca-mem-store
 [gitter-badge]: https://badges.gitter.im/Join%20Chat.svg
 [gitter-url]: https://gitter.im/senecajs/seneca
 [standard-badge]: https://raw.githubusercontent.com/feross/standard/master/badge.png
