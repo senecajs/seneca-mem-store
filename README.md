@@ -77,14 +77,14 @@ npm run test
 
 ```js
 var seneca = require('seneca')()
-seneca.use('level-store', {
-  folder: 'db'
-})
 
+// Since mem-store is a default plugin, it does not need to be
+// added with .use(). You can just go ahead and use it.
 seneca.ready(function () {
   var apple = seneca.make$('fruit')
   apple.name = 'Pink Lady'
   apple.price = 0.99
+
   apple.save$(function (err, apple) {
     console.log("apple.id = " + apple.id)
   })
