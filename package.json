@@ -7,7 +7,9 @@
   "author": "Richard Rodger (http://richardrodger.com)",
   "contributors": [
     "Richard Rodger (http://richardrodger.com)",
-    "Nicolas Herment"
+    "Nicolas Herment (https://github.com/nherment)",
+    "Dean McDonnell (https://github.com/mcdonnelldean)",
+    "Maxence Dalmais (https://github.com/maxired)"
   ],
   "scripts": {
     "test": "lab test/*.test.js -r console -v -L",
@@ -15,7 +17,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/rjrodger/seneca-mem-store"
+    "url": "https://github.com/senecajs/seneca-mem-store"
   },
   "keywords": [
     "seneca",
@@ -29,9 +31,9 @@
   },
   "devDependencies": {
     "docco": "0.7.0",
-    "lab": "^6.2.0",
+    "lab": "6.2.0",
     "seneca": "plugin",
-    "seneca-store-test": "^1.0.0"
+    "seneca-store-test": "1.0.0"
   },
   "peerDependencies": {
     "seneca": "*"

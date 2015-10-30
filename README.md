@@ -17,11 +17,12 @@ The Seneca framework provides an [ActiveRecord-style data storage API][].
 Each supported database has a plugin, such as this one, that provides
 the underlying Seneca plugin actions required for data persistence.
 
-This plugin is included with the main seneca module.
+___This plugin is included with the main seneca module by default.___
 
 - __Version:__ 0.3.1
 - __Tested on:__ Seneca 0.7
 - __Node:__ 0.10, 0.12, 4
+- __License:__ [MIT][]
 
 seneca-mem-store's source can be read in an annotated fashion by,
 
@@ -77,14 +78,14 @@ npm run test
 
 ```js
 var seneca = require('seneca')()
-seneca.use('level-store', {
-  folder: 'db'
-})
 
+// Since mem-store is a default plugin, it does not need to be
+// added with .use(). You can just go ahead and use it.
 seneca.ready(function () {
   var apple = seneca.make$('fruit')
   apple.name = 'Pink Lady'
   apple.price = 0.99
+
   apple.save$(function (err, apple) {
     console.log("apple.id = " + apple.id)
   })
