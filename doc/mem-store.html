@@ -219,12 +219,7 @@ creating and then saving the entity.</p>
         prev = entmap[base][name][mement.id] = _.cloneDeep(mement)
 
         si.log.debug(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
-          <span class="hljs-keyword">return</span> [
-            <span class="hljs-string">'save/'</span> + (create ? <span class="hljs-string">'insert'</span> : <span class="hljs-string">'update'</span>),
-            ent.canon$({string: <span class="hljs-number">1</span>}),
-            mement,
-            desc
-          ]
+          <span class="hljs-keyword">return</span> [<span class="hljs-string">'save/'</span> + (create ? <span class="hljs-string">'insert'</span> : <span class="hljs-string">'update'</span>), ent.canon$({string: <span class="hljs-number">1</span>}), mement, desc]
         })
 
         cb(<span class="hljs-literal">null</span>, ent.make$(prev))
