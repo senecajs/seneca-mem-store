@@ -58,7 +58,8 @@ module.exports = function (options) {
       var create = ent.id == null
       if (create) {
         create_new()
-      } else {
+      }
+      else {
         do_save()
       }
 
@@ -124,7 +125,8 @@ module.exports = function (options) {
         si.act(gen_id, function (err, id) {
           if (err) {
             cb(err)
-          } else {
+          }
+          else {
             do_save(id, true)
           }
         })
@@ -233,7 +235,8 @@ module.exports = function (options) {
     try {
       entmap = JSON.parse(args.json)
       done()
-    } catch (e) {
+    }
+    catch (e) {
       done(e)
     }
   })
