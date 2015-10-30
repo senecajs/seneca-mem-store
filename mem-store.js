@@ -68,7 +68,7 @@ module.exports = function (options) {
       function do_save (id, isnew) {
         var mement = ent.data$(true, 'string')
 
-        if (id !== undefined) {
+        if (undefined !== id) {
           mement.id = id
         }
 
@@ -97,7 +97,7 @@ module.exports = function (options) {
 
         // Check if we already have an id or if
         // we need to generate a new one.
-        if (ent.id$ !== undefined) {
+        if (undefined !== ent.id$) {
 
           // Take a copy of the existing id and
           // delete it from the ent object. Do

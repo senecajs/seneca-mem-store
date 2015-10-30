@@ -35,12 +35,12 @@ describe('mem-store tests', function () {
     var ent = seneca.make('foo', {id$: '0', q: 1})
 
     ent.save$(function (err) {
-      Assert.ok(err === null)
+      Assert.ok(null === err)
 
       seneca.act('role:mem-store, cmd:export', function (e, out) {
         var expected = '{"undefined":{"foo":{"0":{"entity$":"-/-/foo","q":1,"id":"0"}}}}'
 
-        Assert.ok(e == null)
+        Assert.ok(null === e)
         Assert.equal(out.json, expected)
 
         var data = JSON.parse(out.json)
