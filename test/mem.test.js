@@ -37,18 +37,22 @@ describe('mem-store tests', function () {
     ent.save$(function (err) {
       Assert.ok(null === err)
 
-      seneca.act('role:mem-store, cmd:export', function (e, out) {
+      seneca.act('role:mem-store, cmd:export', function (err, exported) {
         var expected = '{"undefined":{"foo":{"0":{"entity$":"-/-/foo","q":1,"id":"0"}}}}'
 
-        Assert.ok(null === e)
-        Assert.equal(out.json, expected)
+        Assert.ok(null === err)
+        Assert.equal(exported.json, expected)
 
-        var data = JSON.parse(out.json)
-        data['undefined']['foo']['1'] = { 'entity$': '-/-/foo', 'z': 2, 'id': '1'}
+        var data = JSON.parse(exported.json)
+        data['undefined']['foo']['1'] = { 'entity$': '-/-/foo', 'val': 2, 'id': '1'}
 
-        seneca.act('role:mem-store, cmd:import', {json: JSON.stringify(data)}, function (e) {
-          seneca.make('foo').load$('1', function (e, f1) {
-            Assert.equal(2, f1.z)
+        seneca.act('role:mem-store, cmd:import', {json: JSON.stringify(data)}, function (err) {
+          Assert.ok(null === err)
+
+          seneca.make('foo').load$('1', function (err, foo) {
+            Assert.ok(null === err)
+            Assert.equal(2, foo.val)
+
             done()
           })
         })
