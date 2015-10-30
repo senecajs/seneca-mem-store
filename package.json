@@ -15,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/rjrodger/seneca-mem-store"
+    "url": "https://github.com/senecajs/seneca-mem-store"
   },
   "keywords": [
     "seneca",
@@ -29,9 +29,9 @@
   },
   "devDependencies": {
     "docco": "0.7.0",
-    "lab": "^6.2.0",
+    "lab": "6.2.0",
     "seneca": "plugin",
-    "seneca-store-test": "^1.0.0"
+    "seneca-store-test": "1.0.0"
   },
   "peerDependencies": {
     "seneca": "*"
