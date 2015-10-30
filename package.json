@@ -7,7 +7,9 @@
   "author": "Richard Rodger (http://richardrodger.com)",
   "contributors": [
     "Richard Rodger (http://richardrodger.com)",
-    "Nicolas Herment"
+    "Nicolas Herment (https://github.com/nherment)",
+    "Dean McDonnell (https://github.com/mcdonnelldean)"
+    "Maxence Dalmais (https://github.com/maxired)"
   ],
   "scripts": {
     "test": "lab test/*.test.js -r console -v -L",
