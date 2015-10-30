@@ -14,16 +14,17 @@ useful for early development and unit testing. It also provides an
 example of a document-oriented storage plugin code-base.
 
 The Seneca framework provides an [ActiveRecord-style data storage API][].
-Each supported database has a plugin, such as this one, that provides 
+Each supported database has a plugin, such as this one, that provides
 the underlying Seneca plugin actions required for data persistence.
 
 This plugin is included with the main seneca module.
 
 - __Version:__ 0.3.1
-- __Tested on:__ Seneca 0.6.2
-- __Node:__ 0.10, 0.11, 0.12, 4
+- __Tested on:__ Seneca 0.7
+- __Node:__ 0.10, 0.12, 4
 
 seneca-mem-store's source can be read in an annotated fashion by,
+
 - running `npm run annotate`
 - viewing [online](http://rjrodger.github.io/seneca-mem-store/doc/mem-store.html).
 
@@ -61,6 +62,7 @@ var seneca = require('seneca')({
     'mem-store': false
   }
 })
+
 seneca.use(require('seneca-mem-store'))
 ```
 
@@ -71,9 +73,65 @@ To run tests, simply use npm:
 npm run test
 ```
 
+## Quick Example
+
+```js
+var seneca = require('seneca')()
+seneca.use('level-store', {
+  folder: 'db'
+})
+
+seneca.ready(function () {
+  var apple = seneca.make$('fruit')
+  apple.name = 'Pink Lady'
+  apple.price = 0.99
+  apple.save$(function (err, apple) {
+    console.log("apple.id = " + apple.id)
+  })
+})
+```
+
+## Usage
+You don't use this module directly. It provides an underlying data storage engine for the Seneca entity API:
+
+```js
+var entity = seneca.make$('typename')
+entity.someproperty = "something"
+entity.anotherproperty = 100
+
+entity.save$(function (err, entity) { ... })
+entity.load$({id: ... }, function (err, entity) { ... })
+entity.list$({property: ... }, function (err, entity) { ... })
+entity.remove$({id: ... }, function (err, entity) { ... })
+```
+
+### Query Support
+The standard Seneca query format is supported:
+
+- `.list$({f1:v1, f2:v2, ...})` implies pseudo-query `f1==v1 AND f2==v2, ...`.
+
+- `.list$({f1:v1,...}, {sort$:{field1:1}})` means sort by f1, ascending.
+
+- `.list$({f1:v1,...}, {sort$:{field1:-1}})` means sort by f1, descending.
+
+- `.list$({f1:v1,...}, {limit$:10})` means only return 10 results.
+
+- `.list$({f1:v1,...}, {skip$:5})` means skip the first 5.
+
+- `.list$({f1:v1,...}, {fields$:['fd1','f2']})` means only return the listed fields.
+
+Note: you can use `sort$`, `limit$`, `skip$` and `fields$` together.
+
+### Native Driver
+This store is an in memory store and as such does not require the need of a native driver.
+
 ## Releases
-- 0.3.1: 2015-06-16: export action responds with object: {json: "..."}
-- 0.3.0: 2015-06-16: cmd:import/export no longer uses filesystem, just accepts/provides JSON string. Prep for Seneca 0.6.2.
+
+#### 0.3.1 - 2015-06-16
+-  export action responds with object: {json: "..."}
+
+#### 0.3.0 - 2015-06-16
+- cmd:import/export no longer uses filesystem, just accepts/provides JSON string. Prep for Seneca 0.6.2.
 
 ## Contributing
 The [Senecajs org][] encourages open participation. If you feel you can help in any way, be it with
@@ -93,5 +151,5 @@ Copyright Richard Rodger and other contributors 2015, Licensed under [MIT][].
 [gitter-url]: https://gitter.im/senecajs/seneca
 [standard-badge]: https://raw.githubusercontent.com/feross/standard/master/badge.png
 [standard-style]: https://github.com/feross/standard
-[github issue]: https://github.com/rjrodger/seneca-mem-store/issues
+[github issue]: https://github.com/senecajs/seneca-mem-store/issues
 [ActiveRecord-style data storage API]:http://senecajs.org/data-entities.html
