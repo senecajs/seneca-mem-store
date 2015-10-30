@@ -139,7 +139,9 @@ The [Senecajs org][] encourages open participation. If you feel you can help in 
 documentation, examples, extra testing, or new features please get in touch.
 
 ## License
-Copyright Richard Rodger and other contributors 2015, Licensed under [MIT][].
+Copyright (c) 2015, Richard Rodger and other contributors.
+Copyright (c) 2010-2014, Richard Rodger.
+Licensed under [MIT][].
 
 [MIT]: ./LICENSE
 [Senecajs org]: https://github.com/senecajs/
