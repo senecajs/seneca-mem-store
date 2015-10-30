@@ -6,41 +6,49 @@
 
 'use strict'
 
-var assert = require('assert')
+var Assert = require('assert')
 var Lab = require('lab')
 var Seneca = require('seneca')
+var MemStore = require('../mem-store')
 var Shared = require('seneca-store-test')
 
 var lab = exports.lab = Lab.script()
 var describe = lab.describe
 var it = lab.it
 
-var si = Seneca({log: 'silent'})
-si.use('mem-store')
+var seneca = Seneca({
+  log: 'silent',
+  default_plugins: {'mem-store': false}
+})
+
+seneca.use(MemStore)
 
 describe('mem-store tests', function () {
-  Shared.basictest({seneca: si, script: lab})
+  Shared.basictest({
+    seneca: seneca,
+    script: lab
+  })
 
   it('custom tests', function (done) {
-    si.options({errhandler: done})
+    seneca.options({errhandler: done})
 
-    var ent = si.make('foo', {id$: '0', q: 1})
+    var ent = seneca.make('foo', {id$: '0', q: 1})
 
     ent.save$(function (err) {
-      assert.ok(err === null)
+      Assert.ok(err === null)
 
-      si.act('role:mem-store, cmd:export', function (e, out) {
+      seneca.act('role:mem-store, cmd:export', function (e, out) {
         var expected = '{"undefined":{"foo":{"0":{"entity$":"-/-/foo","q":1,"id":"0"}}}}'
 
-        assert.ok(e == null)
-        assert.equal(out.json, expected)
+        Assert.ok(e == null)
+        Assert.equal(out.json, expected)
 
         var data = JSON.parse(out.json)
         data['undefined']['foo']['1'] = { 'entity$': '-/-/foo', 'z': 2, 'id': '1'}
 
-        si.act('role:mem-store, cmd:import', {json: JSON.stringify(data)}, function (e) {
-          si.make('foo').load$('1', function (e, f1) {
-            assert.equal(2, f1.z)
+        seneca.act('role:mem-store, cmd:import', {json: JSON.stringify(data)}, function (e) {
+          seneca.make('foo').load$('1', function (e, f1) {
+            Assert.equal(2, f1.z)
             done()
           })
         })

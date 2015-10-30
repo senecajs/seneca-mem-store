@@ -41,7 +41,7 @@ module.exports = function (options) {
 
       // Take a reference to Seneca
       // and the entity to save
-      var si = this
+      var seneca = this
       var ent = args.ent
 
       // create our cannon and take a copy of
@@ -84,7 +84,7 @@ module.exports = function (options) {
 
         prev = entmap[base][name][mement.id] = _.cloneDeep(mement)
 
-        si.log.debug(function () {
+        seneca.log.debug(function () {
           return ['save/' + (create ? 'insert' : 'update'), ent.canon$({string: 1}), mement, desc]
         })
 
@@ -122,7 +122,7 @@ module.exports = function (options) {
         // When we get a respones we will use the id param
         // as our entity id, if this fails we just fail and
         // call cb() as we have no way to save without an id
-        si.act(gen_id, function (err, id) {
+        seneca.act(gen_id, function (err, id) {
           if (err) {
             cb(err)
           }
@@ -241,6 +241,8 @@ module.exports = function (options) {
     }
   })
 
+  // Seneca will call init:plugin-name for us. This makes
+  // this action a great place to do any setup.
   seneca.add('init:mem-store', function (args, done) {
     if (options.web.dump) {
       seneca.act('role:web', {
@@ -267,7 +269,7 @@ module.exports = function (options) {
 // Seneca supports a reasonable set of features
 // in terms of listing. This function can handle
 // sorting, skiping, limiting and general retrieval.
-function listents (si, entmap, qent, q, cb) {
+function listents (seneca, entmap, qent, q, cb) {
   var list = []
 
   var canon = qent.canon$({object: true})
@@ -314,5 +316,5 @@ function listents (si, entmap, qent, q, cb) {
   }
 
   // Return the resulting list to the caller.
-  cb.call(si, null, list)
+  cb.call(seneca, null, list)
 }
