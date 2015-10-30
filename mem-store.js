@@ -12,7 +12,12 @@ module.exports = function (options) {
   var seneca = this
 
   // merge default options with any provided by the caller
-  options = seneca.util.deepextend({prefix: '/mem-store', web: {dump: false}}, options)
+  options = seneca.util.deepextend({
+    prefix: '/mem-store',
+    web: {
+      dump: false
+    }
+  }, options)
 
   // The calling Seneca instance will provide
   // a description for us on init(), it will
