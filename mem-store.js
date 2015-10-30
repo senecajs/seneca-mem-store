@@ -1,7 +1,7 @@
 /*
   MIT License,
-  Copyright (c) 2010-2014 Richard Rodger,
-  Copyright (c) 2015 Richard Rodger and Senecajs.org contributors
+  Copyright (c) 2015, Richard Rodger and other contributors.
+  Copyright (c) 2010-2014, Richard Rodger.
 */
 
 'use strict'
