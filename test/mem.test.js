@@ -9,7 +9,6 @@
 var Assert = require('assert')
 var Lab = require('lab')
 var Seneca = require('seneca')
-var MemStore = require('../mem-store')
 var Shared = require('seneca-store-test')
 
 var lab = exports.lab = Lab.script()
@@ -21,7 +20,7 @@ var seneca = Seneca({
   default_plugins: {'mem-store': false}
 })
 
-seneca.use(MemStore)
+seneca.use({name: '..', tag: '1'})
 
 describe('mem-store tests', function () {
   Shared.basictest({
@@ -29,7 +28,14 @@ describe('mem-store tests', function () {
     script: lab
   })
 
-  it('custom tests', function (done) {
+
+  it('export-native', function (done) {
+    Assert.ok(seneca.export('mem-store/1/native'))
+    done()
+  })
+
+
+  it('custom-test', function (done) {
     seneca.options({errhandler: done})
 
     var ent = seneca.make('foo', {id$: '0', q: 1})
@@ -38,24 +44,28 @@ describe('mem-store tests', function () {
       Assert.ok(null === err)
 
       seneca.act('role:mem-store, cmd:export', function (err, exported) {
-        var expected = '{"undefined":{"foo":{"0":{"entity$":"-/-/foo","q":1,"id":"0"}}}}'
+        var expected =
+              '{"undefined":{"foo":{"0":{"entity$":"-/-/foo","q":1,"id":"0"}}}}'
 
         Assert.ok(null === err)
         Assert.equal(exported.json, expected)
 
         var data = JSON.parse(exported.json)
-        data['undefined']['foo']['1'] = { 'entity$': '-/-/foo', 'val': 2, 'id': '1'}
+        data['undefined']['foo']['1'] = { 'entity$': '-/-/foo', 'val': 2, 'id': '1' }
 
-        seneca.act('role:mem-store, cmd:import', {json: JSON.stringify(data)}, function (err) {
-          Assert.ok(null === err)
-
-          seneca.make('foo').load$('1', function (err, foo) {
+        seneca.act(
+          'role:mem-store, cmd:import',
+          {json: JSON.stringify(data)},
+          function (err) {
             Assert.ok(null === err)
-            Assert.equal(2, foo.val)
 
-            done()
+            seneca.make('foo').load$('1', function (err, foo) {
+              Assert.ok(null === err)
+              Assert.equal(2, foo.val)
+
+              done()
+            })
           })
-        })
       })
     })
   })

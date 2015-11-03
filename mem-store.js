@@ -262,7 +262,10 @@ module.exports = function (options) {
   // and generated meta tag.
   return {
     name: store.name,
-    tag: meta.tag
+    tag: meta.tag,
+    exportmap: {
+      native: entmap
+    }
   }
 }
 
