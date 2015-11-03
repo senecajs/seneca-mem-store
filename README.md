@@ -19,7 +19,7 @@ the underlying Seneca plugin actions required for data persistence.
 
 ___This plugin is included with the main seneca module by default.___
 
-- __Version:__ 0.3.1
+- __Version:__ 0.3.2
 - __Tested on:__ Seneca 0.7
 - __Node:__ 0.10, 0.12, 4
 - __License:__ [MIT][]
