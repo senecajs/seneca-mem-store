@@ -5,8 +5,6 @@
 [![Build Status][travis-badge]][travis-url]
 [![Gitter][gitter-badge]][gitter-url]
 
-[![js-standard-style][standard-badge]][standard-style]
-
 This module is a plugin for the Seneca framework. It provides an
 in-memory storage engine that provides a set of data storage action
 patterns. *Data does not persist betweens runs*.  This plugin is most
@@ -152,7 +150,5 @@ Licensed under [MIT][].
 [travis-url]: https://travis-ci.org/senecajs/seneca-mem-store
 [gitter-badge]: https://badges.gitter.im/Join%20Chat.svg
 [gitter-url]: https://gitter.im/senecajs/seneca
-[standard-badge]: https://raw.githubusercontent.com/feross/standard/master/badge.png
-[standard-style]: https://github.com/feross/standard
 [github issue]: https://github.com/senecajs/seneca-mem-store/issues
 [ActiveRecord-style data storage API]:http://senecajs.org/data-entities.html
