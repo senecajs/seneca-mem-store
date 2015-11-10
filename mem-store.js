@@ -294,6 +294,12 @@ function listents (seneca, entmap, qent, q, done) {
   var entset = entmap[base] ? entmap[base][name] : null
 
   if (entset) {
+    if (_.isString(q)) {
+      var ent = entset[q]
+      if (ent) {
+        list.push(ent)
+      }
+    }
     if (_.isArray(q)) {
       _.each(q, function (id) {
         var ent = entset[id]
