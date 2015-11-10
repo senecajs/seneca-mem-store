@@ -24,7 +24,7 @@ seneca.use({name: '..', tag: '1'})
 var senecaMerge = Seneca({
   log: 'silent'
 })
-senecaMerge.use({name: '..', tag: '1', merge: false })
+senecaMerge.use({name: '..', tag: '1'}, {merge: false})
 
 
 describe('mem-store tests', function () {
