@@ -82,7 +82,19 @@ module.exports = function (options) {
           return done(new Error('Entity of type ' + ent.entity$ + ' with id = ' + id + ' already exists.'))
         }
 
-        prev = entmap[base][name][mement.id] = _.cloneDeep(mement)
+        var shouldMerge = true
+        if (options.merge !== false && ent.merge$ === false) {
+          shouldMerge = false
+        }
+        if (options.merge === false && ent.merge$ !== true) {
+          shouldMerge = false
+        }
+
+        mement = _.cloneDeep(mement)
+        if (shouldMerge) {
+          mement = _.assign(prev || {}, mement)
+        }
+        prev = entmap[base][name][mement.id] = mement
 
         seneca.log.debug(function () {
           return ['save/' + (create ? 'insert' : 'update'), ent.canon$({string: 1}), mement, desc]
@@ -169,8 +181,8 @@ module.exports = function (options) {
       var q = msg.q
       var all = q.all$
 
-      // default true
-      var load = q.load$ !== false
+      // default false
+      var load = q.load$ === true
 
       listents(seneca, entmap, qent, q, function (err, list) {
         if (err) {
@@ -282,18 +294,33 @@ function listents (seneca, entmap, qent, q, done) {
   var entset = entmap[base] ? entmap[base][name] : null
 
   if (entset) {
-    _.keys(entset).forEach(function (id) {
-      var ent = entset[id]
-
-      for (var p in q) {
-        if (!~p.indexOf('$') && q[p] !== ent[p]) {
-          return
-        }
+    if (_.isString(q)) {
+      var ent = entset[q]
+      if (ent) {
+        list.push(ent)
       }
-
-      ent = qent.make$(ent)
-      list.push(ent)
-    })
+    }
+    if (_.isArray(q)) {
+      _.each(q, function (id) {
+        var ent = entset[id]
+        if (ent) {
+          ent = qent.make$(ent)
+          list.push(ent)
+        }
+      })
+    }
+    if (_.isObject(q)) {
+      _.keys(entset).forEach(function (id) {
+        var ent = entset[id]
+        for (var p in q) {
+          if (!~p.indexOf('$') && q[p] !== ent[p]) {
+            return
+          }
+        }
+        ent = qent.make$(ent)
+        list.push(ent)
+      })
+    }
   }
 
   // Always sort first, this is the 'expected' behaviour.
@@ -309,12 +336,12 @@ function listents (seneca, entmap, qent, q, done) {
   }
 
   // Skip before limiting.
-  if (q.skip$) {
+  if (q.skip$ && q.skip$ > 0) {
     list = list.slice(q.skip$)
   }
 
   // Limited the possibly sorted and skipped list.
-  if (q.limit$) {
+  if (q.limit$ && q.limit$ >= 0) {
     list = list.slice(0, q.limit$)
   }
 
