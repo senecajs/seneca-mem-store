@@ -2,6 +2,7 @@
 > A [Seneca.js][] data storage plugin.
 
 # seneca-mem-store
+[![npm version][npm-badge]][npm-url]
 [![Build Status][travis-badge]][travis-url]
 [![Gitter][gitter-badge]][gitter-url]
 
@@ -17,9 +18,8 @@ the underlying Seneca plugin actions required for data persistence.
 
 ___This plugin is included with the main seneca module by default.___
 
-- __Version:__ 0.3.2
-- __Tested on:__ Seneca 0.7
-- __Node:__ 0.10, 0.12, 4
+- __Tested on:__ Seneca 0.7, 0.8
+- __Node:__ 0.10, 0.12, 4, 5
 - __License:__ [MIT][]
 
 seneca-mem-store's source can be read in an annotated fashion by,
@@ -126,6 +126,10 @@ This store is an in memory store and as such does not require the need of a nati
 
 ## Releases
 
+#### 0.4.0 - 2015-11-25
+- the memory store follows the specification of seneca stores
+- linted the codebase to folow the seneca styleguide 
+
 #### 0.3.1 - 2015-06-16
 -  export action responds with object: {json: "..."}
 
@@ -142,6 +146,8 @@ Copyright (c) 2010-2014, Richard Rodger.
 Licensed under [MIT][].
 
 [MIT]: ./LICENSE
+[npm-badge]: https://badge.fury.io/js/seneca-mem-store.svg
+[npm-url]: https://badge.fury.io/js/seneca-mem-store
 [Senecajs org]: https://github.com/senecajs/
 [Seneca.js]: https://www.npmjs.com/package/seneca
 [@senecajs]: http://twitter.com/senecajs
