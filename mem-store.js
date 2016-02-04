@@ -8,6 +8,10 @@
 
 var _ = require('lodash')
 
+var internals = {
+  name: 'mem-store'
+}
+
 module.exports = function (options) {
   var seneca = this
 
@@ -35,7 +39,7 @@ module.exports = function (options) {
 
     // The name of the plugin, this is what is the name you would
     // use in seneca.use(), eg seneca.use('mem-store').
-    name: 'mem-store',
+    name: internals.name,
 
     save: function (msg, done) {
 
@@ -279,6 +283,21 @@ module.exports = function (options) {
       native: entmap
     }
   }
+}
+
+module.exports.preload = function () {
+  var seneca = this
+
+  var meta = {
+    name: internals.name,
+    exportmap: {
+      native: function () {
+        seneca.export(internals.name + '/native').apply(this, arguments)
+      }
+    }
+  }
+
+  return meta
 }
 
 // Seneca supports a reasonable set of features
