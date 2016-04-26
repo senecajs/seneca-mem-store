@@ -18,7 +18,7 @@ the underlying Seneca plugin actions required for data persistence.
 
 ___This plugin is included with the main seneca module by default.___
 
-- __Tested on:__ Seneca 0.7, 0.8
+- __Tested on:__ Seneca 1.x, 2.x
 - __Node:__ 0.10, 0.12, 4, 5
 - __License:__ [MIT][]
 
@@ -128,7 +128,7 @@ This store is an in memory store and as such does not require the need of a nati
 
 #### 0.4.0 - 2015-11-25
 - the memory store follows the specification of seneca stores
-- linted the codebase to folow the seneca styleguide 
+- linted the codebase to folow the seneca styleguide
 
 #### 0.3.1 - 2015-06-16
 -  export action responds with object: {json: "..."}
