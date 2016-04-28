@@ -160,6 +160,6 @@ Licensed under [MIT][].
 [gitter-badge]: https://badges.gitter.im/Join%20Chat.svg
 [gitter-url]: https://gitter.im/senecajs/seneca
 [github issue]: https://github.com/senecajs/seneca-mem-store/issues
-[ActiveRecord-style data storage API]:http://senecajs.org/data-entities.html
+[ActiveRecord-style data storage API]:http://senecajs.org/tutorials/understanding-data-entities.html
 [david-badge]: https://david-dm.org/senecajs/seneca-mem-store.svg
 [david-url]: https://david-dm.org/senecajs/seneca-mem-store
