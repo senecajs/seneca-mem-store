@@ -4,7 +4,10 @@
 # seneca-mem-store
 [![npm version][npm-badge]][npm-url]
 [![Build Status][travis-badge]][travis-url]
+[![Dependency Status][david-badge]][david-url]
 [![Gitter][gitter-badge]][gitter-url]
+
+## Description
 
 This module is a plugin for the Seneca framework. It provides an
 in-memory storage engine that provides a set of data storage action
@@ -18,16 +21,14 @@ the underlying Seneca plugin actions required for data persistence.
 
 ___This plugin is included with the main seneca module by default.___
 
-- __Tested on:__ Seneca 1.x, 2.x
 - __Node:__ 0.10, 0.12, 4, 5
-- __License:__ [MIT][]
 
 seneca-mem-store's source can be read in an annotated fashion by,
 
 - running `npm run annotate`
 - viewing [online](http://senecajs.org/annotations/mem-store.html).
 
-The annotated source can be found locally at [./doc/seneca-mem-store.html]().
+The annotated source can be found locally at [./doc/seneca-mem-store.html](./doc/seneca-mem-store.html).
 
 If you're using this module, and need help, you can:
 
@@ -38,6 +39,8 @@ If you're using this module, and need help, you can:
 If you are new to Seneca in general, please take a look at [senecajs.org][]. We have everything from
 tutorials to sample apps to help get you up and running quickly.
 
+### Seneca compatibility
+Supports Seneca versions **1.x** and **2.x**
 
 ## Install
 This plugin module is included in the main Seneca module.
@@ -63,13 +66,6 @@ var seneca = require('seneca')({
 })
 
 seneca.use(require('seneca-mem-store'))
-```
-
-## Test
-To run tests, simply use npm:
-
-```sh
-npm run test
 ```
 
 ## Quick Example
@@ -140,8 +136,15 @@ This store is an in memory store and as such does not require the need of a nati
 The [Senecajs org][] encourages open participation. If you feel you can help in any way, be it with
 documentation, examples, extra testing, or new features please get in touch.
 
+## Test
+To run tests, simply use npm:
+
+```sh
+npm run test
+```
+
 ## License
-Copyright (c) 2015, Richard Rodger and other contributors.
+Copyright (c) 2015-2016, Richard Rodger and other contributors.
 Copyright (c) 2010-2014, Richard Rodger.
 Licensed under [MIT][].
 
@@ -158,3 +161,5 @@ Licensed under [MIT][].
 [gitter-url]: https://gitter.im/senecajs/seneca
 [github issue]: https://github.com/senecajs/seneca-mem-store/issues
 [ActiveRecord-style data storage API]:http://senecajs.org/data-entities.html
+[david-badge]: https://david-dm.org/senecajs/seneca-mem-store.svg
+[david-url]: https://david-dm.org/senecajs/seneca-mem-store
