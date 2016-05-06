@@ -14,6 +14,7 @@ var Shared = require('seneca-store-test')
 var lab = exports.lab = Lab.script()
 var describe = lab.describe
 var it = lab.it
+var before = lab.before
 
 var seneca = Seneca({
   log: 'silent',
@@ -26,6 +27,14 @@ var senecaMerge = Seneca({
 })
 senecaMerge.use({name: '..', tag: '1'}, {merge: false})
 
+if (seneca.version >= '2.0.0') {
+  seneca.use('entity')
+  senecaMerge.use('entity')
+}
+
+before({}, function (done) {
+  seneca.ready(done)
+})
 
 describe('mem-store tests', function () {
   Shared.basictest({
