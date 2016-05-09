@@ -38,9 +38,6 @@
     "seneca-entity": "0.0.1",
     "seneca-store-test": "1.x.x"
   },
-  "peerDependencies": {
-    "seneca": "*"
-  },
   "files": [
     "README.md",
     "LICENSE",
