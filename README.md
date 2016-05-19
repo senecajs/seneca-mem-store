@@ -5,6 +5,7 @@
 [![npm version][npm-badge]][npm-url]
 [![Build Status][travis-badge]][travis-url]
 [![Dependency Status][david-badge]][david-url]
+[![Coveralls][BadgeCoveralls]][Coveralls]
 [![Gitter][gitter-badge]][gitter-url]
 
 ## Description
@@ -163,3 +164,5 @@ Licensed under [MIT][].
 [ActiveRecord-style data storage API]:http://senecajs.org/tutorials/understanding-data-entities.html
 [david-badge]: https://david-dm.org/senecajs/seneca-mem-store.svg
 [david-url]: https://david-dm.org/senecajs/seneca-mem-store
+[Coveralls]: https://coveralls.io/github/senecajs/seneca-mem-store?branch=master
+[BadgeCoveralls]: https://coveralls.io/repos/github/senecajs/seneca-mem-store/badge.svg?branch=master
