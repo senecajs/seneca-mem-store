@@ -22,7 +22,7 @@ the underlying Seneca plugin actions required for data persistence.
 
 ___This plugin is included with the main seneca module by default.___
 
-- __Node:__ 0.10, 0.12, 4, 5
+- __Node:__ 0.10, 0.12, 4, 5, 6
 
 seneca-mem-store's source can be read in an annotated fashion by,
 
@@ -41,7 +41,7 @@ If you are new to Seneca in general, please take a look at [senecajs.org][]. We 
 tutorials to sample apps to help get you up and running quickly.
 
 ### Seneca compatibility
-Supports Seneca versions **1.x**, **2.x** and **3.x**
+Supports Seneca versions **1.x** - **3.x**
 
 ## Install
 This plugin module is included in the main Seneca module.
@@ -120,18 +120,6 @@ Note: you can use `sort$`, `limit$`, `skip$` and `fields$` together.
 
 ### Native Driver
 This store is an in memory store and as such does not require the need of a native driver.
-
-## Releases
-
-#### 0.4.0 - 2015-11-25
-- the memory store follows the specification of seneca stores
-- linted the codebase to folow the seneca styleguide
-
-#### 0.3.1 - 2015-06-16
--  export action responds with object: {json: "..."}
-
-#### 0.3.0 - 2015-06-16
-- cmd:import/export no longer uses filesystem, just accepts/provides JSON string. Prep for Seneca 0.6.2.
 
 ## Contributing
 The [Senecajs org][] encourages open participation. If you feel you can help in any way, be it with
