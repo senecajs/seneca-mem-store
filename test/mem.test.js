@@ -31,6 +31,10 @@ if (seneca.version >= '2.0.0') {
   seneca.use('entity')
   senecaMerge.use('entity')
 }
+if (seneca.version >= '3.0.0') {
+  seneca.use('basic')
+  senecaMerge.use('basic')
+}
 
 before({}, function (done) {
   seneca.ready(done)

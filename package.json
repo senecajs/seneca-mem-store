@@ -12,8 +12,7 @@
     "Maxence Dalmais (https://github.com/maxired)"
   ],
   "scripts": {
-    "test": "lab test/*.test.js -r console -v -L $LAB_FLAGS",
-    "test:node6": "LAB_FLAGS='--leaks' && npm test",
+    "test": "lab test/*.test.js -r console -v -L",
     "annotate": "docco mem-store.js -o doc",
     "coverage": "lab test -v -r lcov | coveralls",
     "lint": "lab -dL"
@@ -30,17 +29,18 @@
     "memory"
   ],
   "dependencies": {
-    "lodash": "4.6.0"
+    "lodash": "4.15.0"
   },
   "devDependencies": {
-    "docco": "0.7.0",
-    "eslint-config-seneca": "1.x.x",
-    "eslint-plugin-standard": "1.x.x",
-    "lab": "6.2.x",
+    "docco": "0.7.x",
+    "eslint-config-seneca": "3.x.x",
+    "eslint-plugin-hapi": "4.x.x",
+    "eslint-plugin-standard": "2.x.x",
+    "lab": "11.0.x",
     "seneca": "plugin",
-    "seneca-entity": "1.2.0",
+    "seneca-entity": "1.2.x",
     "seneca-store-test": "1.0.0",
-    "coveralls": "2.x.x"
+    "coveralls": "2.11.x"
   },
   "files": [
     "README.md",
