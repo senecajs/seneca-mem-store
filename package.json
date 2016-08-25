@@ -51,7 +51,7 @@
   },
   "files": [
     "README.md",
-    "LICENSE.txt",
+    "LICENSE",
     "mem-store.js"
   ],
   "pre-commit": [

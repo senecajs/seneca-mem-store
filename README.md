@@ -137,7 +137,7 @@ Copyright (c) 2015-2016, Richard Rodger and other contributors.
 Copyright (c) 2010-2014, Richard Rodger.
 Licensed under [MIT][].
 
-[MIT]: ./LICENSE.txt
+[MIT]: ./LICENSE
 [npm-badge]: https://badge.fury.io/js/seneca-mem-store.svg
 [npm-url]: https://badge.fury.io/js/seneca-mem-store
 [Senecajs org]: https://github.com/senecajs/
