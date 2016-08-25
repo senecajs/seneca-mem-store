@@ -42,7 +42,6 @@ module.exports = function (options) {
     name: internals.name,
 
     save: function (msg, done) {
-
       // Take a reference to Seneca
       // and the entity to save
       var seneca = this
@@ -110,11 +109,9 @@ module.exports = function (options) {
       // We will still use do_save to save the entity but
       // we need a place to handle new entites and id concerns.
       function create_new () {
-
         // Check if we already have an id or if
         // we need to generate a new one.
         if (undefined !== ent.id$) {
-
           // Take a copy of the existing id and
           // delete it from the ent object. Do
           // save will handle the id for us.
@@ -165,12 +162,10 @@ module.exports = function (options) {
     },
 
     list: function (msg, done) {
-
       var qent = msg.qent
       var q = msg.q
 
       listents(this, entmap, qent, q, function (err, list) {
-
         this.log.debug(function () {
           return ['list', q, qent.canon$({string: 1}), list.length, list[0], desc]
         })

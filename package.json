@@ -9,11 +9,16 @@
     "Richard Rodger (http://richardrodger.com)",
     "Nicolas Herment (https://github.com/nherment)",
     "Dean McDonnell (https://github.com/mcdonnelldean)",
-    "Maxence Dalmais (https://github.com/maxired)"
+    "Maxence Dalmais (https://github.com/maxired)",
+    "Mihai Dima (https://github.com/mihaidma)",
+    "Wyatt Preul (https://github.com/geek)",
+    "Paolo Chiodi (https://github.com/paolochiodi)",
+    "Shane Lacey (https://github.com/shanel262)",
+    "Oisín Hennessy (https://github.com/code-jace)"
   ],
   "scripts": {
     "test": "lab test/*.test.js -r console -v -L",
-    "annotate": "docco mem-store.js -o doc",
+    "annotate": "docco mem-store.js -o docs/annotated",
     "coverage": "lab test -v -r lcov | coveralls",
     "lint": "lab -dL"
   },
@@ -32,20 +37,24 @@
     "lodash": "4.15.0"
   },
   "devDependencies": {
+    "coveralls": "2.11.x",
     "docco": "0.7.x",
     "eslint-config-seneca": "3.x.x",
     "eslint-plugin-hapi": "4.x.x",
     "eslint-plugin-standard": "2.x.x",
     "lab": "11.0.x",
+    "pre-commit": "1.1.x",
     "seneca": "plugin",
     "seneca-basic": "0.5.x",
     "seneca-entity": "1.2.x",
-    "seneca-store-test": "1.0.0",
-    "coveralls": "2.11.x"
+    "seneca-store-test": "1.0.0"
   },
   "files": [
     "README.md",
     "LICENSE",
     "mem-store.js"
+  ],
+  "pre-commit": [
+    "test"
   ]
 }

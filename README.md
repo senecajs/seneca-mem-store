@@ -29,7 +29,7 @@ seneca-mem-store's source can be read in an annotated fashion by,
 - running `npm run annotate`
 - viewing [online](http://senecajs.org/annotations/mem-store.html).
 
-The annotated source can be found locally at [./doc/seneca-mem-store.html](./doc/seneca-mem-store.html).
+The annotated source can be found locally at ./docs/annotated/mem-store.html.
 
 If you're using this module, and need help, you can:
 
