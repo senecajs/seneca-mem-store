@@ -29,7 +29,7 @@ seneca-mem-store's source can be read in an annotated fashion by,
 - running `npm run annotate`
 - viewing [online](http://senecajs.org/annotations/mem-store.html).
 
-The annotated source can be found locally at [./doc/seneca-mem-store.html](./doc/seneca-mem-store.html).
+The annotated source can be found locally at ./docs/annotated/mem-store.html.
 
 If you're using this module, and need help, you can:
 
@@ -137,7 +137,7 @@ Copyright (c) 2015-2016, Richard Rodger and other contributors.
 Copyright (c) 2010-2014, Richard Rodger.
 Licensed under [MIT][].
 
-[MIT]: ./LICENSE
+[MIT]: ./LICENSE.txt
 [npm-badge]: https://badge.fury.io/js/seneca-mem-store.svg
 [npm-url]: https://badge.fury.io/js/seneca-mem-store
 [Senecajs org]: https://github.com/senecajs/
