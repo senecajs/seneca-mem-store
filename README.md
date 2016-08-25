@@ -22,8 +22,6 @@ the underlying Seneca plugin actions required for data persistence.
 
 ___This plugin is included with the main seneca module by default.___
 
-- __Node:__ 0.10, 0.12, 4, 5, 6
-
 seneca-mem-store's source can be read in an annotated fashion by,
 
 - running `npm run annotate`
