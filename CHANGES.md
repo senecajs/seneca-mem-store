@@ -1,3 +1,9 @@
+#### 0.6.0 - 2016-08-25
+
+* Added Seneca 3 and Node 6 support
+* Dropped Node 0.10, 0.12, 5 support
+* Updated dependencies
+
 #### 0.5.1 - 2016-08-09
 
 * Updated dependencies
