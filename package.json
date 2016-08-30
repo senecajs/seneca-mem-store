@@ -20,7 +20,7 @@
     "test": "lab test/*.test.js -c -r console -v -L -t 58",
     "annotate": "docco mem-store.js -o docs/annotated",
     "coveralls": "lab test -v -r lcov | coveralls",
-    "coverage": "lab -v -P test -L -t 58 -r html > docs/coverage.html",
+    "coverage": "lab -v -P test -L -t 58 -r html > docs/coverage.html"
   },
   "repository": {
     "type": "git",
