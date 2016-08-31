@@ -72,6 +72,9 @@ seneca.use(require('seneca-mem-store'))
 ```js
 var seneca = require('seneca')()
 
+seneca.use('basic')
+.use('entity')
+
 // Since mem-store is a default plugin, it does not need to be
 // added with .use(). You can just go ahead and use it.
 seneca.ready(function () {
