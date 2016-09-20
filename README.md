@@ -20,14 +20,7 @@ The Seneca framework provides an [ActiveRecord-style data storage API][].
 Each supported database has a plugin, such as this one, that provides
 the underlying Seneca plugin actions required for data persistence.
 
-___This plugin is included with the main seneca module by default.___
-
-seneca-mem-store's source can be read in an annotated fashion by,
-
-- running `npm run annotate`
-- viewing [online](http://senecajs.org/annotations/mem-store.html).
-
-The annotated source can be found locally at ./docs/annotated/mem-store.html.
+This plugin is loaded by default by the [seneca-entity][seneca-entity-url] plugin that also needs the [seneca-basic][seneca-basic-url] plugin to function properly.
 
 If you're using this module, and need help, you can:
 
@@ -38,6 +31,10 @@ If you're using this module, and need help, you can:
 If you are new to Seneca in general, please take a look at [senecajs.org][]. We have everything from
 tutorials to sample apps to help get you up and running quickly.
 
+## Code examples
+
+For code samples, please see the [tests][mem-store-tests] for this plugin.
+
 ### Seneca compatibility
 Supports Seneca versions **1.x** - **3.x**
 
@@ -45,30 +42,13 @@ Supports Seneca versions **1.x** - **3.x**
 All Seneca data store supported functionality is implemented in [seneca-store-test](https://github.com/senecajs/seneca-store-test) as a test suite. The tests represent the store functionality specifications.
 
 ## Install
-This plugin module is included in the main Seneca module.
 
 ```sh
 npm install seneca
-```
-
-### Explicit install
-To explicitly install separately,
-
-```sh
 npm install seneca-mem-store
 ```
 
-And in your code:
-
-```js
-var seneca = require('seneca')({
-  default_plugins: {
-    'mem-store': false
-  }
-})
-
-seneca.use(require('seneca-mem-store'))
-```
+You'll need the [seneca](http://github.com/senecajs/seneca) toolkit to use this module - it's just a plugin.
 
 ## Quick Example
 
@@ -158,3 +138,6 @@ Licensed under [MIT][].
 [david-url]: https://david-dm.org/senecajs/seneca-mem-store
 [Coveralls]: https://coveralls.io/github/senecajs/seneca-mem-store?branch=master
 [BadgeCoveralls]: https://coveralls.io/repos/github/senecajs/seneca-mem-store/badge.svg?branch=master
+[seneca-basic-url]: https://github.com/senecajs/seneca-basic
+[seneca-entity-url]: https://github.com/senecajs/seneca-entity
+[mem-store-tests]: https://github.com/senecajs/seneca-mem-store/tree/master/test
