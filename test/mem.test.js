@@ -28,12 +28,8 @@ var senecaMerge = Seneca({
 senecaMerge.use({name: '..', tag: '1'}, {merge: false})
 
 if (seneca.version >= '2.0.0') {
-  seneca.use('entity')
-  senecaMerge.use('entity')
-}
-if (seneca.version >= '3.0.0') {
-  seneca.use('basic')
-  senecaMerge.use('basic')
+  seneca.use('entity', {mem_store: false})
+  senecaMerge.use('entity', {mem_store: false})
 }
 
 before({}, function (done) {
@@ -62,7 +58,6 @@ describe('mem-store tests', function () {
     Assert.ok(seneca.export('mem-store/1/native'))
     done()
   })
-
 
   it('custom-test', function (done) {
     seneca.options({errhandler: done})
@@ -97,5 +92,16 @@ describe('mem-store tests', function () {
           })
       })
     })
+  })
+
+
+  it('generate_id', function (done) {
+    seneca
+      .test(done)
+      .make$('foo', {a: 1})
+      .save$(function (ignore, out) {
+        Assert(6 === out.id.length)
+        done()
+      })
   })
 })

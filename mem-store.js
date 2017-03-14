@@ -1,9 +1,4 @@
-/*
-  MIT License,
-  Copyright (c) 2015, Richard Rodger and other contributors.
-  Copyright (c) 2010-2014, Richard Rodger.
-*/
-
+/* Copyright (c) 2010-2017 Richard Rodger and other contributors, MIT License */
 'use strict'
 
 var _ = require('lodash')
@@ -12,7 +7,10 @@ var internals = {
   name: 'mem-store'
 }
 
-module.exports = function (options) {
+module.exports = mem_store
+Object.defineProperty(module.exports, 'name', {value: 'mem-store'})
+
+function mem_store (options) {
   var seneca = this
 
   // merge default options with any provided by the caller
@@ -20,7 +18,10 @@ module.exports = function (options) {
     prefix: '/mem-store',
     web: {
       dump: false
-    }
+    },
+
+    // TODO: use seneca.export once it allows for null values
+    generate_id: seneca.root.private$.exports['entity/generate_id']
   }, options)
 
   // The calling Seneca instance will provide
@@ -109,40 +110,44 @@ module.exports = function (options) {
       // We will still use do_save to save the entity but
       // we need a place to handle new entites and id concerns.
       function create_new () {
+        var id
+
         // Check if we already have an id or if
         // we need to generate a new one.
         if (undefined !== ent.id$) {
           // Take a copy of the existing id and
           // delete it from the ent object. Do
           // save will handle the id for us.
-          var id = ent.id$
+          id = ent.id$
           delete ent.id$
 
           // Save with the existing id
           return do_save(id, true)
         }
 
-        // We need an id so we will call out
-        // to Seneca for one.
-        var gen_id = {
-          role: 'basic',
-          cmd: 'generate_id',
-          name: name,
-          base: base,
-          zone: zone
-        }
+        // Generate a new id
+        id = options.generate_id ? options.generate_id() : void 0
 
-        // When we get a respones we will use the id param
-        // as our entity id, if this fails we just fail and
-        // call done() as we have no way to save without an id
-        seneca.act(gen_id, function (err, id) {
-          if (err) {
-            done(err)
+        if (undefined !== id) {
+          return do_save(id, true)
+        }
+        else {
+          var gen_id = {
+            role: 'basic',
+            cmd: 'generate_id',
+            name: name,
+            base: base,
+            zone: zone
           }
-          else {
+
+          // When we get a respones we will use the id param
+          // as our entity id, if this fails we just fail and
+          // call done() as we have no way to save without an id
+          seneca.act(gen_id, function (err, id) {
+            if (err) return done(err)
             do_save(id, true)
-          }
-        })
+          })
+        }
       }
     },
 
