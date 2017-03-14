@@ -97,9 +97,10 @@ describe('mem-store tests', function () {
 
   it('generate_id', function (done) {
     seneca
-      .test(done)
       .make$('foo', {a: 1})
-      .save$(function (ignore, out) {
+      .save$(function (err, out) {
+        if (err) return done(err)
+
         Assert(6 === out.id.length)
         done()
       })
