@@ -100,9 +100,7 @@ function mem_store (options) {
         }
         prev = entmap[base][name][mement.id] = mement
 
-        seneca.log.debug(function () {
-          return ['save/' + (create ? 'insert' : 'update'), ent.canon$({string: 1}), mement, desc]
-        })
+        seneca.log.debug({kind: 'mem-store', case: 'save/' + (create ? 'insert' : 'update'), canon: ent.canon$({string: 1}), entity: ent, desc: desc})
 
         done(null, ent.make$(prev))
       }
@@ -158,9 +156,7 @@ function mem_store (options) {
       listents(this, entmap, qent, q, function (err, list) {
         var ent = list[0] || null
 
-        this.log.debug(function () {
-          return [ 'load', q, qent.canon$({string: 1}), ent, desc ]
-        })
+        seneca.log.debug({kind: 'mem-store', case: 'load', q: q, canon: qent.canon$({string: 1}), entity: ent, desc: desc})
 
         done(err, ent)
       })
@@ -171,10 +167,7 @@ function mem_store (options) {
       var q = msg.q
 
       listents(this, entmap, qent, q, function (err, list) {
-        this.log.debug(function () {
-          return ['list', q, qent.canon$({string: 1}), list.length, list[0], desc]
-        })
-
+        seneca.log.debug({kind: 'mem-store', case: 'list', q: q, canon: qent.canon$({string: 1}), length: list.length, entity: list[0], desc: desc})
         done(err, list)
       })
     },
@@ -203,9 +196,7 @@ function mem_store (options) {
 
           delete entmap[canon.base][canon.name][ent.id]
 
-          seneca.log.debug(function () {
-            return ['remove/' + (all ? 'all' : 'one'), q, qent.canon$({string: 1}), ent, desc]
-          })
+          seneca.log.debug({kind: 'mem-store', case: 'remove/' + (all ? 'all' : 'one'), q: q, canon: qent.canon$({string: 1}), entity: ent, desc: desc})
         })
 
         var ent = !all && load && list[0] || null
@@ -215,7 +206,7 @@ function mem_store (options) {
     },
 
     close: function (msg, done) {
-      this.log.debug('close', desc)
+      seneca.log.debug({kind: 'mem-store', case: 'close', desc: desc})
       done()
     },
 
