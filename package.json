@@ -20,7 +20,8 @@
     "test": "lab test/*.test.js -c -r console -v -L -t 80 -I WebAssembly",
     "annotate": "docco mem-store.js -o docs/annotated",
     "coveralls": "lab test -v -r lcov  -I WebAssembly | coveralls",
-    "coverage": "lab -v -P test -L -t 80 -r html -I WebAssembly > docs/coverage.html"
+    "coverage": "lab -v -P test -L -t 80 -r html -I WebAssembly > docs/coverage.html",
+    "prettier": "prettier --write --no-semi --single-quote mem-store.js test/*.js"
   },
   "repository": {
     "type": "git",
@@ -44,6 +45,7 @@
     "eslint-plugin-standard": "2.x.x",
     "lab": "13.1.x",
     "pre-commit": "1.1.x",
+    "prettier": "^1.9.2",
     "seneca": "plugin",
     "seneca-entity": "2.0.x",
     "seneca-store-test": "1.1.1"
