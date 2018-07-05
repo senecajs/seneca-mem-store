@@ -1,7 +1,17 @@
-/* Copyright (c) 2010-2017 Richard Rodger and other contributors, MIT License */
+/* Copyright (c) 2010-2018 Richard Rodger and other contributors, MIT License */
 'use strict'
 
 var _ = require('lodash')
+
+var Eraro = require('eraro')
+var Errors = require('./lib/errors')
+
+var error = (exports.error = Eraro({
+  package: 'seneca',
+  msgmap: Errors,
+  override: true
+}))
+
 
 var internals = {
   name: 'mem-store'
@@ -44,7 +54,7 @@ function mem_store(options) {
     // use in seneca.use(), eg seneca.use('mem-store').
     name: internals.name,
 
-    save: function(msg, done) {
+    save: function(msg, reply) {
       // Take a reference to Seneca
       // and the entity to save
       var seneca = this
@@ -84,7 +94,9 @@ function mem_store(options) {
 
         var prev = entmap[base][name][mement.id]
         if (isnew && prev) {
-          return done(
+          return reply(error('entity-id-exists',{type:ent.entity$, id:id})
+
+            /*
             new Error(
               'Entity of type ' +
                 ent.entity$ +
@@ -92,6 +104,7 @@ function mem_store(options) {
                 id +
                 ' already exists.'
             )
+*/
           )
         }
 
@@ -118,7 +131,7 @@ function mem_store(options) {
           ]
         })
 
-        done(null, ent.make$(prev))
+        reply(null, ent.make$(prev))
       }
 
       // We will still use do_save to save the entity but
@@ -155,16 +168,16 @@ function mem_store(options) {
 
           // When we get a respones we will use the id param
           // as our entity id, if this fails we just fail and
-          // call done() as we have no way to save without an id
+          // call reply() as we have no way to save without an id
           seneca.act(gen_id, function(err, id) {
-            if (err) return done(err)
+            if (err) return reply(err)
             do_save(id, true)
           })
         }
       }
     },
 
-    load: function(msg, done) {
+    load: function(msg, reply) {
       var qent = msg.qent
       var q = msg.q
 
@@ -175,11 +188,11 @@ function mem_store(options) {
           return ['load', q, qent.canon$({ string: 1 }), ent, desc]
         })
 
-        done(err, ent)
+        reply(err, ent)
       })
     },
 
-    list: function(msg, done) {
+    list: function(msg, reply) {
       var qent = msg.qent
       var q = msg.q
 
@@ -195,11 +208,11 @@ function mem_store(options) {
           ]
         })
 
-        done(err, list)
+        reply(err, list)
       })
     },
 
-    remove: function(msg, done) {
+    remove: function(msg, reply) {
       var seneca = this
       var qent = msg.qent
       var q = msg.q
@@ -210,7 +223,7 @@ function mem_store(options) {
 
       listents(seneca, entmap, qent, q, function(err, list) {
         if (err) {
-          return done(err)
+          return reply(err)
         }
 
         list = list || []
@@ -236,20 +249,20 @@ function mem_store(options) {
 
         var ent = (!all && load && list[0]) || null
 
-        done(null, ent)
+        reply(null, ent)
       })
     },
 
-    close: function(msg, done) {
+    close: function(msg, reply) {
       this.log.debug('close', desc)
-      done()
+      reply()
     },
 
     // .native() is used to handle calls to the underlying driver. Since
     // there is no underlying driver for mem-store we simply return the
     // default entityMap object.
-    native: function(msg, done) {
-      done(null, entmap)
+    native: function(msg, reply) {
+      reply(null, entmap)
     }
   }
 
@@ -263,28 +276,28 @@ function mem_store(options) {
 
   options.idlen = options.idlen || 6
 
-  seneca.add({ role: store.name, cmd: 'dump' }, function(msg, done) {
-    done(null, entmap)
+  seneca.add({ role: store.name, cmd: 'dump' }, function(msg, reply) {
+    reply(null, entmap)
   })
 
-  seneca.add({ role: store.name, cmd: 'export' }, function(msg, done) {
+  seneca.add({ role: store.name, cmd: 'export' }, function(msg, reply) {
     var entjson = JSON.stringify(entmap)
 
-    done(null, { json: entjson })
+    reply(null, { json: entjson })
   })
 
-  seneca.add({ role: store.name, cmd: 'import' }, function(msg, done) {
+  seneca.add({ role: store.name, cmd: 'import' }, function(msg, reply) {
     try {
       entmap = JSON.parse(msg.json)
-      done()
+      reply()
     } catch (e) {
-      done(e)
+      reply(e)
     }
   })
 
   // Seneca will call init:plugin-name for us. This makes
   // this action a great place to do any setup.
-  seneca.add('init:mem-store', function(msg, done) {
+  seneca.add('init:mem-store', function(msg, reply) {
     if (options.web.dump) {
       seneca.act('role:web', {
         use: {
@@ -295,7 +308,7 @@ function mem_store(options) {
       })
     }
 
-    return done()
+    return reply()
   })
 
   // We don't return the store itself, it will self load into Seneca via the
@@ -387,6 +400,18 @@ function listents(seneca, entmap, qent, q, done) {
   // Limited the possibly sorted and skipped list.
   if (q.limit$ && q.limit$ >= 0) {
     list = list.slice(0, q.limit$)
+  }
+
+  // Prune fields
+  if (q.fields$) {
+    for (var i = 0; i < list.length; i++) {
+      var entfields = list[i].fields$()
+      for (var j = 0; j < entfields.length; j++) {
+        if ('id' !== entfields[j] && -1 == q.fields$.indexOf(entfields[j])) {
+          delete list[i][entfields[j]]
+        }
+      }
+    }
   }
 
   // Return the resulting list to the caller.

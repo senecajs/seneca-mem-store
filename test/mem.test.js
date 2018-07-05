@@ -1,28 +1,30 @@
 /*
   MIT License,
-  Copyright (c) 2015, Richard Rodger and other contributors.
-  Copyright (c) 2010-2014, Richard Rodger.
+  Copyright (c) 2010-2018, Richard Rodger and other contributors.
 */
 
 'use strict'
 
-var Assert = require('assert')
-var Lab = require('lab')
-var Seneca = require('seneca')
-var Shared = require('seneca-store-test')
+const Assert = require('assert')
+const Seneca = require('seneca')
+const Shared = require('seneca-store-test')
 
-var lab = (exports.lab = Lab.script())
-var describe = lab.describe
-var it = lab.it
-var before = lab.before
+const Lab = require('lab')
+const Code = require('code')
+const lab = (exports.lab = Lab.script())
+const expect = Code.expect
 
-var seneca = Seneca({
+const describe = lab.describe
+const it = lab.it
+const before = lab.before
+
+const seneca = Seneca({
   log: 'silent',
   default_plugins: { 'mem-store': false }
 })
 seneca.use({ name: '..', tag: '1' })
 
-var senecaMerge = Seneca({
+const senecaMerge = Seneca({
   log: 'silent'
 })
 senecaMerge.use({ name: '..', tag: '1' }, { merge: false })
@@ -53,13 +55,13 @@ describe('mem-store tests', function() {
     script: lab
   })
 
-  it('export-native', function(done) {
+  it('export-native', function(fin) {
     Assert.ok(seneca.export('mem-store/1/native'))
-    done()
+    fin()
   })
 
-  it('custom-test', function(done) {
-    seneca.options({ errhandler: done })
+  it('custom-test', function(fin) {
+    seneca.test(fin)
 
     var ent = seneca.make('foo', { id$: '0', q: 1 })
 
@@ -86,7 +88,7 @@ describe('mem-store tests', function() {
               Assert.ok(null === err)
               Assert.equal(2, foo.val)
 
-              done()
+              fin()
             })
           }
         )
@@ -94,12 +96,32 @@ describe('mem-store tests', function() {
     })
   })
 
-  it('generate_id', function(done) {
+  it('generate_id', function(fin) {
     seneca.make$('foo', { a: 1 }).save$(function(err, out) {
-      if (err) return done(err)
+      if (err) return fin(err)
 
       Assert(6 === out.id.length)
-      done()
+      fin()
+    })
+  })
+
+  it('fields', function(fin) {
+    seneca.test(fin)
+
+    var ent = seneca.make('foo', { id$: 'f0', a: 1, b: 2, c: 3 })
+
+    ent.save$(function(err, foo0) {
+      foo0.list$({ id: 'f0', fields$: ['a', 'c'] }, function(err, list) {
+        expect(list[0].toString()).equal('$-/-/foo;id=f0;{a:1,c:3}')
+
+        foo0.load$({ id: 'f0', fields$: ['a', 'not-a-fields'] }, function(
+          err,
+          out
+        ) {
+          expect(out.toString()).equal('$-/-/foo;id=f0;{a:1}')
+          fin()
+        })
+      })
     })
   })
 })
