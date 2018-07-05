@@ -12,7 +12,6 @@ var error = (exports.error = Eraro({
   override: true
 }))
 
-
 var internals = {
   name: 'mem-store'
 }
@@ -94,18 +93,7 @@ function mem_store(options) {
 
         var prev = entmap[base][name][mement.id]
         if (isnew && prev) {
-          return reply(error('entity-id-exists',{type:ent.entity$, id:id})
-
-            /*
-            new Error(
-              'Entity of type ' +
-                ent.entity$ +
-                ' with id = ' +
-                id +
-                ' already exists.'
-            )
-*/
-          )
+          return reply(error('entity-id-exists', { type: ent.entity$, id: id }))
         }
 
         var shouldMerge = true
