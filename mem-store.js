@@ -141,7 +141,7 @@ function mem_store(options) {
         }
 
         // Generate a new id
-        id = options.generate_id ? options.generate_id() : void 0
+        id = options.generate_id ? options.generate_id(canon) : void 0
 
         if (undefined !== id) {
           return do_save(id, true)
