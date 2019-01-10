@@ -41,11 +41,11 @@
     "lodash": "4"
   },
   "devDependencies": {
+    "code": "4",
     "coveralls": "3",
     "lab": "14",
-    "code": "4",
     "prettier": "1",
-    "seneca": "plugin",
+    "seneca": "github:senecajs/seneca",
     "seneca-entity": "2",
     "seneca-store-test": "1"
   },
