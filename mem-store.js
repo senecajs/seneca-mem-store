@@ -19,6 +19,7 @@ var internals = {
 module.exports = mem_store
 Object.defineProperty(module.exports, 'name', { value: 'mem-store' })
 
+
 function mem_store(options) {
   var seneca = this
 
@@ -275,12 +276,9 @@ function mem_store(options) {
   })
 
   seneca.add({ role: store.name, cmd: 'import' }, function(msg, reply) {
-    try {
-      entmap = JSON.parse(msg.json)
-      reply()
-    } catch (e) {
-      reply(e)
-    }
+    var imported = JSON.parse(msg.json)
+    entmap = msg.merge ? this.util.deepextend(entmap, imported) : imported
+    reply()
   })
 
   // Seneca will call init:plugin-name for us. This makes

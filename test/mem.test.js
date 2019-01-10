@@ -96,6 +96,42 @@ describe('mem-store tests', function() {
     })
   })
 
+
+  it('import', function(fin) {
+    seneca.test(fin)
+
+    seneca.act(
+      'role:mem-store, cmd:import',
+      { json: JSON.stringify({foo:{bar:{'aaa': {id:'aaa', a:1}}}}) },
+      function(err) {
+        seneca.make('foo/bar').load$('aaa', function(err, aaa) {
+          Assert.equal('$-/foo/bar;id=aaa;{a:1}', aaa.toString())
+
+          seneca.act(
+            'role:mem-store, cmd:import, merge:true',
+            { json: JSON.stringify({foo:{bar:{
+              'aaa': {id:'aaa', a:2},
+              'bbb': {id:'bbb', a:3}
+            }}}) },
+            function(err) {
+              seneca.make('foo/bar').load$('aaa', function(err, aaa) {
+                Assert.equal('$-/foo/bar;id=aaa;{a:2}', aaa.toString())
+
+                seneca.make('foo/bar').load$('bbb', function(err, bbb) {
+                  Assert.equal('$-/foo/bar;id=bbb;{a:3}', bbb.toString())
+
+                  seneca.act('role:mem-store, cmd:export', function(err, out) {
+                    Assert.equal('{"foo":{"bar":{"aaa":{"id":"aaa","a":2},"bbb":{"id":"bbb","a":3}}}}',out.json)
+                    fin()
+                  })
+                })
+              })
+            })
+        })
+      })
+  })
+
+  
   it('generate_id', function(fin) {
     seneca.make$('foo', { a: 1 }).save$(function(err, out) {
       if (err) return fin(err)
