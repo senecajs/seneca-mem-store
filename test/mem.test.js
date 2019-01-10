@@ -56,7 +56,8 @@ describe('mem-store tests', function() {
   })
 
   it('export-native', function(fin) {
-    Assert.ok(seneca.export('mem-store$1/native'))
+    Assert.ok(seneca.export('mem-store$1/native') ||
+              seneca.export('mem-store/1/native'))
     fin()
   })
 
