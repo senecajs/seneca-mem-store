@@ -17,13 +17,14 @@
     "Oisín Hennessy (https://github.com/code-jace)"
   ],
   "scripts": {
-    "test": "lab -v -t 70 -I URL,URLSearchParams,BigUint64Array,BigInt64Array,BigInt",
+    "test": "lab -v -t 80 -I URL,URLSearchParams,BigUint64Array,BigInt64Array,BigInt",
     "coveralls": "lab -s -P test -r lcov | coveralls",
-    "coverage": "lab -v -P test -t 70 -r html > coverage.html",
+    "coverage": "lab -v -P test -t 80 -r html > coverage.html",
     "prettier": "prettier --write --no-semi --single-quote *.js lib/*.js test/*.js",
-    "clean": "rm -rf node_modules yarn.lock package-lock.json",
+    "clean-npm": "rm -rf node_modules package-lock.json",
+    "clean-yarn": "rm -rf node_modules yarn.lock",
     "repo-tag": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && echo TAG: v$REPO_VERSION && git commit -a -m v$REPO_VERSION && git push && git tag v$REPO_VERSION && git push --tags;",
-    "repo-publish": "npm test && npm run repo-tag && npm publish"
+    "repo-publish": "npm run prettier && npm test && npm run repo-tag && npm publish"
   },
   "repository": {
     "type": "git",
@@ -45,8 +46,8 @@
     "coveralls": "3",
     "lab": "14",
     "prettier": "1",
-    "seneca": "github:senecajs/seneca",
-    "seneca-entity": "2",
+    "seneca": "plugin",
+    "seneca-entity": "^2.5.0",
     "seneca-store-test": "1"
   },
   "files": [

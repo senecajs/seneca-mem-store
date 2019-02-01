@@ -19,7 +19,6 @@ var internals = {
 module.exports = mem_store
 Object.defineProperty(module.exports, 'name', { value: 'mem-store' })
 
-
 function mem_store(options) {
   var seneca = this
 
