@@ -1,6 +1,6 @@
 {
   "name": "seneca-mem-store",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "Seneca in-memory data storage plugin.",
   "main": "mem-store.js",
   "license": "MIT",
@@ -47,7 +47,7 @@
     "lab": "14",
     "prettier": "1",
     "seneca": "plugin",
-    "seneca-entity": "^2.5.0",
+    "seneca-entity": "^2.5.1",
     "seneca-store-test": "1"
   },
   "files": [
