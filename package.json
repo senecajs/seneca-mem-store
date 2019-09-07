@@ -1,6 +1,6 @@
 {
   "name": "seneca-mem-store",
-  "version": "1.5.1",
+  "version": "1.6.0",
   "description": "Seneca in-memory data storage plugin.",
   "main": "mem-store.js",
   "license": "MIT",
@@ -24,7 +24,7 @@
     "clean-npm": "rm -rf node_modules package-lock.json",
     "clean-yarn": "rm -rf node_modules yarn.lock",
     "repo-tag": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && echo TAG: v$REPO_VERSION && git commit -a -m v$REPO_VERSION && git push && git tag v$REPO_VERSION && git push --tags;",
-    "repo-publish": "npm run prettier && npm test && npm run repo-tag && npm publish"
+    "repo-publish": "npm run prettier && npm test && npm run repo-tag && npm publish --access public --registry http://registry.npmjs.org"
   },
   "repository": {
     "type": "git",
@@ -38,17 +38,17 @@
     "memory"
   ],
   "dependencies": {
-    "eraro": "1",
-    "lodash": "4"
+    "eraro": "^1.1.0",
+    "lodash": "^4.17.15"
   },
   "devDependencies": {
-    "code": "4",
-    "coveralls": "3",
-    "lab": "14",
-    "prettier": "1",
+    "@hapi/code": "^6.0.0",
+    "@hapi/lab": "^20.2.2",
+    "coveralls": "^3.0.6",
+    "prettier": "^1.18.2",
     "seneca": "plugin",
-    "seneca-entity": "^2.5.1",
-    "seneca-store-test": "1"
+    "seneca-entity": "^5.1.0",
+    "seneca-store-test": "^1.5.0"
   },
   "files": [
     "README.md",

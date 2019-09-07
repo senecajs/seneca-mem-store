@@ -274,6 +274,7 @@ function mem_store(options) {
     reply(null, { json: entjson })
   })
 
+  // TODO: support direct import of literal objects
   seneca.add({ role: store.name, cmd: 'import' }, function(msg, reply) {
     var imported = JSON.parse(msg.json)
     entmap = msg.merge ? this.util.deepextend(entmap, imported) : imported

@@ -1,21 +1,23 @@
 /*
   MIT License,
-  Copyright (c) 2010-2018, Richard Rodger and other contributors.
+  Copyright (c) 2010-2019, Richard Rodger and other contributors.
 */
 
 'use strict'
+
+const Util = require('util')
 
 const Assert = require('assert')
 const Seneca = require('seneca')
 const Shared = require('seneca-store-test')
 
-const Lab = require('lab')
-const Code = require('code')
+const Lab = require('@hapi/lab')
+const Code = require('@hapi/code')
 const lab = (exports.lab = Lab.script())
 const expect = Code.expect
 
 const describe = lab.describe
-const it = lab.it
+const it = make_it(lab)
 const before = lab.before
 
 const seneca = Seneca({
@@ -33,10 +35,6 @@ if (seneca.version >= '2.0.0') {
   seneca.use('entity', { mem_store: false })
   senecaMerge.use('entity', { mem_store: false })
 }
-
-before({}, function(done) {
-  seneca.ready(done)
-})
 
 describe('mem-store tests', function() {
   Shared.basictest({
@@ -172,3 +170,20 @@ describe('mem-store tests', function() {
     })
   })
 })
+
+function make_it(lab) {
+  return function it(name, opts, func) {
+    if ('function' === typeof opts) {
+      func = opts
+      opts = {}
+    }
+
+    lab.it(
+      name,
+      opts,
+      Util.promisify(function(x, fin) {
+        func(fin)
+      })
+    )
+  }
+}
