@@ -359,13 +359,12 @@ function listents(seneca, entmap, qent, q, done) {
           if (-1 === p.indexOf('$')) {
             //if (!~p.indexOf('$') && q[p] !== ent[p]) {
 
-            if( Array.isArray(q[p]) ) {
-              if( -1 === q[p].indexOf(ent[p])) {
+            if (Array.isArray(q[p])) {
+              if (-1 === q[p].indexOf(ent[p])) {
                 //console.log('AAA',p, q[p],ent[p],q[p].indexOf(ent[p]))
-                return 
+                return
               }
-            }
-            else if (q[p] !== ent[p]) {
+            } else if (q[p] !== ent[p]) {
               return
             }
           }
