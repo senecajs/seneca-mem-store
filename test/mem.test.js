@@ -169,6 +169,34 @@ describe('mem-store tests', function() {
       })
     })
   })
+
+
+  it('in-query', function(fin) {
+    seneca.test(fin)
+
+    seneca.make('zed', { p1:'a',p2:10 }).save$()
+    seneca.make('zed', { p1:'b',p2:20 }).save$()
+    seneca.make('zed', { p1:'c',p2:30 }).save$()
+    seneca.make('zed', { p1:'a',p2:40 }).save$()
+    seneca.ready(function() {
+      seneca.make('zed').list$({p1:'a'}, function(err, list) {
+        //console.log(err,list)
+        expect(list.length).equal(2)
+
+        seneca.make('zed').list$({p1:['a']}, function(err, list) {
+          //console.log(err,list)
+          expect(list.length).equal(2)
+
+          seneca.make('zed').list$({p1:['a','b']}, function(err, list) {
+            //console.log(err,list)
+            expect(list.length).equal(3)
+            fin()
+          })
+        })
+      })
+    })
+  })
+
 })
 
 function make_it(lab) {
