@@ -3,14 +3,6 @@
 
 var _ = require('lodash')
 
-var Eraro = require('eraro')
-var Errors = require('./lib/errors')
-
-var error = (exports.error = Eraro({
-  package: 'seneca',
-  msgmap: Errors,
-  override: true
-}))
 
 var internals = {
   name: 'mem-store'
@@ -18,6 +10,12 @@ var internals = {
 
 module.exports = mem_store
 Object.defineProperty(module.exports, 'name', { value: 'mem-store' })
+
+module.exports.defaults = {
+  'entity-id-exists':
+    'Entity of type <%=type%> with id = <%=id%> already exists.'
+}
+
 
 function mem_store(options) {
   var seneca = this
@@ -93,7 +91,7 @@ function mem_store(options) {
 
         var prev = entmap[base][name][mement.id]
         if (isnew && prev) {
-          return reply(error('entity-id-exists', { type: ent.entity$, id: id }))
+          return reply(seneca.error('entity-id-exists', { type: ent.entity$, id: id }))
         }
 
         var shouldMerge = true
@@ -104,9 +102,9 @@ function mem_store(options) {
           shouldMerge = false
         }
 
-        mement = _.cloneDeep(mement)
+        mement = seneca.util.deep(mement)
         if (shouldMerge) {
-          mement = _.assign(prev || {}, mement)
+          mement = Object.assign(prev || {}, mement)
         }
         prev = entmap[base][name][mement.id] = mement
 
@@ -336,15 +334,15 @@ function listents(seneca, entmap, qent, q, done) {
 
   var entset = entmap[base] ? entmap[base][name] : null
 
-  if (entset) {
-    if (_.isString(q)) {
+  if (null != entset && null != q) {
+    if ('string' == typeof(q)) {
       var ent = entset[q]
       if (ent) {
         list.push(ent)
       }
     }
-    if (_.isArray(q)) {
-      _.each(q, function(id) {
+    else if (Array.isArray(q)) {
+      q.forEach(function(id) {
         var ent = entset[id]
         if (ent) {
           ent = qent.make$(ent)
@@ -352,8 +350,8 @@ function listents(seneca, entmap, qent, q, done) {
         }
       })
     }
-    if (_.isObject(q)) {
-      _.keys(entset).forEach(function(id) {
+    else if ('object' === typeof(q)) {
+      Object.keys(entset).forEach(function(id) {
         var ent = entset[id]
         for (var p in q) {
           if (-1 === p.indexOf('$')) {
