@@ -22,12 +22,12 @@ const before = lab.before
 
 const seneca = Seneca({
   log: 'silent',
-  default_plugins: { 'mem-store': false }
+  default_plugins: { 'mem-store': false },
 })
 seneca.use({ name: '..', tag: '1' })
 
 const senecaMerge = Seneca({
-  log: 'silent'
+  log: 'silent',
 })
 senecaMerge.use({ name: '..', tag: '1' }, { merge: false })
 
@@ -36,39 +36,39 @@ if (seneca.version >= '2.0.0') {
   senecaMerge.use('entity', { mem_store: false })
 }
 
-describe('mem-store tests', function() {
+describe('mem-store tests', function () {
   Shared.basictest({
     seneca: seneca,
     senecaMerge: senecaMerge,
-    script: lab
+    script: lab,
   })
 
   Shared.limitstest({
     seneca: seneca,
-    script: lab
+    script: lab,
   })
 
   Shared.sorttest({
     seneca: seneca,
-    script: lab
+    script: lab,
   })
 
-  it('export-native', function(fin) {
+  it('export-native', function (fin) {
     Assert.ok(
       seneca.export('mem-store$1/native') || seneca.export('mem-store/1/native')
     )
     fin()
   })
 
-  it('custom-test', function(fin) {
+  it('custom-test', function (fin) {
     seneca.test(fin)
 
     var ent = seneca.make('foo', { id$: '0', q: 1 })
 
-    ent.save$(function(err) {
+    ent.save$(function (err) {
       Assert.ok(null === err)
 
-      seneca.act('role:mem-store, cmd:export', function(err, exported) {
+      seneca.act('role:mem-store, cmd:export', function (err, exported) {
         var expected =
           '{"undefined":{"foo":{"0":{"entity$":"-/-/foo","q":1,"id":"0"}}}}'
 
@@ -81,10 +81,10 @@ describe('mem-store tests', function() {
         seneca.act(
           'role:mem-store, cmd:import',
           { json: JSON.stringify(data) },
-          function(err) {
+          function (err) {
             Assert.ok(null === err)
 
-            seneca.make('foo').load$('1', function(err, foo) {
+            seneca.make('foo').load$('1', function (err, foo) {
               Assert.ok(null === err)
               Assert.equal(2, foo.val)
 
@@ -96,14 +96,14 @@ describe('mem-store tests', function() {
     })
   })
 
-  it('import', function(fin) {
+  it('import', function (fin) {
     seneca.test(fin)
 
     seneca.act(
       'role:mem-store, cmd:import',
       { json: JSON.stringify({ foo: { bar: { aaa: { id: 'aaa', a: 1 } } } }) },
-      function(err) {
-        seneca.make('foo/bar').load$('aaa', function(err, aaa) {
+      function (err) {
+        seneca.make('foo/bar').load$('aaa', function (err, aaa) {
           Assert.equal('$-/foo/bar;id=aaa;{a:1}', aaa.toString())
 
           seneca.act(
@@ -113,19 +113,19 @@ describe('mem-store tests', function() {
                 foo: {
                   bar: {
                     aaa: { id: 'aaa', a: 2 },
-                    bbb: { id: 'bbb', a: 3 }
-                  }
-                }
-              })
+                    bbb: { id: 'bbb', a: 3 },
+                  },
+                },
+              }),
             },
-            function(err) {
-              seneca.make('foo/bar').load$('aaa', function(err, aaa) {
+            function (err) {
+              seneca.make('foo/bar').load$('aaa', function (err, aaa) {
                 Assert.equal('$-/foo/bar;id=aaa;{a:2}', aaa.toString())
 
-                seneca.make('foo/bar').load$('bbb', function(err, bbb) {
+                seneca.make('foo/bar').load$('bbb', function (err, bbb) {
                   Assert.equal('$-/foo/bar;id=bbb;{a:3}', bbb.toString())
 
-                  seneca.act('role:mem-store, cmd:export', function(err, out) {
+                  seneca.act('role:mem-store, cmd:export', function (err, out) {
                     Assert.equal(
                       '{"foo":{"bar":{"aaa":{"id":"aaa","a":2},"bbb":{"id":"bbb","a":3}}}}',
                       out.json
@@ -141,8 +141,8 @@ describe('mem-store tests', function() {
     )
   })
 
-  it('generate_id', function(fin) {
-    seneca.make$('foo', { a: 1 }).save$(function(err, out) {
+  it('generate_id', function (fin) {
+    seneca.make$('foo', { a: 1 }).save$(function (err, out) {
       if (err) return fin(err)
 
       Assert(6 === out.id.length)
@@ -150,16 +150,16 @@ describe('mem-store tests', function() {
     })
   })
 
-  it('fields', function(fin) {
+  it('fields', function (fin) {
     seneca.test(fin)
 
     var ent = seneca.make('foo', { id$: 'f0', a: 1, b: 2, c: 3 })
 
-    ent.save$(function(err, foo0) {
-      foo0.list$({ id: 'f0', fields$: ['a', 'c'] }, function(err, list) {
+    ent.save$(function (err, foo0) {
+      foo0.list$({ id: 'f0', fields$: ['a', 'c'] }, function (err, list) {
         expect(list[0].toString()).equal('$-/-/foo;id=f0;{a:1,c:3}')
 
-        foo0.load$({ id: 'f0', fields$: ['a', 'not-a-fields'] }, function(
+        foo0.load$({ id: 'f0', fields$: ['a', 'not-a-fields'] }, function (
           err,
           out
         ) {
@@ -170,23 +170,23 @@ describe('mem-store tests', function() {
     })
   })
 
-  it('in-query', function(fin) {
+  it('in-query', function (fin) {
     seneca.test(fin)
 
     seneca.make('zed', { p1: 'a', p2: 10 }).save$()
     seneca.make('zed', { p1: 'b', p2: 20 }).save$()
     seneca.make('zed', { p1: 'c', p2: 30 }).save$()
     seneca.make('zed', { p1: 'a', p2: 40 }).save$()
-    seneca.ready(function() {
-      seneca.make('zed').list$({ p1: 'a' }, function(err, list) {
+    seneca.ready(function () {
+      seneca.make('zed').list$({ p1: 'a' }, function (err, list) {
         //console.log(err,list)
         expect(list.length).equal(2)
 
-        seneca.make('zed').list$({ p1: ['a'] }, function(err, list) {
+        seneca.make('zed').list$({ p1: ['a'] }, function (err, list) {
           //console.log(err,list)
           expect(list.length).equal(2)
 
-          seneca.make('zed').list$({ p1: ['a', 'b'] }, function(err, list) {
+          seneca.make('zed').list$({ p1: ['a', 'b'] }, function (err, list) {
             //console.log(err,list)
             expect(list.length).equal(3)
             fin()
@@ -207,7 +207,7 @@ function make_it(lab) {
     lab.it(
       name,
       opts,
-      Util.promisify(function(x, fin) {
+      Util.promisify(function (x, fin) {
         func(fin)
       })
     )
