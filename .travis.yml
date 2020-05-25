@@ -1,4 +1,3 @@
-sudo: false
 language: node_js
 
 env:
@@ -7,15 +6,10 @@ env:
   - SENECA_VER=senecajs/seneca
   
 node_js:
+  - "14"
   - "13"
   - "12"
   - "10"
-  - "8"
-
-
-
-install:
-  - NODE_VERSION=$(node -v); if [ ${NODE_VERSION:1:2} -ge 10 ]; then npm i -g npm@6; npm ci; else npm install; fi
 
 
 before_script:
@@ -25,7 +19,7 @@ before_script:
 
 script:
   - npm test
-  - if [ ${NODE_VERSION:1:2} -ge 10 ]; then npm audit; fi
+  - npm audit
 
 
 after_script:
