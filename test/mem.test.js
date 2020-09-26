@@ -37,19 +37,23 @@ if (seneca.version >= '2.0.0') {
 }
 
 
-seneca.use('promisify')
+const seneca_test = Seneca({
+  log: 'silent',
+})
+      .use('promisify')
+      .use('entity', {mem_store: false})
+      .use('..')
 
 const test_opts = {
-  seneca:seneca,
+  seneca:seneca_test,
   name:'mem-store'
 }
 
 
 Shared.test.init(lab,test_opts)
+Shared.test.keyvalue(lab,test_opts)
 
 
-
-/*
 describe('mem-store tests', function () {
   Shared.basictest({
     seneca: seneca,
@@ -210,7 +214,7 @@ describe('mem-store tests', function () {
     })
   })
 })
-*/
+
 
 function make_it(lab) {
   return function it(name, opts, func) {
