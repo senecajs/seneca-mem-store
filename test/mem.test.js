@@ -1,6 +1,6 @@
 /*
   MIT License,
-  Copyright (c) 2010-2019, Richard Rodger and other contributors.
+  Copyright (c) 2010-2020, Richard Rodger and other contributors.
 */
 
 'use strict'
@@ -36,23 +36,20 @@ if (seneca.version >= '2.0.0') {
   senecaMerge.use('entity', { mem_store: false })
 }
 
-
 const seneca_test = Seneca({
   log: 'silent',
 })
-      .use('promisify')
-      .use('entity', {mem_store: false})
-      .use('..')
+  .use('promisify')
+  .use('entity', { mem_store: false })
+  .use('..')
 
 const test_opts = {
-  seneca:seneca_test,
-  name:'mem-store'
+  seneca: seneca_test,
+  name: 'mem-store',
 }
 
-
-Shared.test.init(lab,test_opts)
-Shared.test.keyvalue(lab,test_opts)
-
+Shared.test.init(lab, test_opts)
+Shared.test.keyvalue(lab, test_opts)
 
 describe('mem-store tests', function () {
   Shared.basictest({
@@ -214,7 +211,6 @@ describe('mem-store tests', function () {
     })
   })
 })
-
 
 function make_it(lab) {
   return function it(name, opts, func) {
