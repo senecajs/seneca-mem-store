@@ -1,7 +1,5 @@
-/* Copyright (c) 2010-2018 Richard Rodger and other contributors, MIT License */
+/* Copyright (c) 2010-2020 Richard Rodger and other contributors, MIT License */
 'use strict'
-
-var _ = require('lodash')
 
 var internals = {
   name: 'mem-store',
@@ -19,7 +17,7 @@ function mem_store(options) {
   var seneca = this
 
   var init = seneca.export('entity/init')
-  
+
   // merge default options with any provided by the caller
   options = seneca.util.deepextend(
     {
@@ -293,7 +291,7 @@ function mem_store(options) {
           pin: { role: 'mem-store', cmd: '*' },
           map: { dump: true },
         },
-        default$: {}
+        default$: {},
       })
     }
 
