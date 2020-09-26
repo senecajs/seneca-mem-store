@@ -44,6 +44,7 @@
     "prettier": "^2.1.2",
     "seneca": "^3.22.0",
     "seneca-entity": "^10.1.0",
+    "seneca-promisify": "^2.0.0",
     "seneca-store-test": "^2.1.0"
   },
   "files": [

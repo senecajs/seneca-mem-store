@@ -36,6 +36,20 @@ if (seneca.version >= '2.0.0') {
   senecaMerge.use('entity', { mem_store: false })
 }
 
+
+seneca.use('promisify')
+
+const test_opts = {
+  seneca:seneca,
+  name:'mem-store'
+}
+
+
+Shared.test.init(lab,test_opts)
+
+
+
+/*
 describe('mem-store tests', function () {
   Shared.basictest({
     seneca: seneca,
@@ -196,6 +210,7 @@ describe('mem-store tests', function () {
     })
   })
 })
+*/
 
 function make_it(lab) {
   return function it(name, opts, func) {
