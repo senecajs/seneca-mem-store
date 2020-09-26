@@ -18,6 +18,8 @@ module.exports.defaults = {
 function mem_store(options) {
   var seneca = this
 
+  var init = seneca.export('entity/init')
+  
   // merge default options with any provided by the caller
   options = seneca.util.deepextend(
     {
@@ -254,7 +256,8 @@ function mem_store(options) {
 
   // Init the store using the seneca instance, merged
   // options and the store description object above.
-  var meta = seneca.store.init(seneca, options, store)
+  var meta = init(seneca, options, store)
+  //var meta = seneca.store.init(seneca, options, store)
 
   // int() returns some metadata for us, one of these is the
   // description, we'll take a copy of that here.
@@ -281,14 +284,16 @@ function mem_store(options) {
 
   // Seneca will call init:plugin-name for us. This makes
   // this action a great place to do any setup.
-  seneca.add('init:mem-store', function (msg, reply) {
+  //seneca.add('init:mem-store', function (msg, reply) {
+  seneca.init(function (reply) {
     if (options.web.dump) {
-      seneca.act('role:web', {
+      this.act('role:web', {
         use: {
           prefix: options.prefix,
           pin: { role: 'mem-store', cmd: '*' },
           map: { dump: true },
         },
+        default$: {}
       })
     }
 
