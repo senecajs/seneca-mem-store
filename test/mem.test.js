@@ -36,12 +36,11 @@ if (seneca.version >= '2.0.0') {
   senecaMerge.use('entity', { mem_store: false })
 }
 
-const seneca_test = Seneca({
-  log: 'silent',
-})
-  .use('promisify')
-  .use('entity', { mem_store: false })
-  .use('..')
+const seneca_test = Seneca({require})
+      .test()
+      .use('promisify')
+      .use('entity', { mem_store: false })
+      //.use('..')
 
 const test_opts = {
   seneca: seneca_test,

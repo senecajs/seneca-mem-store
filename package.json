@@ -46,7 +46,7 @@
     "seneca": "^3.22.0",
     "seneca-entity": "^10.1.0",
     "seneca-promisify": "^2.0.0",
-    "seneca-store-test": "^3.0.0"
+    "seneca-store-test": "^3.1.0"
   },
   "files": [
     "README.md",
