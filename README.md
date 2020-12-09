@@ -3,7 +3,7 @@
 
 # seneca-mem-store
 [![npm version][npm-badge]][npm-url]
-[![Build Status][travis-badge]][travis-url]
+![Build](https://github.com/senecajs/seneca-mem-store/workflows/build/badge.svg)
 [![Dependency Status][david-badge]][david-url]
 [![Maintainability](https://api.codeclimate.com/v1/badges/e2cdcc5415161cb378b0/maintainability)](https://codeclimate.com/github/senecajs/seneca-mem-store/maintainability)
 [![Coveralls][BadgeCoveralls]][Coveralls]
