@@ -1,7 +1,7 @@
 /* Copyright (c) 2010-2020 Richard Rodger and other contributors, MIT License */
 'use strict'
 
-var internals = {
+let internals = {
   name: 'mem-store',
 }
 
@@ -13,10 +13,10 @@ module.exports.defaults = {
     'Entity of type <%=type%> with id = <%=id%> already exists.',
 }
 
-function mem_store(options) {
-  var seneca = this
+function mem_store(options: any) {
+  let seneca = this
 
-  var init = seneca.export('entity/init')
+  let init = seneca.export('entity/init')
 
   // merge default options with any provided by the caller
   options = seneca.util.deepextend(
@@ -35,38 +35,38 @@ function mem_store(options) {
   // The calling Seneca instance will provide
   // a description for us on init(), it will
   // be used in the logs
-  var desc
+  let desc: any
 
   // Our super awesome in mem database. Please bear in mind
   // that this store is meant for fast prototyping, using
   // it for production is not advised!
-  var entmap = {}
+  let entmap: any = {}
 
   // Define the store using a description object.
   // This is a convenience provided by seneca.store.init function.
-  var store = {
+  let store = {
     // The name of the plugin, this is what is the name you would
     // use in seneca.use(), eg seneca.use('mem-store').
     name: internals.name,
 
-    save: function (msg, reply) {
+    save: function(msg: any, reply: any) {
       // Take a reference to Seneca
       // and the entity to save
-      var seneca = this
-      var ent = msg.ent
+      let seneca = this
+      let ent = msg.ent
 
       // create our cannon and take a copy of
       // the zone, base and name, we will use
       // this info further down.
-      var canon = ent.canon$({ object: true })
-      var zone = canon.zone
-      var base = canon.base
-      var name = canon.name
+      let canon = ent.canon$({ object: true })
+      let zone = canon.zone
+      let base = canon.base
+      let name = canon.name
 
       // check if we are in create mode,
       // if we are do a create, otherwise
       // we will do a save instead
-      var create = ent.id == null
+      let create = ent.id == null
       if (create) {
         create_new()
       } else {
@@ -75,8 +75,8 @@ function mem_store(options) {
 
       // The actual save logic for saving or
       // creating and then saving the entity.
-      function do_save(id, isnew) {
-        var mement = ent.data$(true, 'string')
+      function do_save(id?: any, isnew?: boolean) {
+        let mement = ent.data$(true, 'string')
 
         if (undefined !== id) {
           mement.id = id
@@ -87,14 +87,14 @@ function mem_store(options) {
         entmap[base] = entmap[base] || {}
         entmap[base][name] = entmap[base][name] || {}
 
-        var prev = entmap[base][name][mement.id]
+        let prev = entmap[base][name][mement.id]
         if (isnew && prev) {
           return reply(
             seneca.error('entity-id-exists', { type: ent.entity$, id: id })
           )
         }
 
-        var shouldMerge = true
+        let shouldMerge = true
         if (options.merge !== false && ent.merge$ === false) {
           shouldMerge = false
         }
@@ -108,7 +108,7 @@ function mem_store(options) {
         }
         prev = entmap[base][name][mement.id] = mement
 
-        seneca.log.debug(function () {
+        seneca.log.debug(function() {
           return [
             'save/' + (create ? 'insert' : 'update'),
             ent.canon$({ string: 1 }),
@@ -123,7 +123,7 @@ function mem_store(options) {
       // We will still use do_save to save the entity but
       // we need a place to handle new entites and id concerns.
       function create_new() {
-        var id
+        let id
 
         // Check if we already have an id or if
         // we need to generate a new one.
@@ -144,7 +144,7 @@ function mem_store(options) {
         if (undefined !== id) {
           return do_save(id, true)
         } else {
-          var gen_id = {
+          let gen_id = {
             role: 'basic',
             cmd: 'generate_id',
             name: name,
@@ -155,7 +155,7 @@ function mem_store(options) {
           // When we get a respones we will use the id param
           // as our entity id, if this fails we just fail and
           // call reply() as we have no way to save without an id
-          seneca.act(gen_id, function (err, id) {
+          seneca.act(gen_id, function(err: Error, id: string) {
             if (err) return reply(err)
             do_save(id, true)
           })
@@ -163,14 +163,14 @@ function mem_store(options) {
       }
     },
 
-    load: function (msg, reply) {
-      var qent = msg.qent
-      var q = msg.q
+    load: function(msg: any, reply: any) {
+      let qent = msg.qent
+      let q = msg.q
 
-      listents(this, entmap, qent, q, function (err, list) {
-        var ent = list[0] || null
+      listents(this, entmap, qent, q, function(err: Error, list: any[]) {
+        let ent = list[0] || null
 
-        this.log.debug(function () {
+        this.log.debug(function() {
           return ['load', q, qent.canon$({ string: 1 }), ent, desc]
         })
 
@@ -178,12 +178,12 @@ function mem_store(options) {
       })
     },
 
-    list: function (msg, reply) {
-      var qent = msg.qent
-      var q = msg.q
+    list: function(msg: any, reply: any) {
+      let qent = msg.qent
+      let q = msg.q
 
-      listents(this, entmap, qent, q, function (err, list) {
-        this.log.debug(function () {
+      listents(this, entmap, qent, q, function(err: Error, list: any[]) {
+        this.log.debug(function() {
           return [
             'list',
             q,
@@ -198,16 +198,16 @@ function mem_store(options) {
       })
     },
 
-    remove: function (msg, reply) {
-      var seneca = this
-      var qent = msg.qent
-      var q = msg.q
-      var all = q.all$
+    remove: function(msg: any, reply: any) {
+      let seneca = this
+      let qent = msg.qent
+      let q = msg.q
+      let all = q.all$
 
       // default false
-      var load = q.load$ === true
+      let load = q.load$ === true
 
-      listents(seneca, entmap, qent, q, function (err, list) {
+      listents(seneca, entmap, qent, q, function(err: Error, list: any[]) {
         if (err) {
           return reply(err)
         }
@@ -215,14 +215,14 @@ function mem_store(options) {
         list = list || []
         list = all ? list : list.slice(0, 1)
 
-        list.forEach(function (ent) {
-          var canon = qent.canon$({
+        list.forEach(function(ent) {
+          let canon = qent.canon$({
             object: true,
           })
 
           delete entmap[canon.base][canon.name][ent.id]
 
-          seneca.log.debug(function () {
+          seneca.log.debug(function() {
             return [
               'remove/' + (all ? 'all' : 'one'),
               q,
@@ -233,13 +233,13 @@ function mem_store(options) {
           })
         })
 
-        var ent = (!all && load && list[0]) || null
+        let ent = (!all && load && list[0]) || null
 
         reply(null, ent)
       })
     },
 
-    close: function (msg, reply) {
+    close: function(msg: any, reply: any) {
       this.log.debug('close', desc)
       reply()
     },
@@ -247,15 +247,15 @@ function mem_store(options) {
     // .native() is used to handle calls to the underlying driver. Since
     // there is no underlying driver for mem-store we simply return the
     // default entityMap object.
-    native: function (msg, reply) {
+    native: function(msg: any, reply: any) {
       reply(null, entmap)
     },
   }
 
   // Init the store using the seneca instance, merged
   // options and the store description object above.
-  var meta = init(seneca, options, store)
-  //var meta = seneca.store.init(seneca, options, store)
+  let meta = init(seneca, options, store)
+  //let meta = seneca.store.init(seneca, options, store)
 
   // int() returns some metadata for us, one of these is the
   // description, we'll take a copy of that here.
@@ -263,19 +263,19 @@ function mem_store(options) {
 
   options.idlen = options.idlen || 6
 
-  seneca.add({ role: store.name, cmd: 'dump' }, function (msg, reply) {
+  seneca.add({ role: store.name, cmd: 'dump' }, function(msg: any, reply: any) {
     reply(null, entmap)
   })
 
-  seneca.add({ role: store.name, cmd: 'export' }, function (msg, reply) {
-    var entjson = JSON.stringify(entmap)
+  seneca.add({ role: store.name, cmd: 'export' }, function(msg: any, reply: any) {
+    let entjson = JSON.stringify(entmap)
 
     reply(null, { json: entjson })
   })
 
   // TODO: support direct import of literal objects
-  seneca.add({ role: store.name, cmd: 'import' }, function (msg, reply) {
-    var imported = JSON.parse(msg.json)
+  seneca.add({ role: store.name, cmd: 'import' }, function(msg: any, reply: any) {
+    let imported = JSON.parse(msg.json)
     entmap = msg.merge ? this.util.deepextend(entmap, imported) : imported
     reply()
   })
@@ -283,7 +283,7 @@ function mem_store(options) {
   // Seneca will call init:plugin-name for us. This makes
   // this action a great place to do any setup.
   //seneca.add('init:mem-store', function (msg, reply) {
-  seneca.init(function (reply) {
+  seneca.init(function(reply: any) {
     if (options.web.dump) {
       this.act('role:web', {
         use: {
@@ -310,13 +310,13 @@ function mem_store(options) {
   }
 }
 
-module.exports.preload = function () {
-  var seneca = this
+module.exports.preload = function() {
+  let seneca = this
 
-  var meta = {
+  let meta = {
     name: internals.name,
     exportmap: {
-      native: function () {
+      native: function() {
         seneca.export(internals.name + '/native').apply(this, arguments)
       },
     },
@@ -328,16 +328,16 @@ module.exports.preload = function () {
 // Seneca supports a reasonable set of features
 // in terms of listing. This function can handle
 // sorting, skiping, limiting and general retrieval.
-function listents(seneca, entmap, qent, q, done) {
-  var list = []
+function listents(seneca: any, entmap: any, qent: any, q: any, done: any) {
+  let list = []
 
-  var canon = qent.canon$({ object: true })
-  var base = canon.base
-  var name = canon.name
+  let canon = qent.canon$({ object: true })
+  let base = canon.base
+  let name = canon.name
 
-  var entset = entmap[base] ? entmap[base][name] : null
-  var ent
-  
+  let entset = entmap[base] ? entmap[base][name] : null
+  let ent
+
   if (null != entset && null != q) {
     if ('string' == typeof q) {
       ent = entset[q]
@@ -345,8 +345,8 @@ function listents(seneca, entmap, qent, q, done) {
         list.push(ent)
       }
     } else if (Array.isArray(q)) {
-      q.forEach(function (id) {
-        var ent = entset[id]
+      q.forEach(function(id) {
+        let ent = entset[id]
         if (ent) {
           ent = qent.make$(ent)
           list.push(ent)
@@ -356,9 +356,9 @@ function listents(seneca, entmap, qent, q, done) {
 
       let entids = Object.keys(entset)
       next_ent:
-      for( let id of entids ) {
+      for (let id of entids) {
         ent = entset[id]
-        for (var p in q) {
+        for (let p in q) {
           let qv = q[p]   // query val
           let ev = ent[p] // ent val
 
@@ -367,19 +367,18 @@ function listents(seneca, entmap, qent, q, done) {
               if (-1 === qv.indexOf(ev)) {
                 continue next_ent
               }
-            } else if (null != qv && 'object' === typeof(qv)) {
+            } else if (null != qv && 'object' === typeof (qv)) {
 
               // mongo style constraints
-              if( (null != qv.$ne && qv.$ne == ev) ||
-                  (null != qv.$gte && qv.$gte > ev) ||
-                  (null != qv.$gt && qv.$gt >= ev) ||
-                  (null != qv.$lt && qv.$lt <= ev) ||
-                  (null != qv.$lte && qv.$lte < ev) ||
-                  (null != qv.$in && -1 === qv.$in.indexOf(ev) ) ||
-                  (null != qv.$nin && -1 !== qv.$nin.indexOf(ev) ) ||
-                  false
-                )
-              {
+              if ((null != qv.$ne && qv.$ne == ev) ||
+                (null != qv.$gte && qv.$gte > ev) ||
+                (null != qv.$gt && qv.$gt >= ev) ||
+                (null != qv.$lt && qv.$lt <= ev) ||
+                (null != qv.$lte && qv.$lte < ev) ||
+                (null != qv.$in && -1 === qv.$in.indexOf(ev)) ||
+                (null != qv.$nin && -1 !== qv.$nin.indexOf(ev)) ||
+                false
+              ) {
                 continue next_ent
               }
 
@@ -396,12 +395,13 @@ function listents(seneca, entmap, qent, q, done) {
 
   // Always sort first, this is the 'expected' behaviour.
   if (q.sort$) {
-    for (var sf in q.sort$) {
+    let sf: any
+    for (sf in q.sort$) {
       break
     }
 
-    var sd = q.sort$[sf] < 0 ? -1 : 1
-    list = list.sort(function (a, b) {
+    let sd = q.sort$[sf] < 0 ? -1 : 1
+    list = list.sort(function(a, b) {
       return sd * (a[sf] < b[sf] ? -1 : a[sf] === b[sf] ? 0 : 1)
     })
   }
@@ -418,9 +418,9 @@ function listents(seneca, entmap, qent, q, done) {
 
   // Prune fields
   if (q.fields$) {
-    for (var i = 0; i < list.length; i++) {
-      var entfields = list[i].fields$()
-      for (var j = 0; j < entfields.length; j++) {
+    for (let i = 0; i < list.length; i++) {
+      let entfields = list[i].fields$()
+      for (let j = 0; j < entfields.length; j++) {
         if ('id' !== entfields[j] && -1 == q.fields$.indexOf(entfields[j])) {
           delete list[i][entfields[j]]
         }

@@ -2,7 +2,8 @@
   "name": "seneca-mem-store",
   "version": "4.0.1",
   "description": "Seneca in-memory data storage plugin.",
-  "main": "mem-store.js",
+  "main": "dist/mem-store.js",
+  "types": "dist/mem-store.d.ts",
   "license": "MIT",
   "author": "Richard Rodger (http://richardrodger.com)",
   "contributors": [
@@ -17,14 +18,16 @@
     "Oisín Hennessy (https://github.com/code-jace)"
   ],
   "scripts": {
-    "test": "lab -v -P test -L -t 80 -r console -o stdout -r html -o test/coverage.html -r lcov -o test/lcov.info",
-    "test-some": "lab -v -P test -g",
-    "prettier": "prettier --write --no-semi --single-quote *.js lib/*.js test/*.js",
-    "reset": "npm run clean && npm i && npm test",
+    "build": "tsc -d",
+    "watch": "tsc -w -d",
+    "test": "lab -v -P test -L -t 80 -r console -o stdout -r html -o test/coverage.html -r lcov -o test/lcov.info --sourcemaps --transform node_modules/lab-transform-typescript",
+    "test-some": "lab -v -P test --sourcemaps --transform node_modules/lab-transform-typescript -g",
+    "prettier": "prettier --write --no-semi --single-quote *.ts test/*.js",
+    "reset": "npm run clean && npm i && npm run build && npm test",
     "clean": "rm -rf node_modules package-lock.json yarn.lock",
     "repo-tag": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && echo TAG: v$REPO_VERSION && git commit -a -m v$REPO_VERSION && git push && git tag v$REPO_VERSION && git push --tags;",
     "repo-publish": "npm run clean && npm i --registry=http://registry.npmjs.org && npm run repo-publish-quick",
-    "repo-publish-quick": "npm run prettier && npm test && npm run repo-tag && npm publish --access public --registry=http://registry.npmjs.org"
+    "repo-publish-quick": "npm run prettier && npm run build && npm test && npm run repo-tag && npm publish --access public --registry=http://registry.npmjs.org"
   },
   "repository": {
     "type": "git",
@@ -40,12 +43,13 @@
   "devDependencies": {
     "@hapi/code": "^8.0.2",
     "@hapi/lab": "^24.1.0",
-    "coveralls": "^3.1.0",
     "prettier": "^2.2.1",
     "seneca": "^3.23.0",
     "seneca-entity": "^11.0.0",
     "seneca-promisify": "^2.0.0",
-    "seneca-store-test": "^3.1.0"
+    "seneca-store-test": "^3.1.0",
+    "lab-transform-typescript": "^3.0.1",
+    "typescript": "^4.1.2"
   },
   "files": [
     "README.md",
