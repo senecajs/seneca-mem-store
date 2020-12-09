@@ -36,11 +36,11 @@ if (seneca.version >= '2.0.0') {
   senecaMerge.use('entity', { mem_store: false })
 }
 
-const seneca_test = Seneca({require})
-      .test()
-      .use('promisify')
-      .use('entity', { mem_store: false })
-      //.use('..')
+const seneca_test = Seneca({ require })
+  .test()
+  .use('promisify')
+  .use('entity', { mem_store: false })
+//.use('..')
 
 const test_opts = {
   seneca: seneca_test,
@@ -62,6 +62,7 @@ describe('mem-store tests', function () {
     script: lab,
   })
 
+  // TODO: does not seem to include ents that are equvalent for sorting
   Shared.sorttest({
     seneca: seneca,
     script: lab,
@@ -173,18 +174,17 @@ describe('mem-store tests', function () {
       foo0.list$({ id: 'f0', fields$: ['a', 'c'] }, function (err, list) {
         expect(list[0].toString()).equal('$-/-/foo;id=f0;{a:1,c:3}')
 
-        foo0.load$({ id: 'f0', fields$: ['a', 'not-a-fields'] }, function (
-          err,
-          out
-        ) {
-          expect(out.toString()).equal('$-/-/foo;id=f0;{a:1}')
-          fin()
-        })
+        foo0.load$(
+          { id: 'f0', fields$: ['a', 'not-a-fields'] },
+          function (err, out) {
+            expect(out.toString()).equal('$-/-/foo;id=f0;{a:1}')
+            fin()
+          }
+        )
       })
     })
   })
 
-  
   it('in-query', function (fin) {
     seneca.test(fin)
 
@@ -211,7 +211,6 @@ describe('mem-store tests', function () {
     })
   })
 
-
   it('mongo-style-query', function (fin) {
     seneca.test(fin)
 
@@ -221,44 +220,57 @@ describe('mem-store tests', function () {
     seneca.make('mongo', { p1: 'a', p2: 40 }).save$()
 
     seneca.ready(function () {
-      seneca.make('mongo')
-        .list$(
-          { p2: { $gte: 20} },
-          function (err, list) {
+      let m = seneca.make('mongo')
+
+      m.list$({ p2: { $gte: 20 } }, function (err, list) {
+        //console.log(err,list)
+        expect(list.length).equal(3)
+
+        m.list$({ p2: { $gt: 20 } }, function (err, list) {
+          //console.log(err,list)
+          expect(list.length).equal(2)
+
+          m.list$({ p2: { $lt: 20 } }, function (err, list) {
             //console.log(err,list)
-            expect(list.length).equal(3)
+            expect(list.length).equal(1)
 
-            seneca.make('mongo')
-              .list$(
-                { p2: { $lt: 20} },
-                function (err, list) {
-                  //console.log(err,list)
-                  expect(list.length).equal(1)
+            m.list$({ p2: { $lte: 20 } }, function (err, list) {
+              //console.log(err,list)
+              expect(list.length).equal(2)
 
-                  seneca.make('mongo')
-                    .list$(
-                      { p1: { $in: ['a', 'b'] } },
+              m.list$({ p2: { $ne: 20 } }, function (err, list) {
+                //console.log(err,list)
+                expect(list.length).equal(3)
+
+                m.list$({ p1: { $in: ['a', 'b'] } }, function (err, list) {
+                  // console.log(err,list)
+                  expect(list.length).equal(3)
+
+                  m.list$({ p1: { $nin: ['a', 'b'] } }, function (err, list) {
+                    // console.log(err,list)
+                    expect(list.length).equal(1)
+
+                    // ignore unknown constraints
+                    m.list$(
+                      { p1: { $notaconstraint: 'whatever' } },
                       function (err, list) {
                         // console.log(err,list)
-                        expect(list.length).equal(3)
-                        
-                        seneca.make('mongo')
-                          .list$(
-                            { p1: { $nin: ['a', 'b'] } },
-                            function (err, list) {
-                              // console.log(err,list)
-                              expect(list.length).equal(1)
-                              
-                              fin()
-                            })
-                      })
+                        expect(list.length).equal(4)
+
+                        fin()
+                      }
+                    )
+                  })
                 })
+              })
+            })
           })
+        })
+      })
     })
   })
 })
 
-  
 function make_it(lab) {
   return function it(name, opts, func) {
     if ('function' === typeof opts) {

@@ -301,7 +301,7 @@ function listents(seneca, entmap, qent, q, done) {
                                 continue next_ent;
                             }
                         }
-                        else if (null != qv && 'object' === typeof (qv)) {
+                        else if (null != qv && 'object' === typeof qv) {
                             // mongo style constraints
                             if ((null != qv.$ne && qv.$ne == ev) ||
                                 (null != qv.$gte && qv.$gte > ev) ||
