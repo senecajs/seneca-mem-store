@@ -50,7 +50,6 @@
   "files": [
     "README.md",
     "LICENSE",
-    "mem-store.js",
-    "lib/errors.js"
+    "mem-store.js"
   ]
 }
