@@ -18,7 +18,7 @@ const expect = Code.expect
 
 const describe = lab.describe
 const it = make_it(lab)
-const before = lab.before
+// const before = lab.before
 
 const seneca = Seneca({
   log: 'silent',
@@ -184,6 +184,7 @@ describe('mem-store tests', function () {
     })
   })
 
+  
   it('in-query', function (fin) {
     seneca.test(fin)
 
@@ -209,8 +210,55 @@ describe('mem-store tests', function () {
       })
     })
   })
+
+
+  it('mongo-style-query', function (fin) {
+    seneca.test(fin)
+
+    seneca.make('mongo', { p1: 'a', p2: 10 }).save$()
+    seneca.make('mongo', { p1: 'b', p2: 20 }).save$()
+    seneca.make('mongo', { p1: 'c', p2: 30 }).save$()
+    seneca.make('mongo', { p1: 'a', p2: 40 }).save$()
+
+    seneca.ready(function () {
+      seneca.make('mongo')
+        .list$(
+          { p2: { $gte: 20} },
+          function (err, list) {
+            //console.log(err,list)
+            expect(list.length).equal(3)
+
+            seneca.make('mongo')
+              .list$(
+                { p2: { $lt: 20} },
+                function (err, list) {
+                  //console.log(err,list)
+                  expect(list.length).equal(1)
+
+                  seneca.make('mongo')
+                    .list$(
+                      { p1: { $in: ['a', 'b'] } },
+                      function (err, list) {
+                        // console.log(err,list)
+                        expect(list.length).equal(3)
+                        
+                        seneca.make('mongo')
+                          .list$(
+                            { p1: { $nin: ['a', 'b'] } },
+                            function (err, list) {
+                              // console.log(err,list)
+                              expect(list.length).equal(1)
+                              
+                              fin()
+                            })
+                      })
+                })
+          })
+    })
+  })
 })
 
+  
 function make_it(lab) {
   return function it(name, opts, func) {
     if ('function' === typeof opts) {

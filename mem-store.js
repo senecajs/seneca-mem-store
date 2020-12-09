@@ -336,10 +336,11 @@ function listents(seneca, entmap, qent, q, done) {
   var name = canon.name
 
   var entset = entmap[base] ? entmap[base][name] : null
-
+  var ent
+  
   if (null != entset && null != q) {
     if ('string' == typeof q) {
-      var ent = entset[q]
+      ent = entset[q]
       if (ent) {
         list.push(ent)
       }
@@ -352,25 +353,44 @@ function listents(seneca, entmap, qent, q, done) {
         }
       })
     } else if ('object' === typeof q) {
-      Object.keys(entset).forEach(function (id) {
-        var ent = entset[id]
-        for (var p in q) {
-          if (-1 === p.indexOf('$')) {
-            //if (!~p.indexOf('$') && q[p] !== ent[p]) {
 
-            if (Array.isArray(q[p])) {
-              if (-1 === q[p].indexOf(ent[p])) {
-                //console.log('AAA',p, q[p],ent[p],q[p].indexOf(ent[p]))
-                return
+      let entids = Object.keys(entset)
+      next_ent:
+      for( let id of entids ) {
+        ent = entset[id]
+        for (var p in q) {
+          let qv = q[p]   // query val
+          let ev = ent[p] // ent val
+
+          if (-1 === p.indexOf('$')) {
+            if (Array.isArray(qv)) {
+              if (-1 === qv.indexOf(ev)) {
+                continue next_ent
               }
-            } else if (q[p] !== ent[p]) {
-              return
+            } else if (null != qv && 'object' === typeof(qv)) {
+
+              // mongo style constraints
+              if( (null != qv.$ne && qv.$ne == ev) ||
+                  (null != qv.$gte && qv.$gte > ev) ||
+                  (null != qv.$gt && qv.$gt >= ev) ||
+                  (null != qv.$lt && qv.$lt <= ev) ||
+                  (null != qv.$lte && qv.$lte < ev) ||
+                  (null != qv.$in && -1 === qv.$in.indexOf(ev) ) ||
+                  (null != qv.$nin && -1 !== qv.$nin.indexOf(ev) ) ||
+                  false
+                )
+              {
+                continue next_ent
+              }
+
+            } else if (qv !== ev) {
+              continue next_ent
             }
           }
         }
         ent = qent.make$(ent)
         list.push(ent)
-      })
+      }
     }
   }
 

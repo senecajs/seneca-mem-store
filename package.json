@@ -17,7 +17,8 @@
     "Oisín Hennessy (https://github.com/code-jace)"
   ],
   "scripts": {
-    "test": "lab -v -t 80 -r console -o stdout -r html -o test/coverage.html",
+    "test": "lab -v -P test -L -t 80 -r console -o stdout -r html -o test/coverage.html",
+    "test-some": "lab -v -P test -g",
     "coveralls": "lab -s -P test -r lcov | coveralls",
     "coverage": "lab -v -P test -t 80 -r html > coverage.html",
     "prettier": "prettier --write --no-semi --single-quote *.js lib/*.js test/*.js",
@@ -40,11 +41,11 @@
   ],
   "devDependencies": {
     "@hapi/code": "^8.0.2",
-    "@hapi/lab": "^24.0.0",
+    "@hapi/lab": "^24.1.0",
     "coveralls": "^3.1.0",
-    "prettier": "^2.1.2",
-    "seneca": "^3.22.0",
-    "seneca-entity": "^10.1.0",
+    "prettier": "^2.2.1",
+    "seneca": "^3.23.0",
+    "seneca-entity": "^11.0.0",
     "seneca-promisify": "^2.0.0",
     "seneca-store-test": "^3.1.0"
   },
