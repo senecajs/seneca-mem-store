@@ -78,9 +78,7 @@ function mem_store(options: any) {
       // The actual save logic for saving or
       // creating and then saving the entity.
       function do_save(id?: any, isnew?: boolean) {
-        const ent_data = ent.data$(true, 'string');
-
-        let mement = ent_data;
+        let mement = ent.data$(true, 'string');
 
         if (undefined !== id) {
           mement.id = id
@@ -149,14 +147,27 @@ function mem_store(options: any) {
 
           if (query_for_save && Array.isArray(query_for_save.upsert$)) {
             if (query_for_save.upsert$.length > 0) {
-              const upsert_on: Array<string> = query_for_save.upsert$
-                .filter((field: string) => field in ent_data);
+              const ent_data = ent.data$(false);
+
+              console.log('ent', ent) // dbg
+              console.log(query_for_save.upsert$) // dbg
+              console.log(ent_data) // dbg
+
+              const upsert_on: Array<string> = query_for_save.upsert$;
 
               const shouldUpdateDoc = (doc: any) => {
-                return upsert_on.every(upsert_on_field =>
-                  upsert_on_field in doc &&
-                    doc[upsert_on_field] === mement[upsert_on_field]);
-              }
+                console.log('upsert on', upsert_on) // dbg
+                console.log('doc', doc) // dbg
+                console.log('mement', mement) // dbg
+
+                return upsert_on.every(upsert_on_field => {
+                  const we_do_not_care_if_a_doc_has_the_field_or_not =
+                    ((upsert_on_field in doc) || !(upsert_on_field in doc));
+
+                  return we_do_not_care_if_a_doc_has_the_field_or_not &&
+                    doc[upsert_on_field] === mement[upsert_on_field];
+                });
+              };
 
               const collection = entmap[base][name] || {};
               const docs = Object.values(collection);

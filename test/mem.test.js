@@ -389,10 +389,152 @@ describe('mem-store tests', function () {
     })
 
     describe('when a document/record in the upsert$ directive matches on a private field', () => {
-    }) // TODO
+      const app = makeSenecaForTest()
 
-    // TODO: undefineds?
-    //
+      beforeEach(fin => {
+        app.make('product')
+          .data$({ label: 'toothbrush', price: '3.95', psst$: 'private' })
+          .save$(fin)
+      })
+
+      it('cannot match on private fields of a document', fin => {
+        app.test(fin)
+
+        app.ready(() => {
+          app.make('product')
+            .data$({ label: 'a new toothbrush', price: '5.95', psst$: 'private' })
+            .save$({ upsert$: ['psst$'] }, err => {
+              if (err) {
+                return fin(err)
+              }
+
+              app.make('product').list$({}, (err, products) => {
+                if (err) {
+                  return fin(err)
+                }
+
+                console.log(products) // dbg
+                return fin() // dbg
+
+                expect(products.length).to.equal(2)
+
+                /*
+                expect(products[1]).to.contain({
+                  label: 'CS101 textbook',
+                  price: '134.95'
+                })
+                */
+
+                return fin()
+              })
+            })
+        })
+      })
+    })
+
+    describe('when a document/record in the upsert$ directive matches on an existing field set to undefined', () => {
+      const app = makeSenecaForTest()
+
+      beforeEach(fin => {
+        app.make('product')
+          .data$({ label: undefined, price: '3.95' })
+          .save$(fin)
+      })
+
+      beforeEach(fin => {
+        app.make('product')
+          .data$({ label: 'CS101 textbook', price: '134.95' })
+          .save$(fin)
+      })
+
+      it('updates the matching document', fin => {
+        app.test(fin)
+
+        app.ready(() => {
+          app.make('product')
+            .data$({ label: undefined, price: '5.95' })
+            .save$({ upsert$: ['label'] }, err => {
+              if (err) {
+                return fin(err)
+              }
+
+              app.make('product').list$({}, (err, products) => {
+                if (err) {
+                  return fin(err)
+                }
+
+                expect(products.length).to.equal(2)
+
+                expect(products[0]).to.contain({
+                  // NOTE: WARNING: Seneca seems to be stripping out fields
+                  // with a value of undefined in a document.
+                  //
+                  // label: undefined,
+
+                  price: '5.95'
+                })
+
+                expect(products[1]).to.contain({
+                  label: 'CS101 textbook',
+                  price: '134.95'
+                })
+
+                return fin()
+              })
+            })
+        })
+      })
+    })
+
+    describe('when a document/record in the upsert$ directive matches on an existing field set to null', () => {
+      const app = makeSenecaForTest()
+
+      beforeEach(fin => {
+        app.make('product')
+          .data$({ label: null, price: '3.95' })
+          .save$(fin)
+      })
+
+      beforeEach(fin => {
+        app.make('product')
+          .data$({ label: 'CS101 textbook', price: '134.95' })
+          .save$(fin)
+      })
+
+      it('updates the matching document', fin => {
+        app.test(fin)
+
+        app.ready(() => {
+          app.make('product')
+            .data$({ label: null, price: '5.95' })
+            .save$({ upsert$: ['label'] }, err => {
+              if (err) {
+                return fin(err)
+              }
+
+              app.make('product').list$({}, (err, products) => {
+                if (err) {
+                  return fin(err)
+                }
+
+                expect(products.length).to.equal(2)
+
+                expect(products[0]).to.contain({
+                  label: null,
+                  price: '5.95'
+                })
+
+                expect(products[1]).to.contain({
+                  label: 'CS101 textbook',
+                  price: '134.95'
+                })
+
+                return fin()
+              })
+            })
+        })
+      })
+    })
 
     describe('when some of the fields in the data$/upsert$ directives do not exist in a document/record', () => {
       const app = makeSenecaForTest()
