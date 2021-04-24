@@ -1,8 +1,6 @@
 /* Copyright (c) 2010-2020 Richard Rodger and other contributors, MIT License */
 'use strict'
 
-const Assert = require('assert')
-
 let internals = {
   name: 'mem-store',
 }
@@ -109,19 +107,13 @@ function mem_store(options: any) {
           mement = Object.assign(prev || {}, mement)
         }
 
-        return upsertIfRequested(msg, function (err: Error, ctx: any) {
+        return upsertIfRequested(msg, function (err: Error, ctx: UpsertIfRequestedContext) {
           if (err) {
             return reply(err);
           }
 
-          Assert('did_upsert' in ctx, 'ctx.did_upsert');
-          const { did_upsert } = ctx;
-
-          if (did_upsert) {
-            Assert('out' in ctx, 'ctx.out');
-            const { out } = ctx;
-
-            return reply(null, out);
+          if (ctx.did_upsert) {
+            return reply(null, ctx.out);
           }
 
 
@@ -140,12 +132,14 @@ function mem_store(options: any) {
         })
 
 
-        type UpsertIfRequestedCallbackType = (
+        type UpsertIfRequestedContext = { did_upsert: boolean, out?: any }
+
+        type UpsertIfRequestedCallback = (
           err:      Error | null,
-          result?:  { did_upsert: boolean, out?: any }
+          result?: UpsertIfRequestedContext 
         ) => any
 
-        function upsertIfRequested(msg: any, reply: UpsertIfRequestedCallbackType) {
+        function upsertIfRequested(msg: any, reply: UpsertIfRequestedCallback) {
           // This is the query passed to the .save$ method.
           //
           const query_for_save = msg.q;
@@ -198,10 +192,7 @@ function mem_store(options: any) {
                           return cb(err);
                         }
 
-                        // TODO: NOTE: WARNING: stack overflow alert
-                        // use process.nextTick, NOT setImmediate
-                        //
-                        return updateNextDoc(i + 1, cb);
+                        return process.nextTick(() => updateNextDoc(i + 1, cb));
                       });
                   }
 
