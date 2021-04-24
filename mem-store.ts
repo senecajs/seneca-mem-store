@@ -140,7 +140,12 @@ function mem_store(options: any) {
         })
 
 
-        function upsertIfRequested(msg: any, reply: any) {
+        type UpsertIfRequestedCallbackType = (
+          err:      Error | null,
+          result?:  { did_upsert: boolean, out?: any }
+        ) => any
+
+        function upsertIfRequested(msg: any, reply: UpsertIfRequestedCallbackType) {
           // This is the query passed to the .save$ method.
           //
           const query_for_save = msg.q;
@@ -163,74 +168,63 @@ function mem_store(options: any) {
 
             if (upsert_on.length > 0) {
               const qent = msg.ent;
-              const public_entdata = msg.ent.data$(false)
+              const public_entdata = msg.ent.data$(false);
 
               const q = upsert_on.reduce((acc: any, upsert_on_field: string) => {
                 acc[upsert_on_field] = public_entdata[upsert_on_field];
                 return acc;
               }, {});
 
-              //console.log('q', q) // dbg
-              //console.log('msg.ent', qent) // dbg
-              //console.log('msg.ent.data$(false)', qent.data$(false)) // dbg
-              //console.log('mement', mement) // dbg
 
               return listents(seneca, entmap, qent, q, function (err: Error, docs_to_update: any[]) {
                 if (err) {
-                  return reply(err)
+                  return reply(err);
                 }
-
-                //console.log('docs to update:', docs_to_update) // dbg
 
                 const ent_data = ent.data$(false);
 
                 if (docs_to_update.length > 0) {
                   function updateNextDoc(i: number, cb: Function) {
                     if (i >= docs_to_update.length) {
-                      return cb(null)
+                      return cb(null);
                     }
 
-                    const doc = docs_to_update[i]
+                    const doc = docs_to_update[i];
 
                     return doc
                       .data$(public_entdata)
                       .save$((err: Error) => {
                         if (err) {
-                          return cb(err)
+                          return cb(err);
                         }
 
                         // TODO: NOTE: WARNING: stack overflow alert
                         // use process.nextTick, NOT setImmediate
                         //
-                        return updateNextDoc(i + 1, cb)
-                      })
+                        return updateNextDoc(i + 1, cb);
+                      });
                   }
 
                   return updateNextDoc(0, (err: Error) => {
                     if (err) {
-                      return reply(err)
+                      return reply(err);
                     }
 
-                    return reply(null, contextToPass({
+                    return reply(null, {
                       did_upsert: true,
                       out: ent.list$(public_entdata)
-                    }));
+                    });
                   })
                 }
 
-                return reply(null, contextToPass({ did_upsert: false, out: null }));
+                return reply(null, { did_upsert: false, out: null });
               });
             } else {
-              return reply(null, contextToPass({ did_upsert: false, out: null }));
+              return reply(null, { did_upsert: false, out: null });
             }
           }
 
-          return reply(null, contextToPass({ did_upsert: false, out: null }));
-
-
-          function contextToPass(data: { did_upsert: boolean, out?: any }) {
-            return data;
-          }
+          return reply(null, { did_upsert: false, out: null });
         }
       }
 
