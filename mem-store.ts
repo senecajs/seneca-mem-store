@@ -112,8 +112,11 @@ function mem_store(options: any) {
             return reply(err);
           }
 
-          if (ctx.did_upsert) {
-            return reply(null, ctx.out);
+          const { did_upsert } = ctx;
+
+          if (did_upsert) {
+            const { out } = ctx;
+            return reply(null, out);
           }
 
 
@@ -135,7 +138,7 @@ function mem_store(options: any) {
         type UpsertIfRequestedContext = { did_upsert: boolean, out?: any }
 
         type UpsertIfRequestedCallback = (
-          err:      Error | null,
+          err:     Error | null,
           result?: UpsertIfRequestedContext 
         ) => any
 
@@ -170,7 +173,7 @@ function mem_store(options: any) {
               }, {});
 
 
-              return listents(seneca, entmap, qent, q, function (err: Error, docs_to_update: any[]) {
+              return listents(seneca, entmap, qent, q, function (err: Error | null, docs_to_update: any[]) {
                 if (err) {
                   return reply(err);
                 }
@@ -178,7 +181,19 @@ function mem_store(options: any) {
                 const ent_data = ent.data$(false);
 
                 if (docs_to_update.length > 0) {
-                  function updateNextDoc(i: number, cb: Function) {
+                  return updateNextDoc(0, (err: Error | null) => {
+                    if (err) {
+                      return reply(err);
+                    }
+
+                    return reply(null, {
+                      did_upsert: true,
+                      out: ent.list$(public_entdata)
+                    });
+                  });
+
+
+                  function updateNextDoc(i: number, cb: (err: Error | null) => any) {
                     if (i >= docs_to_update.length) {
                       return cb(null);
                     }
@@ -195,17 +210,6 @@ function mem_store(options: any) {
                         return process.nextTick(() => updateNextDoc(i + 1, cb));
                       });
                   }
-
-                  return updateNextDoc(0, (err: Error) => {
-                    if (err) {
-                      return reply(err);
-                    }
-
-                    return reply(null, {
-                      did_upsert: true,
-                      out: ent.list$(public_entdata)
-                    });
-                  })
                 }
 
                 return reply(null, { did_upsert: false, out: null });
@@ -213,9 +217,9 @@ function mem_store(options: any) {
             } else {
               return reply(null, { did_upsert: false, out: null });
             }
+          } else {
+            return reply(null, { did_upsert: false, out: null });
           }
-
-          return reply(null, { did_upsert: false, out: null });
         }
       }
 
