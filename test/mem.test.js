@@ -413,17 +413,61 @@ describe('mem-store tests', function () {
                   return fin(err)
                 }
 
-                console.log(products) // dbg
-                return fin() // dbg
+                expect(products.length).to.equal(2)
+
+                expect(products[0]).to.contain({
+                  label: 'toothbrush',
+                  price: '3.95'
+                })
+
+                expect(products[1]).to.contain({
+                  label: 'a new toothbrush',
+                  price: '5.95'
+                })
+
+                return fin()
+              })
+            })
+        })
+      })
+    })
+
+    describe('when the upsert$ directive is empty', () => {
+      const app = makeSenecaForTest()
+
+      beforeEach(fin => {
+        app.make('product')
+          .data$({ label: 'toothbrush', price: '3.95' })
+          .save$(fin)
+      })
+
+      it('creates a new document', fin => {
+        app.test(fin)
+
+        app.ready(() => {
+          app.make('product')
+            .data$({ label: 'toothbrush', price: '5.95' })
+            .save$({ upsert$: [] }, err => {
+              if (err) {
+                return fin(err)
+              }
+
+              app.make('product').list$({}, (err, products) => {
+                if (err) {
+                  return fin(err)
+                }
 
                 expect(products.length).to.equal(2)
 
-                /*
-                expect(products[1]).to.contain({
-                  label: 'CS101 textbook',
-                  price: '134.95'
+                expect(products[0]).to.contain({
+                  label: 'toothbrush',
+                  price: '3.95'
                 })
-                */
+
+                expect(products[1]).to.contain({
+                  label: 'toothbrush',
+                  price: '5.95'
+                })
 
                 return fin()
               })

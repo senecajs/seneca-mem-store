@@ -145,44 +145,83 @@ function mem_store(options: any) {
           //
           const query_for_save = msg.q;
 
-          if (query_for_save && Array.isArray(query_for_save.upsert$)) {
-            if (query_for_save.upsert$.length > 0) {
-              const ent_data = ent.data$(false);
 
-              console.log('ent', ent) // dbg
-              console.log(query_for_save.upsert$) // dbg
-              console.log(ent_data) // dbg
+          if (Array.isArray(query_for_save.upsert$)) {
+            const upsert_on = query_for_save.upsert$
+              //
+              // NOTE: Here we are stripping private properties from the
+              // upsert$ fields. That's because the underlying `listents`
+              // helper ignores private properties completely, - in ways
+              // that lead to situations where:
+              // ```
+              //  .list$({ i_am_private_prop$: 'abc' })
+              // ```
+              // - returns a list of all entities.
+              //
+              .filter((p: string) => !isPrivateProp(p));
 
-              const upsert_on: Array<string> = query_for_save.upsert$;
 
-              const shouldUpdateDoc = (doc: any) => {
-                console.log('upsert on', upsert_on) // dbg
-                console.log('doc', doc) // dbg
-                console.log('mement', mement) // dbg
+            if (upsert_on.length > 0) {
+              const qent = msg.ent;
+              const public_entdata = msg.ent.data$(false)
 
-                return upsert_on.every(upsert_on_field => {
-                  const we_do_not_care_if_a_doc_has_the_field_or_not =
-                    ((upsert_on_field in doc) || !(upsert_on_field in doc));
+              const q = upsert_on.reduce((acc: any, upsert_on_field: string) => {
+                acc[upsert_on_field] = public_entdata[upsert_on_field];
+                return acc;
+              }, {});
 
-                  return we_do_not_care_if_a_doc_has_the_field_or_not &&
-                    doc[upsert_on_field] === mement[upsert_on_field];
-                });
-              };
+              //console.log('q', q) // dbg
+              //console.log('msg.ent', qent) // dbg
+              //console.log('msg.ent.data$(false)', qent.data$(false)) // dbg
+              //console.log('mement', mement) // dbg
 
-              const collection = entmap[base][name] || {};
-              const docs = Object.values(collection);
-              const docs_to_update = docs.filter(shouldUpdateDoc);
-
-              if (docs_to_update.length > 0) {
-                for (const doc of docs_to_update) {
-                  Object.assign(doc, ent_data);
+              return listents(seneca, entmap, qent, q, function (err: Error, docs_to_update: any[]) {
+                if (err) {
+                  return reply(err)
                 }
 
-                return reply(null, contextToPass({
-                  did_upsert: true,
-                  out: ent.list$(ent_data)
-                }));
-              }
+                //console.log('docs to update:', docs_to_update) // dbg
+
+                const ent_data = ent.data$(false);
+
+                if (docs_to_update.length > 0) {
+                  function updateNextDoc(i: number, cb: Function) {
+                    if (i >= docs_to_update.length) {
+                      return cb(null)
+                    }
+
+                    const doc = docs_to_update[i]
+
+                    return doc
+                      .data$(public_entdata)
+                      .save$((err: Error) => {
+                        if (err) {
+                          return cb(err)
+                        }
+
+                        // TODO: NOTE: WARNING: stack overflow alert
+                        // use process.nextTick, NOT setImmediate
+                        //
+                        return updateNextDoc(i + 1, cb)
+                      })
+                  }
+
+                  return updateNextDoc(0, (err: Error) => {
+                    if (err) {
+                      return reply(err)
+                    }
+
+                    return reply(null, contextToPass({
+                      did_upsert: true,
+                      out: ent.list$(public_entdata)
+                    }));
+                  })
+                }
+
+                return reply(null, contextToPass({ did_upsert: false, out: null }));
+              });
+            } else {
+              return reply(null, contextToPass({ did_upsert: false, out: null }));
             }
           }
 
@@ -512,3 +551,9 @@ function listents(seneca: any, entmap: any, qent: any, q: any, done: any) {
   // Return the resulting list to the caller.
   done.call(seneca, null, list)
 }
+
+function isPrivateProp(prop: any) : boolean {
+  return typeof prop === 'string' &&
+    (<string> prop).indexOf('$') >= 0;
+}
+
