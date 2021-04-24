@@ -1,6 +1,8 @@
 /* Copyright (c) 2010-2020 Richard Rodger and other contributors, MIT License */
 'use strict'
 
+const Assert = require('assert')
+
 let internals = {
   name: 'mem-store',
 }
@@ -76,7 +78,9 @@ function mem_store(options: any) {
       // The actual save logic for saving or
       // creating and then saving the entity.
       function do_save(id?: any, isnew?: boolean) {
-        let mement = ent.data$(true, 'string')
+        const ent_data = ent.data$(true, 'string');
+
+        let mement = ent_data;
 
         if (undefined !== id) {
           mement.id = id
@@ -106,18 +110,78 @@ function mem_store(options: any) {
         if (shouldMerge) {
           mement = Object.assign(prev || {}, mement)
         }
-        prev = entmap[base][name][mement.id] = mement
 
-        seneca.log.debug(function () {
-          return [
-            'save/' + (create ? 'insert' : 'update'),
-            ent.canon$({ string: 1 }),
-            mement,
-            desc,
-          ]
+        return upsertIfRequested(msg, function (err: Error, ctx: any) {
+          if (err) {
+            return reply(err);
+          }
+
+          Assert('did_upsert' in ctx, 'ctx.did_upsert');
+          const { did_upsert } = ctx;
+
+          if (did_upsert) {
+            Assert('out' in ctx, 'ctx.out');
+            const { out } = ctx;
+
+            return reply(null, out);
+          }
+
+
+          prev = entmap[base][name][mement.id] = mement;
+
+          seneca.log.debug(function () {
+            return [
+              'save/' + (create ? 'insert' : 'update'),
+              ent.canon$({ string: 1 }),
+              mement,
+              desc,
+            ];
+          });
+
+          return reply(null, ent.make$(prev));
         })
 
-        reply(null, ent.make$(prev))
+
+        function upsertIfRequested(msg: any, reply: any) {
+          // This is the query passed to the .save$ method.
+          //
+          const query_for_save = msg.q;
+
+          if (query_for_save && Array.isArray(query_for_save.upsert$)) {
+            if (query_for_save.upsert$.length > 0) {
+              const upsert_on: Array<string> = query_for_save.upsert$
+                .filter((field: string) => field in ent_data);
+
+              const shouldUpdateDoc = (doc: any) => {
+                return upsert_on.every(upsert_on_field =>
+                  upsert_on_field in doc &&
+                    doc[upsert_on_field] === mement[upsert_on_field]);
+              }
+
+              const collection = entmap[base][name] || {};
+              const docs = Object.values(collection);
+              const docs_to_update = docs.filter(shouldUpdateDoc);
+
+              if (docs_to_update.length > 0) {
+                for (const doc of docs_to_update) {
+                  Object.assign(doc, ent_data);
+                }
+
+                return reply(null, contextToPass({
+                  did_upsert: true,
+                  out: ent.list$(ent_data)
+                }));
+              }
+            }
+          }
+
+          return reply(null, contextToPass({ did_upsert: false, out: null }));
+
+
+          function contextToPass(data: { did_upsert: boolean, out?: any }) {
+            return data;
+          }
+        }
       }
 
       // We will still use do_save to save the entity but
