@@ -1,6 +1,8 @@
 /* Copyright (c) 2010-2020 Richard Rodger and other contributors, MIT License */
 'use strict'
 
+const Assert = require('assert')
+
 let internals = {
   name: 'mem-store',
 }
@@ -148,7 +150,7 @@ function mem_store(options: any) {
           const query_for_save = msg.q;
 
 
-          if (Array.isArray(query_for_save.upsert$)) {
+          if (isNewEntityBeingCreated(msg) && Array.isArray(query_for_save.upsert$)) {
             const upsert_on = query_for_save.upsert$
               //
               // NOTE: Here we are stripping private properties from the
@@ -186,6 +188,8 @@ function mem_store(options: any) {
                       return reply(err);
                     }
 
+                    console.log('OK'); // dbg
+
                     return reply(null, {
                       did_upsert: true,
                       out: ent.list$(public_entdata)
@@ -194,6 +198,8 @@ function mem_store(options: any) {
 
 
                   function updateNextDoc(i: number, cb: (err: Error | null) => any) {
+                    Assert(i >= 0, 'i must be positive');
+
                     if (i >= docs_to_update.length) {
                       return cb(null);
                     }
@@ -263,6 +269,18 @@ function mem_store(options: any) {
             do_save(id, true)
           })
         }
+      }
+
+      function isNewEntityBeingCreated(msg: any) {
+        if (!('ent' in msg)) {
+          // NOTE: This should not happen.
+          //
+          return false;
+        }
+
+        const ent = msg.ent;
+
+        return ent && ent.id === null || ent.id === undefined;
       }
     },
 
