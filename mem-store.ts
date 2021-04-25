@@ -187,8 +187,6 @@ function mem_store(options: any) {
                       return reply(err);
                     }
 
-                    console.log('OK'); // dbg
-
                     return reply(null, {
                       did_upsert: true,
                       out: ent.list$(public_entdata)
