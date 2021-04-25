@@ -1,7 +1,7 @@
 /* Copyright (c) 2010-2020 Richard Rodger and other contributors, MIT License */
 'use strict'
 
-const Assert = require('assert')
+const Assert = require('assert');
 
 let internals = {
   name: 'mem-store',
