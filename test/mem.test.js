@@ -285,125 +285,22 @@ describe('mem-store tests', function () {
   })
 
   describe('upsert', () => {
-    describe('when no documents/records in the upsert$ directive match', () => {
-      const app = makeSenecaForTest()
+    describe('when creating a new document/record', () => {
+      describe('when no documents/records in the upsert$ directive match', () => {
+        const app = makeSenecaForTest()
 
-      beforeEach(fin => {
-        app.make('product')
-          .data$({ label: 'a macchiato espressionado', price: '3.40' })
-          .save$(fin)
-      })
-
-      it('creates a new document', fin => {
-        app.test(fin)
-
-        app.make('product')
-          .data$({ label: 'b toothbrush', price: '3.40' })
-          .save$({ upsert$: ['label'] }, err => {
-            if (err) {
-              return fin(err)
-            }
-
-            app.make('product').list$({}, (err, products) => {
-              if (err) {
-                return fin(err)
-              }
-
-              expect(products.length).to.equal(2)
-
-              expect(products[0]).to.contain({
-                label: 'a macchiato espressionado',
-                price: '3.40'
-              })
-
-              expect(products[1]).to.contain({
-                label: 'b toothbrush',
-                price: '3.40'
-              })
-
-              return fin()
-            })
-          })
-      })
-    })
-
-    describe('when some documents/records in the upsert$ directive match', () => {
-      const app = makeSenecaForTest()
-
-      beforeEach(fin => {
-        app.make('product')
-          .data$({ label: 'a toothbrush', price: '3.95' })
-          .save$(fin)
-      })
-
-      beforeEach(fin => {
-        app.make('product')
-          .data$({ label: 'a toothbrush', price: '3.70' })
-          .save$(fin)
-      })
-
-      beforeEach(fin => {
-        app.make('product')
-          .data$({ label: 'bbs tires', price: '4.10' })
-          .save$(fin)
-      })
-
-      it('updates the matching documents', fin => {
-        app.test(fin)
-
-        app.ready(() => {
+        beforeEach(fin => {
           app.make('product')
-            .data$({ label: 'a toothbrush', price: '4.95' })
-            .save$({ upsert$: ['label'] }, err => {
-              if (err) {
-                return fin(err)
-              }
-
-              app.make('product').list$({}, (err, products) => {
-                if (err) {
-                  return fin(err)
-                }
-
-                expect(products.length).to.equal(3)
-
-                expect(products[0]).to.contain({
-                  label: 'a toothbrush',
-                  price: '4.95'
-                })
-
-                expect(products[1]).to.contain({
-                  label: 'a toothbrush',
-                  price: '4.95'
-                })
-
-                expect(products[2]).to.contain({
-                  label: 'bbs tires',
-                  price: '4.10'
-                })
-
-                return fin()
-              })
-            })
+            .data$({ label: 'a macchiato espressionado', price: '3.40' })
+            .save$(fin)
         })
-      })
-    })
 
-    describe('when a document/record in the upsert$ directive matches on a private field', () => {
-      const app = makeSenecaForTest()
+        it('creates a new document', fin => {
+          app.test(fin)
 
-      beforeEach(fin => {
-        app.make('product')
-          .data$({ label: 'toothbrush', price: '3.95', psst$: 'private' })
-          .save$(fin)
-      })
-
-      it('cannot match on private fields of a document', fin => {
-        app.test(fin)
-
-        app.ready(() => {
           app.make('product')
-            .data$({ label: 'a new toothbrush', price: '5.95', psst$: 'private' })
-            .save$({ upsert$: ['psst$'] }, err => {
+            .data$({ label: 'b toothbrush', price: '3.40' })
+            .save$({ upsert$: ['label'] }, err => {
               if (err) {
                 return fin(err)
               }
@@ -416,243 +313,409 @@ describe('mem-store tests', function () {
                 expect(products.length).to.equal(2)
 
                 expect(products[0]).to.contain({
-                  label: 'toothbrush',
+                  label: 'a macchiato espressionado',
+                  price: '3.40'
+                })
+
+                expect(products[1]).to.contain({
+                  label: 'b toothbrush',
+                  price: '3.40'
+                })
+
+                return fin()
+              })
+            })
+        })
+      })
+
+      describe('when some documents/records in the upsert$ directive match', () => {
+        const app = makeSenecaForTest()
+
+        beforeEach(fin => {
+          app.make('product')
+            .data$({ label: 'a toothbrush', price: '3.95' })
+            .save$(fin)
+        })
+
+        beforeEach(fin => {
+          app.make('product')
+            .data$({ label: 'a toothbrush', price: '3.70' })
+            .save$(fin)
+        })
+
+        beforeEach(fin => {
+          app.make('product')
+            .data$({ label: 'bbs tires', price: '4.10' })
+            .save$(fin)
+        })
+
+        it('updates the matching documents', fin => {
+          app.test(fin)
+
+          app.ready(() => {
+            app.make('product')
+              .data$({ label: 'a toothbrush', price: '4.95' })
+              .save$({ upsert$: ['label'] }, err => {
+                if (err) {
+                  return fin(err)
+                }
+
+                app.make('product').list$({}, (err, products) => {
+                  if (err) {
+                    return fin(err)
+                  }
+
+                  expect(products.length).to.equal(3)
+
+                  expect(products[0]).to.contain({
+                    label: 'a toothbrush',
+                    price: '4.95'
+                  })
+
+                  expect(products[1]).to.contain({
+                    label: 'a toothbrush',
+                    price: '4.95'
+                  })
+
+                  expect(products[2]).to.contain({
+                    label: 'bbs tires',
+                    price: '4.10'
+                  })
+
+                  return fin()
+                })
+              })
+          })
+        })
+      })
+
+      describe('when a document/record in the upsert$ directive matches on a private field', () => {
+        const app = makeSenecaForTest()
+
+        beforeEach(fin => {
+          app.make('product')
+            .data$({ label: 'toothbrush', price: '3.95', psst$: 'private' })
+            .save$(fin)
+        })
+
+        it('cannot match on private fields of a document', fin => {
+          app.test(fin)
+
+          app.ready(() => {
+            app.make('product')
+              .data$({ label: 'a new toothbrush', price: '5.95', psst$: 'private' })
+              .save$({ upsert$: ['psst$'] }, err => {
+                if (err) {
+                  return fin(err)
+                }
+
+                app.make('product').list$({}, (err, products) => {
+                  if (err) {
+                    return fin(err)
+                  }
+
+                  expect(products.length).to.equal(2)
+
+                  expect(products[0]).to.contain({
+                    label: 'toothbrush',
+                    price: '3.95'
+                  })
+
+                  expect(products[1]).to.contain({
+                    label: 'a new toothbrush',
+                    price: '5.95'
+                  })
+
+                  return fin()
+                })
+              })
+          })
+        })
+      })
+
+      describe('when the upsert$ directive is empty', () => {
+        const app = makeSenecaForTest()
+
+        beforeEach(fin => {
+          app.make('product')
+            .data$({ label: 'toothbrush', price: '3.95' })
+            .save$(fin)
+        })
+
+        it('creates a new document', fin => {
+          app.test(fin)
+
+          app.ready(() => {
+            app.make('product')
+              .data$({ label: 'toothbrush', price: '5.95' })
+              .save$({ upsert$: [] }, err => {
+                if (err) {
+                  return fin(err)
+                }
+
+                app.make('product').list$({}, (err, products) => {
+                  if (err) {
+                    return fin(err)
+                  }
+
+                  expect(products.length).to.equal(2)
+
+                  expect(products[0]).to.contain({
+                    label: 'toothbrush',
+                    price: '3.95'
+                  })
+
+                  expect(products[1]).to.contain({
+                    label: 'toothbrush',
+                    price: '5.95'
+                  })
+
+                  return fin()
+                })
+              })
+          })
+        })
+      })
+
+      describe('when a document/record in the upsert$ directive matches on an existing field set to undefined', () => {
+        const app = makeSenecaForTest()
+
+        beforeEach(fin => {
+          app.make('product')
+            .data$({ label: undefined, price: '3.95' })
+            .save$(fin)
+        })
+
+        beforeEach(fin => {
+          app.make('product')
+            .data$({ label: 'CS101 textbook', price: '134.95' })
+            .save$(fin)
+        })
+
+        it('updates the matching document', fin => {
+          app.test(fin)
+
+          app.ready(() => {
+            app.make('product')
+              .data$({ label: undefined, price: '5.95' })
+              .save$({ upsert$: ['label'] }, err => {
+                if (err) {
+                  return fin(err)
+                }
+
+                app.make('product').list$({}, (err, products) => {
+                  if (err) {
+                    return fin(err)
+                  }
+
+                  expect(products.length).to.equal(2)
+
+                  expect(products[0]).to.contain({
+                    // NOTE: WARNING: Seneca seems to be stripping out fields
+                    // with a value of undefined in a document.
+                    //
+                    // label: undefined,
+
+                    price: '5.95'
+                  })
+
+                  expect(products[1]).to.contain({
+                    label: 'CS101 textbook',
+                    price: '134.95'
+                  })
+
+                  return fin()
+                })
+              })
+          })
+        })
+      })
+
+      describe('when a document/record in the upsert$ directive matches on an existing field set to null', () => {
+        const app = makeSenecaForTest()
+
+        beforeEach(fin => {
+          app.make('product')
+            .data$({ label: null, price: '3.95' })
+            .save$(fin)
+        })
+
+        beforeEach(fin => {
+          app.make('product')
+            .data$({ label: 'CS101 textbook', price: '134.95' })
+            .save$(fin)
+        })
+
+        it('updates the matching document', fin => {
+          app.test(fin)
+
+          app.ready(() => {
+            app.make('product')
+              .data$({ label: null, price: '5.95' })
+              .save$({ upsert$: ['label'] }, err => {
+                if (err) {
+                  return fin(err)
+                }
+
+                app.make('product').list$({}, (err, products) => {
+                  if (err) {
+                    return fin(err)
+                  }
+
+                  expect(products.length).to.equal(2)
+
+                  expect(products[0]).to.contain({
+                    label: null,
+                    price: '5.95'
+                  })
+
+                  expect(products[1]).to.contain({
+                    label: 'CS101 textbook',
+                    price: '134.95'
+                  })
+
+                  return fin()
+                })
+              })
+          })
+        })
+      })
+
+      describe('when some of the fields in the data$/upsert$ directives do not exist in a document/record', () => {
+        const app = makeSenecaForTest()
+
+        beforeEach(fin => {
+          app.make('product')
+            .data$({ label: 'a toothbrush', price: '3.40' })
+            .save$(fin)
+        })
+
+        it('creates a new document because it can never match any of the documents/records because the none of them have the queried-for fields', fin => {
+          app.test(fin)
+
+          app.make('product')
+            .data$({ label: 'a toothbrush', price: '2.95', coolness_factor: '0.95' })
+            .save$({ upsert$: ['label', 'coolness_factor'] }, err => {
+              if (err) {
+                return fin(err)
+              }
+
+              app.make('product').list$({}, (err, products) => {
+                if (err) {
+                  return fin(err)
+                }
+
+                expect(products.length).to.equal(2)
+
+                expect(products[1]).to.contain({
+                  label: 'a toothbrush',
+                  price: '2.95',
+                  coolness_factor: '0.95'
+                })
+
+
+                return fin()
+              })
+            })
+        })
+      })
+
+      describe('when some of the fields in the upsert$ directive do not exist in the attributes passed via data$', () => {
+        const app = makeSenecaForTest()
+
+        beforeEach(fin => {
+          app.make('product')
+            .data$({ label: 'a toothbrush', price: '3.40' })
+            .save$(fin)
+        })
+
+        it('ignores the missing fields and updates the matching existing record', fin => {
+          app.test(fin)
+
+          app.make('product')
+            .data$({ label: 'a toothbrush', price: '2.95' })
+            .save$({ upsert$: ['label', 'coolness_factor'] }, err => {
+              if (err) {
+                return fin(err)
+              }
+
+              app.make('product').list$({}, (err, products) => {
+                if (err) {
+                  return fin(err)
+                }
+
+                expect(products.length).to.equal(1)
+
+                expect(products[0]).to.contain({
+                  label: 'a toothbrush',
+                  price: '2.95'
+                })
+
+                return fin()
+              })
+            })
+        })
+      })
+    })
+
+    describe('when invoking upsert via the #save method of an existing entity', () => {
+      describe('when some other existing documents/records in the upsert$ directive match', () => {
+        const app = makeSenecaForTest()
+
+
+        let existing_product
+
+        beforeEach(fin => {
+          app.make('product')
+            .data$({ label: 'a macchiato espressionado', price: '3.40' })
+            .save$((err, new_product) => {
+              if (err) {
+                return fin(err)
+              }
+
+              existing_product = new_product
+
+              return fin()
+            })
+        })
+
+        beforeEach(fin => {
+          app.make('product')
+            .data$({ label: 'a macchiato espressionado', price: '1.95' })
+            .save$(fin)
+        })
+
+        it('ignores the upsert$ directive and updates the entity the update is called on, as it normally would', fin => {
+          app.test(fin)
+
+          existing_product
+            .data$({ label: 'a macchiato espressionado', price: '3.95' })
+            .save$({ upsert$: ['label'] }, err => {
+              if (err) {
+                return fin(err)
+              }
+
+              app.make('product').list$({}, (err, products) => {
+                if (err) {
+                  return fin(err)
+                }
+
+                expect(products.length).to.equal(2)
+
+                expect(products[0]).to.contain({
+                  label: 'a macchiato espressionado',
                   price: '3.95'
                 })
 
                 expect(products[1]).to.contain({
-                  label: 'a new toothbrush',
-                  price: '5.95'
+                  label: 'a macchiato espressionado',
+                  price: '1.95'
                 })
 
                 return fin()
               })
             })
         })
-      })
-    })
-
-    describe('when the upsert$ directive is empty', () => {
-      const app = makeSenecaForTest()
-
-      beforeEach(fin => {
-        app.make('product')
-          .data$({ label: 'toothbrush', price: '3.95' })
-          .save$(fin)
-      })
-
-      it('creates a new document', fin => {
-        app.test(fin)
-
-        app.ready(() => {
-          app.make('product')
-            .data$({ label: 'toothbrush', price: '5.95' })
-            .save$({ upsert$: [] }, err => {
-              if (err) {
-                return fin(err)
-              }
-
-              app.make('product').list$({}, (err, products) => {
-                if (err) {
-                  return fin(err)
-                }
-
-                expect(products.length).to.equal(2)
-
-                expect(products[0]).to.contain({
-                  label: 'toothbrush',
-                  price: '3.95'
-                })
-
-                expect(products[1]).to.contain({
-                  label: 'toothbrush',
-                  price: '5.95'
-                })
-
-                return fin()
-              })
-            })
-        })
-      })
-    })
-
-    describe('when a document/record in the upsert$ directive matches on an existing field set to undefined', () => {
-      const app = makeSenecaForTest()
-
-      beforeEach(fin => {
-        app.make('product')
-          .data$({ label: undefined, price: '3.95' })
-          .save$(fin)
-      })
-
-      beforeEach(fin => {
-        app.make('product')
-          .data$({ label: 'CS101 textbook', price: '134.95' })
-          .save$(fin)
-      })
-
-      it('updates the matching document', fin => {
-        app.test(fin)
-
-        app.ready(() => {
-          app.make('product')
-            .data$({ label: undefined, price: '5.95' })
-            .save$({ upsert$: ['label'] }, err => {
-              if (err) {
-                return fin(err)
-              }
-
-              app.make('product').list$({}, (err, products) => {
-                if (err) {
-                  return fin(err)
-                }
-
-                expect(products.length).to.equal(2)
-
-                expect(products[0]).to.contain({
-                  // NOTE: WARNING: Seneca seems to be stripping out fields
-                  // with a value of undefined in a document.
-                  //
-                  // label: undefined,
-
-                  price: '5.95'
-                })
-
-                expect(products[1]).to.contain({
-                  label: 'CS101 textbook',
-                  price: '134.95'
-                })
-
-                return fin()
-              })
-            })
-        })
-      })
-    })
-
-    describe('when a document/record in the upsert$ directive matches on an existing field set to null', () => {
-      const app = makeSenecaForTest()
-
-      beforeEach(fin => {
-        app.make('product')
-          .data$({ label: null, price: '3.95' })
-          .save$(fin)
-      })
-
-      beforeEach(fin => {
-        app.make('product')
-          .data$({ label: 'CS101 textbook', price: '134.95' })
-          .save$(fin)
-      })
-
-      it('updates the matching document', fin => {
-        app.test(fin)
-
-        app.ready(() => {
-          app.make('product')
-            .data$({ label: null, price: '5.95' })
-            .save$({ upsert$: ['label'] }, err => {
-              if (err) {
-                return fin(err)
-              }
-
-              app.make('product').list$({}, (err, products) => {
-                if (err) {
-                  return fin(err)
-                }
-
-                expect(products.length).to.equal(2)
-
-                expect(products[0]).to.contain({
-                  label: null,
-                  price: '5.95'
-                })
-
-                expect(products[1]).to.contain({
-                  label: 'CS101 textbook',
-                  price: '134.95'
-                })
-
-                return fin()
-              })
-            })
-        })
-      })
-    })
-
-    describe('when some of the fields in the data$/upsert$ directives do not exist in a document/record', () => {
-      const app = makeSenecaForTest()
-
-      beforeEach(fin => {
-        app.make('product')
-          .data$({ label: 'a toothbrush', price: '3.40' })
-          .save$(fin)
-      })
-
-      it('creates a new document because it can never match any of the documents/records because the none of them have the queried-for fields', fin => {
-        app.test(fin)
-
-        app.make('product')
-          .data$({ label: 'a toothbrush', price: '2.95', coolness_factor: '0.95' })
-          .save$({ upsert$: ['label', 'coolness_factor'] }, err => {
-            if (err) {
-              return fin(err)
-            }
-
-            app.make('product').list$({}, (err, products) => {
-              if (err) {
-                return fin(err)
-              }
-
-              expect(products.length).to.equal(2)
-
-              expect(products[1]).to.contain({
-                label: 'a toothbrush',
-                price: '2.95',
-                coolness_factor: '0.95'
-              })
-
-
-              return fin()
-            })
-          })
-      })
-    })
-
-    describe('when some of the fields in the upsert$ directive do not exist in the attributes passed via data$', () => {
-      const app = makeSenecaForTest()
-
-      beforeEach(fin => {
-        app.make('product')
-          .data$({ label: 'a toothbrush', price: '3.40' })
-          .save$(fin)
-      })
-
-      it('ignores the missing fields and updates the matching existing record', fin => {
-        app.test(fin)
-
-        app.make('product')
-          .data$({ label: 'a toothbrush', price: '2.95' })
-          .save$({ upsert$: ['label', 'coolness_factor'] }, err => {
-            if (err) {
-              return fin(err)
-            }
-
-            app.make('product').list$({}, (err, products) => {
-              if (err) {
-                return fin(err)
-              }
-
-              expect(products.length).to.equal(1)
-
-              expect(products[0]).to.contain({
-                label: 'a toothbrush',
-                price: '2.95'
-              })
-
-              return fin()
-            })
-          })
       })
     })
   })
