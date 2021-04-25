@@ -68,8 +68,7 @@ function mem_store(options: any) {
       // check if we are in create mode,
       // if we are do a create, otherwise
       // we will do a save instead
-      let create = ent.id == null
-      if (create) {
+      if (isNewEntityBeingCreated(msg)) {
         create_new()
       } else {
         do_save()
@@ -126,7 +125,7 @@ function mem_store(options: any) {
 
           seneca.log.debug(function () {
             return [
-              'save/' + (create ? 'insert' : 'update'),
+              'save/' + (isNewEntityBeingCreated(msg) ? 'insert' : 'update'),
               ent.canon$({ string: 1 }),
               mement,
               desc,
@@ -271,12 +270,9 @@ function mem_store(options: any) {
         }
       }
 
-      function isNewEntityBeingCreated(msg: any) {
-        if (!('ent' in msg)) {
-          // NOTE: This should not happen.
-          //
-          return false;
-        }
+      function isNewEntityBeingCreated(msg: any) : boolean {
+        Assert('ent' in msg, 'msg.ent');
+        Assert(msg.ent, 'msg.ent');
 
         const ent = msg.ent;
 
