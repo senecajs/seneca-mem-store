@@ -210,6 +210,12 @@ function mem_store(options: any) {
                           return cb(err);
                         }
 
+                        // NOTE: WARNING: It is intentional that the
+                        // `updateNextDoc` function is invoked asynchronously.
+                        //
+                        // Calling it synchronously may lead to a stack
+                        // overflow, when there's a huge list of matches.
+                        //
                         return process.nextTick(() => updateNextDoc(i + 1, cb));
                       });
                   }
