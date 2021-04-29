@@ -179,8 +179,6 @@ function mem_store(options: any) {
                   return reply(err)
                 }
 
-                const ent_data = ent.data$(false)
-
                 if (docs_to_update.length > 0) {
                   const doc = docs_to_update[0]
 
