@@ -382,8 +382,6 @@ describe('mem-store tests', function () {
         })
       })
 
-      // TODO: WIP: Change this:
-      //
       describe('when some documents/records in the upsert$ directive match', () => {
         const app = makeSenecaForTest()
 
@@ -432,7 +430,7 @@ describe('mem-store tests', function () {
 
                   expect(products[1]).to.contain({
                     label: 'a toothbrush',
-                    price: '4.95'
+                    price: '3.70'
                   })
 
                   expect(products[2]).to.contain({

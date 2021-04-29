@@ -182,43 +182,20 @@ function mem_store(options: any) {
                 const ent_data = ent.data$(false);
 
                 if (docs_to_update.length > 0) {
-                  return updateNextDoc(0, (err: Error | null) => {
+                  const doc = docs_to_update[0];
+
+                  return doc
+                    .data$(public_entdata)
+                    .save$((err: Error | null) => {
                     if (err) {
                       return reply(err);
                     }
 
                     return reply(null, {
                       did_upsert: true,
-                      out: ent.list$(public_entdata)
+                      out: ent.make$(public_entdata)
                     });
                   });
-
-
-                  function updateNextDoc(i: number, cb: (err: Error | null) => any) {
-                    Assert(i >= 0, 'i must be positive');
-
-                    if (i >= docs_to_update.length) {
-                      return cb(null);
-                    }
-
-                    const doc = docs_to_update[i];
-
-                    return doc
-                      .data$(public_entdata)
-                      .save$((err: Error) => {
-                        if (err) {
-                          return cb(err);
-                        }
-
-                        // NOTE: WARNING: It is intentional that the
-                        // `updateNextDoc` function is invoked asynchronously.
-                        //
-                        // Calling it synchronously may lead to a stack
-                        // overflow, when there's a huge list of matches.
-                        //
-                        return process.nextTick(() => updateNextDoc(i + 1, cb));
-                      });
-                  }
                 }
 
                 return reply(null, { did_upsert: false, out: null });
