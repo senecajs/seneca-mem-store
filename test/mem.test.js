@@ -330,6 +330,60 @@ describe('mem-store tests', function () {
         })
       })
 
+      describe('when a document/record in the upsert$ directive matches', () => {
+        const app = makeSenecaForTest()
+
+        before(fin => app.ready(fin))
+
+        beforeEach(fin => {
+          app.make('product')
+            .data$({ label: 'a toothbrush', price: '3.95' })
+            .save$(fin)
+        })
+
+        beforeEach(fin => {
+          app.make('product')
+            .data$({ label: 'bbs tires', price: '4.10' })
+            .save$(fin)
+        })
+
+        it('only updates a single matching document', fin => {
+          app.test(fin)
+
+          app.ready(() => {
+            app.make('product')
+              .data$({ label: 'a toothbrush', price: '4.95' })
+              .save$({ upsert$: ['label'] }, err => {
+                if (err) {
+                  return fin(err)
+                }
+
+                app.make('product').list$({}, (err, products) => {
+                  if (err) {
+                    return fin(err)
+                  }
+
+                  expect(products.length).to.equal(2)
+
+                  expect(products[0]).to.contain({
+                    label: 'a toothbrush',
+                    price: '4.95'
+                  })
+
+                  expect(products[1]).to.contain({
+                    label: 'bbs tires',
+                    price: '4.10'
+                  })
+
+                  return fin()
+                })
+              })
+          })
+        })
+      })
+
+      // TODO: WIP: Change this:
+      //
       describe('when some documents/records in the upsert$ directive match', () => {
         const app = makeSenecaForTest()
 
@@ -353,7 +407,7 @@ describe('mem-store tests', function () {
             .save$(fin)
         })
 
-        it('updates the matching documents', fin => {
+        it('only updates a single matching document', fin => {
           app.test(fin)
 
           app.ready(() => {
@@ -675,7 +729,7 @@ describe('mem-store tests', function () {
     })
 
     describe('when invoking upsert via the #save method of an existing entity', () => {
-      describe('when some other existing documents/records in the upsert$ directive match', () => {
+      describe('when an existing document/record in the upsert$ directive matches', () => {
         const app = makeSenecaForTest()
 
         before(fin => app.ready(fin))
@@ -697,12 +751,6 @@ describe('mem-store tests', function () {
             })
         })
 
-        beforeEach(fin => {
-          app.make('product')
-            .data$({ label: 'a macchiato espressionado', price: '1.95' })
-            .save$(fin)
-        })
-
         it('ignores the upsert$ directive and updates the entity the update is called on, as it normally would', fin => {
           app.test(fin)
 
@@ -718,16 +766,11 @@ describe('mem-store tests', function () {
                   return fin(err)
                 }
 
-                expect(products.length).to.equal(2)
+                expect(products.length).to.equal(1)
 
                 expect(products[0]).to.contain({
                   label: 'a macchiato espressionado',
                   price: '3.95'
-                })
-
-                expect(products[1]).to.contain({
-                  label: 'a macchiato espressionado',
-                  price: '1.95'
                 })
 
                 return fin()
