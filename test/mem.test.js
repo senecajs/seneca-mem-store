@@ -15,7 +15,7 @@ const Lab = require('@hapi/lab')
 const Code = require('@hapi/code')
 const { expect } = Code
 const lab = (exports.lab = Lab.script())
-const { describe, beforeEach } = lab
+const { describe, before, beforeEach } = lab
 const it = make_it(lab)
 // const before = lab.before
 
@@ -289,6 +289,8 @@ describe('mem-store tests', function () {
       describe('when no documents/records in the upsert$ directive match', () => {
         const app = makeSenecaForTest()
 
+        before(fin => app.ready(fin))
+
         beforeEach(fin => {
           app.make('product')
             .data$({ label: 'a macchiato espressionado', price: '3.40' })
@@ -330,6 +332,8 @@ describe('mem-store tests', function () {
 
       describe('when some documents/records in the upsert$ directive match', () => {
         const app = makeSenecaForTest()
+
+        before(fin => app.ready(fin))
 
         beforeEach(fin => {
           app.make('product')
@@ -392,6 +396,8 @@ describe('mem-store tests', function () {
       describe('when a document/record in the upsert$ directive matches on a private field', () => {
         const app = makeSenecaForTest()
 
+        before(fin => app.ready(fin))
+
         beforeEach(fin => {
           app.make('product')
             .data$({ label: 'toothbrush', price: '3.95', psst$: 'private' })
@@ -436,6 +442,8 @@ describe('mem-store tests', function () {
       describe('when the upsert$ directive is empty', () => {
         const app = makeSenecaForTest()
 
+        before(fin => app.ready(fin))
+
         beforeEach(fin => {
           app.make('product')
             .data$({ label: 'toothbrush', price: '3.95' })
@@ -479,6 +487,8 @@ describe('mem-store tests', function () {
 
       describe('when a document/record in the upsert$ directive matches on an existing field set to undefined', () => {
         const app = makeSenecaForTest()
+
+        before(fin => app.ready(fin))
 
         beforeEach(fin => {
           app.make('product')
@@ -534,6 +544,8 @@ describe('mem-store tests', function () {
       describe('when a document/record in the upsert$ directive matches on an existing field set to null', () => {
         const app = makeSenecaForTest()
 
+        before(fin => app.ready(fin))
+
         beforeEach(fin => {
           app.make('product')
             .data$({ label: null, price: '3.95' })
@@ -584,6 +596,8 @@ describe('mem-store tests', function () {
       describe('when some of the fields in the data$/upsert$ directives do not exist in a document/record', () => {
         const app = makeSenecaForTest()
 
+        before(fin => app.ready(fin))
+
         beforeEach(fin => {
           app.make('product')
             .data$({ label: 'a toothbrush', price: '3.40' })
@@ -623,6 +637,8 @@ describe('mem-store tests', function () {
       describe('when some of the fields in the upsert$ directive do not exist in the attributes passed via data$', () => {
         const app = makeSenecaForTest()
 
+        before(fin => app.ready(fin))
+
         beforeEach(fin => {
           app.make('product')
             .data$({ label: 'a toothbrush', price: '3.40' })
@@ -661,6 +677,8 @@ describe('mem-store tests', function () {
     describe('when invoking upsert via the #save method of an existing entity', () => {
       describe('when some other existing documents/records in the upsert$ directive match', () => {
         const app = makeSenecaForTest()
+
+        before(fin => app.ready(fin))
 
 
         let existing_product
