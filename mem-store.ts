@@ -110,18 +110,18 @@ function mem_store(options: any) {
 
         return upsertIfRequested(msg, function (err: Error, ctx: UpsertIfRequestedContext) {
           if (err) {
-            return reply(err);
+            return reply(err)
           }
 
-          const { did_upsert } = ctx;
+          const { did_upsert } = ctx
 
           if (did_upsert) {
-            const { out } = ctx;
-            return reply(null, out);
+            const { out } = ctx
+            return reply(null, out)
           }
 
 
-          prev = entmap[base][name][mement.id] = mement;
+          prev = entmap[base][name][mement.id] = mement
 
           seneca.log.debug(function () {
             return [
@@ -129,8 +129,8 @@ function mem_store(options: any) {
               ent.canon$({ string: 1 }),
               mement,
               desc,
-            ];
-          });
+            ]
+          })
 
           return reply(null, ent.make$(prev));
         })
@@ -146,7 +146,7 @@ function mem_store(options: any) {
         function upsertIfRequested(msg: any, reply: UpsertIfRequestedCallback) {
           // This is the query passed to the .save$ method.
           //
-          const query_for_save = msg.q;
+          const query_for_save = msg.q
 
 
           if (isNewEntityBeingCreated(msg) && Array.isArray(query_for_save.upsert$)) {
@@ -161,50 +161,50 @@ function mem_store(options: any) {
               // ```
               // - returns a list of all entities.
               //
-              .filter((p: string) => !isPrivateProp(p));
+              .filter((p: string) => !isPrivateProp(p))
 
 
             if (upsert_on.length > 0) {
-              const qent = msg.ent;
-              const public_entdata = msg.ent.data$(false);
+              const qent = msg.ent
+              const public_entdata = msg.ent.data$(false)
 
               const q = upsert_on.reduce((acc: any, upsert_on_field: string) => {
-                acc[upsert_on_field] = public_entdata[upsert_on_field];
-                return acc;
-              }, {});
+                acc[upsert_on_field] = public_entdata[upsert_on_field]
+                return acc
+              }, {})
 
 
               return listents(seneca, entmap, qent, q, function (err: Error | null, docs_to_update: any[]) {
                 if (err) {
-                  return reply(err);
+                  return reply(err)
                 }
 
-                const ent_data = ent.data$(false);
+                const ent_data = ent.data$(false)
 
                 if (docs_to_update.length > 0) {
-                  const doc = docs_to_update[0];
+                  const doc = docs_to_update[0]
 
                   return doc
                     .data$(public_entdata)
                     .save$((err: Error | null) => {
                     if (err) {
-                      return reply(err);
+                      return reply(err)
                     }
 
                     return reply(null, {
                       did_upsert: true,
                       out: ent.make$(public_entdata)
-                    });
-                  });
+                    })
+                  })
                 }
 
-                return reply(null, { did_upsert: false, out: null });
+                return reply(null, { did_upsert: false, out: null })
               });
             } else {
-              return reply(null, { did_upsert: false, out: null });
+              return reply(null, { did_upsert: false, out: null })
             }
           } else {
-            return reply(null, { did_upsert: false, out: null });
+            return reply(null, { did_upsert: false, out: null })
           }
         }
       }
