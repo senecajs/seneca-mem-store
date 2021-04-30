@@ -728,6 +728,159 @@ describe('mem-store tests', function () {
             })
         })
       })
+
+      describe('when upserting on an id', () => {
+        describe('when a document/record in the upsert$ directive matches', () => {
+          const app = makeSenecaForTest()
+
+          before(fin => app.ready(fin))
+
+
+          const id_of_richard = 'some_id'
+
+          beforeEach(fin => {
+            app.make('user')
+              .data$({ id: id_of_richard, username: 'richard', points: 8000 })
+              .save$(fin)
+          })
+
+
+          beforeEach(fin => {
+            app.make('user')
+              .data$({ username: 'bob', points: 1000 })
+              .save$(fin)
+          })
+
+          it('updates the matching document', fin => {
+            app.test(fin)
+
+            app.make('user')
+              .data$({ id: id_of_richard, username: 'richard', points: 9999 })
+              .save$({ upsert$: ['id'] }, err => {
+                if (err) {
+                  return fin(err)
+                }
+
+                app.make('user').list$({}, (err, users) => {
+                  if (err) {
+                    return fin(err)
+                  }
+
+                  expect(users.length).to.equal(2)
+
+                  expect(users[0]).to.contain({
+                    id: id_of_richard,
+                    username: 'richard',
+                    points: 9999
+                  })
+
+                  expect(users[1]).to.contain({
+                    username: 'bob',
+                    points: 1000
+                  })
+
+                  return fin()
+                })
+              })
+          })
+
+          it('can still retrieve the updated document by the given id via the #load$ method', fin => {
+            app.test(fin)
+
+            app.make('user')
+              .data$({ id: id_of_richard, username: 'richard', points: 9999 })
+              .save$({ upsert$: ['id'] }, err => {
+                if (err) {
+                  return fin(err)
+                }
+
+                app.make('user').load$(id_of_richard, (err, user) => {
+                  if (err) {
+                    return fin(err)
+                  }
+
+                  expect(user).to.contain({
+                    id: id_of_richard,
+                    username: 'richard',
+                    points: 9999
+                  })
+
+                  return fin()
+                })
+              })
+          })
+        })
+
+        describe('when no documents/records in the upsert$ directive match', () => {
+          const app = makeSenecaForTest()
+
+          before(fin => app.ready(fin))
+
+          const some_id = 'some_id'
+
+          beforeEach(fin => {
+            app.make('user')
+              .data$({ username: 'richard' })
+              .save$(fin)
+          })
+
+          it('creates a new document with that id', fin => {
+            app.test(fin)
+
+            app.make('user')
+              .data$({ id: some_id, username: 'jim' })
+              .save$({ upsert$: ['id'] }, err => {
+                if (err) {
+                  return fin(err)
+                }
+
+                app.make('user').list$({}, (err, users) => {
+                  if (err) {
+                    return fin(err)
+                  }
+
+                  expect(users.length).to.equal(2)
+
+                  expect(users[0]).to.contain({
+                    username: 'richard'
+                  })
+
+                  expect(users[1]).to.contain({
+                    id: some_id,
+                    username: 'jim'
+                  })
+
+                  return fin()
+                })
+              })
+          })
+
+          it('can retrieve the new document by the given id via the #load$ method', fin => {
+            app.test(fin)
+
+            app.make('user')
+              .data$({ id: some_id, username: 'jim' })
+              .save$({ upsert$: ['id'] }, err => {
+                if (err) {
+                  return fin(err)
+                }
+
+                app.make('user').load$(some_id, (err, user) => {
+                  if (err) {
+                    return fin(err)
+                  }
+
+                  expect(user).to.contain({
+                    id: some_id,
+                    username: 'jim'
+                  })
+
+                  return fin()
+                })
+              })
+          })
+        })
+      })
     })
 
     describe('when invoking upsert via the #save method of an existing entity', () => {
