@@ -407,11 +407,11 @@ describe('mem-store tests', function () {
       })
 
       describe('when no documents/records in the upsert$ directive match', () => {
-        const app = makeSenecaForTest()
-
-        before(fin => app.ready(fin))
-
         describe('normally', () => {
+          const app = makeSenecaForTest()
+
+          before(fin => app.ready(fin))
+
           beforeEach(fin => {
             app.make('product')
               .data$({ label: 'a macchiato espressionado', price: '3.40' })
@@ -452,6 +452,10 @@ describe('mem-store tests', function () {
         })
 
         describe('when bombarding the store with near-parallel upserts', () => {
+          const app = makeSenecaForTest()
+
+          before(fin => app.ready(fin))
+
           it('does not result in a race condition, and creates the resulting document only once', fin => {
             app.test(fin)
 

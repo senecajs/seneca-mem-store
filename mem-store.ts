@@ -133,7 +133,7 @@ function mem_store(options: any) {
             ]
           })
 
-          return reply(null, ent.make$(prev));
+          return reply(null, ent.make$(prev))
         })
 
 
@@ -151,53 +151,47 @@ function mem_store(options: any) {
 
 
           if (isNewEntityBeingCreated(msg) && Array.isArray(query_for_save.upsert$)) {
-            //
-            // NOTE: Here we are stripping private properties from the
-            // upsert$ fields. That's because the underlying `listents`
-            // helper ignores private properties completely, - in ways
-            // that lead to situations where:
-            // ```
-            //  .list$({ i_am_private_prop$: 'abc' })
-            // ```
-            // - returns a list of all entities.
-            //
             const upsert_on = Common.clean(query_for_save.upsert$)
 
 
             if (upsert_on.length > 0) {
-              const qent = msg.ent
-              const public_entdata = msg.ent.data$(false)
-
-              const q = upsert_on.reduce((acc: any, upsert_on_field: string) => {
-                acc[upsert_on_field] = public_entdata[upsert_on_field]
-                return acc
-              }, {})
-
-
-              return listents(seneca, entmap, qent, q, function (err: Error | null, docs_to_update: any[]) {
-                if (err) {
-                  return reply(err)
-                }
-
-                if (docs_to_update.length > 0) {
-                  const doc = docs_to_update[0]
-
-                  return doc
-                    .data$(public_entdata)
-                    .save$((err: Error | null) => {
-                    if (err) {
-                      return reply(err)
-                    }
-
-                    return reply(null, {
-                      did_upsert: true,
-                      out: ent.make$(public_entdata)
-                    })
-                  })
-                }
-
+              if (!(base in entmap)) {
                 return reply(null, { did_upsert: false, out: null })
-              });
+              }
+
+              if (!(name in entmap[base])) {
+                return reply(null, { did_upsert: false, out: null })
+              }
+
+              const ent = msg.ent
+              const public_entdata = ent.data$(false)
+
+              const collection = entmap[base][name]
+              const docs = Object.values(collection)
+
+              const doc_to_update = docs.find((doc: any) => {
+                return upsert_on.every((upsert_on_field: string) => {
+                  return doc[upsert_on_field] === public_entdata[upsert_on_field]
+                })
+              })
+
+              if (!doc_to_update) {
+                return reply(null, { did_upsert: false, out: null })
+              }
+
+
+              return ent.make$(doc_to_update)
+                .data$(public_entdata)
+                .save$((err: Error | null, out: any) => {
+                  if (err) {
+                    return reply(err)
+                  }
+
+                  return reply(null, {
+                    did_upsert: true,
+                    out
+                  })
+              })
             } else {
               return reply(null, { did_upsert: false, out: null })
             }
