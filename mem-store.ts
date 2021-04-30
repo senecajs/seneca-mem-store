@@ -1,10 +1,11 @@
 /* Copyright (c) 2010-2020 Richard Rodger and other contributors, MIT License */
 'use strict'
 
-const Assert = require('assert');
+const Assert = require('assert')
+import * as Common from './lib/common'
 
 let internals = {
-  name: 'mem-store',
+  name: 'mem-store'
 }
 
 module.exports = mem_store
@@ -150,18 +151,17 @@ function mem_store(options: any) {
 
 
           if (isNewEntityBeingCreated(msg) && Array.isArray(query_for_save.upsert$)) {
-            const upsert_on = query_for_save.upsert$
-              //
-              // NOTE: Here we are stripping private properties from the
-              // upsert$ fields. That's because the underlying `listents`
-              // helper ignores private properties completely, - in ways
-              // that lead to situations where:
-              // ```
-              //  .list$({ i_am_private_prop$: 'abc' })
-              // ```
-              // - returns a list of all entities.
-              //
-              .filter((p: string) => !isPrivateProp(p))
+            //
+            // NOTE: Here we are stripping private properties from the
+            // upsert$ fields. That's because the underlying `listents`
+            // helper ignores private properties completely, - in ways
+            // that lead to situations where:
+            // ```
+            //  .list$({ i_am_private_prop$: 'abc' })
+            // ```
+            // - returns a list of all entities.
+            //
+            const upsert_on = Common.clean(query_for_save.upsert$)
 
 
             if (upsert_on.length > 0) {
@@ -532,10 +532,5 @@ function listents(seneca: any, entmap: any, qent: any, q: any, done: any) {
 
   // Return the resulting list to the caller.
   done.call(seneca, null, list)
-}
-
-function isPrivateProp(prop: any) : boolean {
-  return typeof prop === 'string' &&
-    (<string> prop).indexOf('$') >= 0;
 }
 
