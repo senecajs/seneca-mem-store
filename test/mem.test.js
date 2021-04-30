@@ -577,8 +577,8 @@ describe('mem-store tests', function () {
                   expect(products.length).to.equal(2)
 
                   expect(products[0]).to.contain({
-                    // NOTE: WARNING: Seneca seems to be stripping out fields
-                    // with a value of undefined in a document.
+                    // NOTE: WARNING: Seneca is stripping out fields
+                    // with a value of `undefined` in a document.
                     //
                     // label: undefined,
 
