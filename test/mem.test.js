@@ -8,6 +8,7 @@
 const Util = require('util')
 
 const Assert = require('assert')
+const Async = require('async')
 const Seneca = require('seneca')
 const Shared = require('seneca-store-test')
 
@@ -410,42 +411,85 @@ describe('mem-store tests', function () {
 
         before(fin => app.ready(fin))
 
-        beforeEach(fin => {
-          app.make('product')
-            .data$({ label: 'a macchiato espressionado', price: '3.40' })
-            .save$(fin)
-        })
+        describe('normally', () => {
+          beforeEach(fin => {
+            app.make('product')
+              .data$({ label: 'a macchiato espressionado', price: '3.40' })
+              .save$(fin)
+          })
 
-        it('creates a new document', fin => {
-          app.test(fin)
+          it('creates a new document', fin => {
+            app.test(fin)
 
-          app.make('product')
-            .data$({ label: 'b toothbrush', price: '3.40' })
-            .save$({ upsert$: ['label'] }, err => {
-              if (err) {
-                return fin(err)
-              }
-
-              app.make('product').list$({}, (err, products) => {
+            app.make('product')
+              .data$({ label: 'b toothbrush', price: '3.40' })
+              .save$({ upsert$: ['label'] }, err => {
                 if (err) {
                   return fin(err)
                 }
 
-                expect(products.length).to.equal(2)
+                app.make('product').list$({}, (err, products) => {
+                  if (err) {
+                    return fin(err)
+                  }
+
+                  expect(products.length).to.equal(2)
+
+                  expect(products[0]).to.contain({
+                    label: 'a macchiato espressionado',
+                    price: '3.40'
+                  })
+
+                  expect(products[1]).to.contain({
+                    label: 'b toothbrush',
+                    price: '3.40'
+                  })
+
+                  return fin()
+                })
+              })
+          })
+        })
+
+        describe('when bombarding the store with near-parallel upserts', () => {
+          it('does not result in a race condition, and creates the resulting document only once', fin => {
+            app.test(fin)
+
+            const product_entity = app.entity('product')
+
+            const upsertProduct = cb => 
+              product_entity
+                .data$({ name: 'pencil', price: '1.95' })
+                .save$({ upsert$: ['name'] }, cb)
+
+
+            Async.parallel([
+              upsertProduct,
+              upsertProduct,
+              upsertProduct
+            ], err => {
+              if (err) {
+                return fin(err)
+              }
+
+              product_entity.list$((err, products) => {
+                if (err) {
+                  return fin(err)
+                }
+
+                expect(products.length).to.equal(1)
 
                 expect(products[0]).to.contain({
-                  label: 'a macchiato espressionado',
-                  price: '3.40'
-                })
-
-                expect(products[1]).to.contain({
-                  label: 'b toothbrush',
-                  price: '3.40'
+                  name: 'pencil',
+                  price: '1.95'
                 })
 
                 return fin()
               })
             })
+
+            return
+          })
         })
       })
 
