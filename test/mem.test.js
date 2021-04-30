@@ -286,64 +286,20 @@ describe('mem-store tests', function () {
 
   describe('upsert', () => {
     describe('when creating a new document/record', () => {
-      describe('when no documents/records in the upsert$ directive match', () => {
-        const app = makeSenecaForTest()
-
-        before(fin => app.ready(fin))
-
-        beforeEach(fin => {
-          app.make('product')
-            .data$({ label: 'a macchiato espressionado', price: '3.40' })
-            .save$(fin)
-        })
-
-        it('creates a new document', fin => {
-          app.test(fin)
-
-          app.make('product')
-            .data$({ label: 'b toothbrush', price: '3.40' })
-            .save$({ upsert$: ['label'] }, err => {
-              if (err) {
-                return fin(err)
-              }
-
-              app.make('product').list$({}, (err, products) => {
-                if (err) {
-                  return fin(err)
-                }
-
-                expect(products.length).to.equal(2)
-
-                expect(products[0]).to.contain({
-                  label: 'a macchiato espressionado',
-                  price: '3.40'
-                })
-
-                expect(products[1]).to.contain({
-                  label: 'b toothbrush',
-                  price: '3.40'
-                })
-
-                return fin()
-              })
-            })
-        })
-      })
-
       describe('when a document/record in the upsert$ directive matches', () => {
         const app = makeSenecaForTest()
 
         before(fin => app.ready(fin))
 
         beforeEach(fin => {
-          app.make('product')
-            .data$({ label: 'a toothbrush', price: '3.95' })
+          app.make('user')
+            .data$({ username: 'richard' })
             .save$(fin)
         })
 
         beforeEach(fin => {
-          app.make('product')
-            .data$({ label: 'bbs tires', price: '4.10' })
+          app.make('user')
+            .data$({ username: 'bob' })
             .save$(fin)
         })
 
@@ -351,29 +307,33 @@ describe('mem-store tests', function () {
           app.test(fin)
 
           app.ready(() => {
-            app.make('product')
-              .data$({ label: 'a toothbrush', price: '4.95' })
-              .save$({ upsert$: ['label'] }, err => {
+            app.make('user')
+              .data$({ username: 'richard', points: 9999 })
+              .save$({ upsert$: ['username'] }, err => {
                 if (err) {
                   return fin(err)
                 }
 
-                app.make('product').list$({}, (err, products) => {
+                app.make('user').list$({}, (err, users) => {
                   if (err) {
                     return fin(err)
                   }
 
-                  expect(products.length).to.equal(2)
+                  expect(users.length).to.equal(2)
 
-                  expect(products[0]).to.contain({
-                    label: 'a toothbrush',
-                    price: '4.95'
+
+                  expect(users[0]).to.contain({
+                    username: 'richard',
+                    points: 9999
                   })
 
-                  expect(products[1]).to.contain({
-                    label: 'bbs tires',
-                    price: '4.10'
+
+                  expect(users[1]).to.contain({
+                    username: 'bob'
                   })
+
+                  expect(users[1]).to.not.contain('points')
+
 
                   return fin()
                 })
@@ -442,6 +402,50 @@ describe('mem-store tests', function () {
                 })
               })
           })
+        })
+      })
+
+      describe('when no documents/records in the upsert$ directive match', () => {
+        const app = makeSenecaForTest()
+
+        before(fin => app.ready(fin))
+
+        beforeEach(fin => {
+          app.make('product')
+            .data$({ label: 'a macchiato espressionado', price: '3.40' })
+            .save$(fin)
+        })
+
+        it('creates a new document', fin => {
+          app.test(fin)
+
+          app.make('product')
+            .data$({ label: 'b toothbrush', price: '3.40' })
+            .save$({ upsert$: ['label'] }, err => {
+              if (err) {
+                return fin(err)
+              }
+
+              app.make('product').list$({}, (err, products) => {
+                if (err) {
+                  return fin(err)
+                }
+
+                expect(products.length).to.equal(2)
+
+                expect(products[0]).to.contain({
+                  label: 'a macchiato espressionado',
+                  price: '3.40'
+                })
+
+                expect(products[1]).to.contain({
+                  label: 'b toothbrush',
+                  price: '3.40'
+                })
+
+                return fin()
+              })
+            })
         })
       })
 
