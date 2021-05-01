@@ -163,16 +163,15 @@ function mem_store(options: any) {
                 return reply(null, { did_upsert: false, out: null })
               }
 
-              const ent = msg.ent
-              const public_entdata = ent.data$(false)
 
+              const public_entdata = msg.ent.data$(false)
               const collection = entmap[base][name]
               const docs = Object.values(collection)
 
+
               const doc_to_update = docs.find((doc: any) => {
-                return upsert_on.every((upsert_on_field: string) => {
-                  return upsert_on_field in public_entdata &&
-                    public_entdata[upsert_on_field] === doc[upsert_on_field]
+                return upsert_on.every((p: string) => {
+                  return p in public_entdata && public_entdata[p] === doc[p]
                 })
               })
 
@@ -181,7 +180,7 @@ function mem_store(options: any) {
               }
 
 
-              return ent.make$(doc_to_update)
+              return msg.ent.make$(doc_to_update)
                 .data$(public_entdata)
                 .save$((err: Error | null, out: any) => {
                   if (err) {
