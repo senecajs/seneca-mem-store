@@ -78,7 +78,7 @@ function mem_store(options: any) {
       // The actual save logic for saving or
       // creating and then saving the entity.
       function do_save(id?: any, isnew?: boolean) {
-        let mement = ent.data$(true, 'string');
+        let mement = ent.data$(true, 'string')
 
         if (undefined !== id) {
           mement.id = id
