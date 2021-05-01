@@ -288,126 +288,251 @@ describe('mem-store tests', function () {
   describe('upsert', () => {
     describe('save$ invoked on a new entity instance', () => {
       describe('matching entity exists', () => {
-        const app = makeSenecaForTest()
+        describe('matches on 1 upsert$ field', () => {
+          const app = makeSenecaForTest()
 
-        before(fin => app.ready(fin))
+          before(fin => app.ready(fin))
 
-        beforeEach(fin => {
-          app.make('user')
-            .data$({ username: 'richard' })
-            .save$(fin)
-        })
-
-        beforeEach(fin => {
-          app.make('user')
-            .data$({ username: 'bob' })
-            .save$(fin)
-        })
-
-        it('updates the entity', fin => {
-          app.test(fin)
-
-          app.ready(() => {
+          beforeEach(fin => {
             app.make('user')
-              .data$({ username: 'richard', points: 9999 })
-              .save$({ upsert$: ['username'] }, err => {
-                if (err) {
-                  return fin(err)
-                }
+              .data$({ username: 'richard', points: 0 })
+              .save$(fin)
+          })
 
-                app.make('user').list$({}, (err, users) => {
+          beforeEach(fin => {
+            app.make('user')
+              .data$({ username: 'bob', points: 0 })
+              .save$(fin)
+          })
+
+          it('updates the entity', fin => {
+            app.test(fin)
+
+            app.ready(() => {
+              app.make('user')
+                .data$({ username: 'richard', points: 9999 })
+                .save$({ upsert$: ['username'] }, err => {
                   if (err) {
                     return fin(err)
                   }
 
-                  expect(users.length).to.equal(2)
+                  app.make('user').list$({}, (err, users) => {
+                    if (err) {
+                      return fin(err)
+                    }
+
+                    expect(users.length).to.equal(2)
 
 
-                  expect(users[0]).to.contain({
-                    username: 'richard',
-                    points: 9999
+                    expect(users[0]).to.contain({
+                      username: 'richard',
+                      points: 9999
+                    })
+
+
+                    expect(users[1]).to.contain({
+                      username: 'bob',
+                      points: 0
+                    })
+
+                    return fin()
                   })
-
-
-                  expect(users[1]).to.contain({
-                    username: 'bob'
-                  })
-
-                  expect(users[1]).to.not.contain('points')
-
-
-                  return fin()
                 })
-              })
+            })
+          })
+        })
+
+        describe('matches on 2 upsert$ fields', () => {
+          const app = makeSenecaForTest()
+
+          before(fin => app.ready(fin))
+
+          beforeEach(fin => {
+            app.make('user')
+              .data$({ username: 'richard', skill: 9999, points: 0 })
+              .save$(fin)
+          })
+
+          beforeEach(fin => {
+            app.make('user')
+              .data$({ username: 'bob', skill: 9999, points: 0 })
+              .save$(fin)
+          })
+
+          it('updates the entity', fin => {
+            app.test(fin)
+
+            app.ready(() => {
+              app.make('user')
+                .data$({ username: 'richard', skill: 9999, points: 1234 })
+                .save$({ upsert$: ['username', 'skill'] }, err => {
+                  if (err) {
+                    return fin(err)
+                  }
+
+                  app.make('user').list$({}, (err, users) => {
+                    if (err) {
+                      return fin(err)
+                    }
+
+                    expect(users.length).to.equal(2)
+
+
+                    expect(users[0]).to.contain({
+                      username: 'richard',
+                      skill: 9999,
+                      points: 1234
+                    })
+
+
+                    expect(users[1]).to.contain({
+                      username: 'bob',
+                      skill: 9999,
+                      points: 0
+                    })
+
+
+                    return fin()
+                  })
+                })
+            })
           })
         })
       })
 
       describe('many matching entities exist', () => {
-        const app = makeSenecaForTest()
+        describe('matches on 1 upsert$ field', () => {
+          const app = makeSenecaForTest()
 
-        before(fin => app.ready(fin))
+          before(fin => app.ready(fin))
 
-        beforeEach(fin => {
-          app.make('product')
-            .data$({ label: 'a toothbrush', price: '3.95' })
-            .save$(fin)
-        })
-
-        beforeEach(fin => {
-          app.make('product')
-            .data$({ label: 'a toothbrush', price: '3.70' })
-            .save$(fin)
-        })
-
-        beforeEach(fin => {
-          app.make('product')
-            .data$({ label: 'bbs tires', price: '4.10' })
-            .save$(fin)
-        })
-
-        it('updates a single matching entity', fin => {
-          app.test(fin)
-
-          app.ready(() => {
+          beforeEach(fin => {
             app.make('product')
-              .data$({ label: 'a toothbrush', price: '4.95' })
-              .save$({ upsert$: ['label'] }, err => {
-                if (err) {
-                  return fin(err)
-                }
+              .data$({ label: 'a toothbrush', price: '3.95' })
+              .save$(fin)
+          })
 
-                app.make('product').list$({}, (err, products) => {
+          beforeEach(fin => {
+            app.make('product')
+              .data$({ label: 'a toothbrush', price: '3.70' })
+              .save$(fin)
+          })
+
+          beforeEach(fin => {
+            app.make('product')
+              .data$({ label: 'bbs tires', price: '4.10' })
+              .save$(fin)
+          })
+
+          it('updates a single matching entity', fin => {
+            app.test(fin)
+
+            app.ready(() => {
+              app.make('product')
+                .data$({ label: 'a toothbrush', price: '4.95' })
+                .save$({ upsert$: ['label'] }, err => {
                   if (err) {
                     return fin(err)
                   }
 
-                  expect(products.length).to.equal(3)
+                  app.make('product').list$({}, (err, products) => {
+                    if (err) {
+                      return fin(err)
+                    }
 
-                  expect(products[0]).to.contain({
-                    label: 'a toothbrush',
-                    price: '4.95'
+                    expect(products.length).to.equal(3)
+
+                    expect(products[0]).to.contain({
+                      label: 'a toothbrush',
+                      price: '4.95'
+                    })
+
+                    expect(products[1]).to.contain({
+                      label: 'a toothbrush',
+                      price: '3.70'
+                    })
+
+                    expect(products[2]).to.contain({
+                      label: 'bbs tires',
+                      price: '4.10'
+                    })
+
+                    return fin()
                   })
-
-                  expect(products[1]).to.contain({
-                    label: 'a toothbrush',
-                    price: '3.70'
-                  })
-
-                  expect(products[2]).to.contain({
-                    label: 'bbs tires',
-                    price: '4.10'
-                  })
-
-                  return fin()
                 })
-              })
+            })
+          })
+        })
+
+        describe('matches on 2 upsert$ fields', () => {
+          const app = makeSenecaForTest()
+
+          before(fin => app.ready(fin))
+
+          beforeEach(fin => {
+            app.make('product')
+              .data$({ label: 'a toothbrush', price: '3.95', coolness_factor: 2 })
+              .save$(fin)
+          })
+
+          beforeEach(fin => {
+            app.make('product')
+              .data$({ label: 'a toothbrush', price: '3.70', coolness_factor: 3 })
+              .save$(fin)
+          })
+
+          beforeEach(fin => {
+            app.make('product')
+              .data$({ label: 'bbs tires', price: '4.10', coolness_factor: 7 })
+              .save$(fin)
+          })
+
+          it('updates a single matching entity', fin => {
+            app.test(fin)
+
+            app.ready(() => {
+              app.make('product')
+                .data$({ label: 'a toothbrush', price: '3.95', coolness_factor: 4 })
+                .save$({ upsert$: ['label', 'price'] }, err => {
+                  if (err) {
+                    return fin(err)
+                  }
+
+                  app.make('product').list$({}, (err, products) => {
+                    if (err) {
+                      return fin(err)
+                    }
+
+                    expect(products.length).to.equal(3)
+
+                    expect(products[0]).to.contain({
+                      label: 'a toothbrush',
+                      price: '3.95',
+                      coolness_factor: 4
+                    })
+
+                    expect(products[1]).to.contain({
+                      label: 'a toothbrush',
+                      price: '3.70',
+                      coolness_factor: 3
+                    })
+
+                    expect(products[2]).to.contain({
+                      label: 'bbs tires',
+                      price: '4.10',
+                      coolness_factor: 7
+                    })
+
+                    return fin()
+                  })
+                })
+            })
           })
         })
       })
 
-      describe('no matching entities exist', () => {
-        describe('normally', () => {
+      describe('no matching entity exists', () => {
+        describe('1 upsert$ field', () => {
           const app = makeSenecaForTest()
 
           before(fin => app.ready(fin))
@@ -451,48 +576,98 @@ describe('mem-store tests', function () {
           })
         })
 
-        describe('bombarding the store with near-parallel upserts', () => {
+        describe('2 upsert$ fields', () => {
           const app = makeSenecaForTest()
 
           before(fin => app.ready(fin))
 
-          it('does not result in a race condition - creates a single new entity', fin => {
+          beforeEach(fin => {
+            app.make('product')
+              .data$({ label: 'frapuccino', price: '2.40', coolness_factor: 5 })
+              .save$(fin)
+          })
+
+          it('creates a new entity', fin => {
             app.test(fin)
 
-            const product_entity = app.entity('product')
-
-            const upsertProduct = cb => 
-              product_entity
-                .data$({ name: 'pencil', price: '1.95' })
-                .save$({ upsert$: ['name'] }, cb)
-
-
-            Async.parallel([
-              upsertProduct,
-              upsertProduct,
-              upsertProduct
-            ], err => {
-              if (err) {
-                return fin(err)
-              }
-
-              product_entity.list$((err, products) => {
+            app.make('product')
+              .data$({ label: 'frapuccino', price: '3.40', coolness_factor: 7 })
+              .save$({ upsert$: ['label', 'price'] }, err => {
                 if (err) {
                   return fin(err)
                 }
 
-                expect(products.length).to.equal(1)
+                app.make('product').list$({}, (err, products) => {
+                  if (err) {
+                    return fin(err)
+                  }
 
-                expect(products[0]).to.contain({
-                  name: 'pencil',
-                  price: '1.95'
+                  expect(products.length).to.equal(2)
+
+                  expect(products[0]).to.contain({
+                    label: 'frapuccino',
+                    price: '2.40',
+                    coolness_factor: 5
+                  })
+
+                  expect(products[1]).to.contain({
+                    label: 'frapuccino',
+                    price: '3.40',
+                    coolness_factor: 7
+                  })
+
+                  return fin()
+                })
+              })
+          })
+        })
+
+        describe('edge cases', () => {
+          describe('bombarding the store with near-parallel upserts', () => {
+            describe('1 upsert$ field', () => {
+              const app = makeSenecaForTest()
+
+              before(fin => app.ready(fin))
+
+              it('does not result in a race condition - creates a single new entity', fin => {
+                app.test(fin)
+
+                const product_entity = app.entity('product')
+
+                const upsertProduct = cb => 
+                  product_entity
+                    .data$({ name: 'pencil', price: '1.95' })
+                    .save$({ upsert$: ['name'] }, cb)
+
+
+                Async.parallel([
+                  upsertProduct,
+                  upsertProduct,
+                  upsertProduct
+                ], err => {
+                  if (err) {
+                    return fin(err)
+                  }
+
+                  product_entity.list$((err, products) => {
+                    if (err) {
+                      return fin(err)
+                    }
+
+                    expect(products.length).to.equal(1)
+
+                    expect(products[0]).to.contain({
+                      name: 'pencil',
+                      price: '1.95'
+                    })
+
+                    return fin()
+                  })
                 })
 
-                return fin()
+                return
               })
             })
-
-            return
           })
         })
       })
