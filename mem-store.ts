@@ -114,9 +114,9 @@ function mem_store(options: any) {
             return reply(err)
           }
 
-          const { did_upsert } = ctx
+          const { did_update } = ctx
 
-          if (did_upsert) {
+          if (did_update) {
             const { out } = ctx
             return reply(null, out)
           }
@@ -137,7 +137,7 @@ function mem_store(options: any) {
         })
 
 
-        type UpsertIfRequestedContext = { did_upsert: boolean, out?: any }
+        type UpsertIfRequestedContext = { did_update: boolean, out?: any }
 
         type UpsertIfRequestedCallback = (
           err:     Error | null,
@@ -156,11 +156,11 @@ function mem_store(options: any) {
 
             if (upsert_on.length > 0) {
               if (!(base in entmap)) {
-                return reply(null, { did_upsert: false, out: null })
+                return reply(null, { did_update: false, out: null })
               }
 
               if (!(name in entmap[base])) {
-                return reply(null, { did_upsert: false, out: null })
+                return reply(null, { did_update: false, out: null })
               }
 
 
@@ -176,7 +176,7 @@ function mem_store(options: any) {
               })
 
               if (!doc_to_update) {
-                return reply(null, { did_upsert: false, out: null })
+                return reply(null, { did_update: false, out: null })
               }
 
 
@@ -188,15 +188,15 @@ function mem_store(options: any) {
                   }
 
                   return reply(null, {
-                    did_upsert: true,
+                    did_update: true,
                     out
                   })
               })
             } else {
-              return reply(null, { did_upsert: false, out: null })
+              return reply(null, { did_update: false, out: null })
             }
           } else {
-            return reply(null, { did_upsert: false, out: null })
+            return reply(null, { did_update: false, out: null })
           }
         }
       }
