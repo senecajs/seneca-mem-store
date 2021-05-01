@@ -600,13 +600,7 @@ describe('mem-store tests', function () {
             .save$(fin)
         })
 
-        beforeEach(fin => {
-          app.make('product')
-            .data$({ label: 'CS101 textbook', price: '134.95' })
-            .save$(fin)
-        })
-
-        it('updates the matching document', fin => {
+        it('can never match on undefined fields, hence a new document is created', fin => {
           app.test(fin)
 
           app.ready(() => {
@@ -630,12 +624,16 @@ describe('mem-store tests', function () {
                     //
                     // label: undefined,
 
-                    price: '5.95'
+                    price: '3.95'
                   })
 
                   expect(products[1]).to.contain({
-                    label: 'CS101 textbook',
-                    price: '134.95'
+                    // NOTE: WARNING: Seneca is stripping out fields
+                    // with a value of `undefined` in a document.
+                    //
+                    // label: undefined,
+
+                    price: '5.95'
                   })
 
                   return fin()
