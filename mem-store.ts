@@ -164,9 +164,9 @@ function mem_store(options: any) {
               }
 
 
-              const public_entdata = msg.ent.data$(false)
               const collection = entmap[base][name]
               const docs = Object.values(collection)
+              const public_entdata = msg.ent.data$(false)
 
 
               const doc_to_update = docs.find((doc: any) => {
