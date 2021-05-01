@@ -171,7 +171,8 @@ function mem_store(options: any) {
 
               const doc_to_update = docs.find((doc: any) => {
                 return upsert_on.every((upsert_on_field: string) => {
-                  return doc[upsert_on_field] === public_entdata[upsert_on_field]
+                  return upsert_on_field in public_entdata &&
+                    public_entdata[upsert_on_field] === doc[upsert_on_field]
                 })
               })
 

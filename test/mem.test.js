@@ -749,7 +749,7 @@ describe('mem-store tests', function () {
             .save$(fin)
         })
 
-        it('ignores the missing fields and updates the matching existing record', fin => {
+        it('can never match, hence a new document is created', fin => {
           app.test(fin)
 
           app.make('product')
@@ -764,9 +764,14 @@ describe('mem-store tests', function () {
                   return fin(err)
                 }
 
-                expect(products.length).to.equal(1)
+                expect(products.length).to.equal(2)
 
                 expect(products[0]).to.contain({
+                  label: 'a toothbrush',
+                  price: '3.40'
+                })
+
+                expect(products[1]).to.contain({
                   label: 'a toothbrush',
                   price: '2.95'
                 })
