@@ -1,7 +1,32 @@
 /* Copyright (c) 2010-2020 Richard Rodger and other contributors, MIT License */
 'use strict';
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const assert_1 = __importDefault(require("assert"));
+const Common = __importStar(require("./lib/common"));
 let internals = {
-    name: 'mem-store',
+    name: 'mem-store'
 };
 module.exports = mem_store;
 Object.defineProperty(module.exports, 'name', { value: 'mem-store' });
@@ -49,8 +74,7 @@ function mem_store(options) {
             // check if we are in create mode,
             // if we are do a create, otherwise
             // we will do a save instead
-            let create = ent.id == null;
-            if (create) {
+            if (isNewEntityBeingCreated(msg)) {
                 create_new();
             }
             else {
@@ -81,16 +105,70 @@ function mem_store(options) {
                 if (shouldMerge) {
                     mement = Object.assign(prev || {}, mement);
                 }
-                prev = entmap[base][name][mement.id] = mement;
-                seneca.log.debug(function () {
-                    return [
-                        'save/' + (create ? 'insert' : 'update'),
-                        ent.canon$({ string: 1 }),
-                        mement,
-                        desc,
-                    ];
+                return upsertIfRequested(msg, function (err, ctx) {
+                    if (err) {
+                        return reply(err);
+                    }
+                    const { did_update } = ctx;
+                    if (did_update) {
+                        const { out } = ctx;
+                        return reply(null, out);
+                    }
+                    prev = entmap[base][name][mement.id] = mement;
+                    seneca.log.debug(function () {
+                        return [
+                            'save/' + (isNewEntityBeingCreated(msg) ? 'insert' : 'update'),
+                            ent.canon$({ string: 1 }),
+                            mement,
+                            desc,
+                        ];
+                    });
+                    return reply(null, ent.make$(prev));
                 });
-                reply(null, ent.make$(prev));
+                function upsertIfRequested(msg, reply) {
+                    // This is the query passed to the .save$ method.
+                    //
+                    const query_for_save = msg.q;
+                    if (isNewEntityBeingCreated(msg) && Array.isArray(query_for_save.upsert$)) {
+                        const upsert_on = Common.clean(query_for_save.upsert$);
+                        if (upsert_on.length > 0) {
+                            if (!(base in entmap)) {
+                                return reply(null, { did_update: false, out: null });
+                            }
+                            if (!(name in entmap[base])) {
+                                return reply(null, { did_update: false, out: null });
+                            }
+                            const collection = entmap[base][name];
+                            const docs = Object.values(collection);
+                            const public_entdata = msg.ent.data$(false);
+                            const doc_to_update = docs.find((doc) => {
+                                return upsert_on.every((p) => {
+                                    return p in public_entdata && public_entdata[p] === doc[p];
+                                });
+                            });
+                            if (!doc_to_update) {
+                                return reply(null, { did_update: false, out: null });
+                            }
+                            return msg.ent.make$(doc_to_update)
+                                .data$(public_entdata)
+                                .save$((err, out) => {
+                                if (err) {
+                                    return reply(err);
+                                }
+                                return reply(null, {
+                                    did_update: true,
+                                    out
+                                });
+                            });
+                        }
+                        else {
+                            return reply(null, { did_update: false, out: null });
+                        }
+                    }
+                    else {
+                        return reply(null, { did_update: false, out: null });
+                    }
+                }
             }
             // We will still use do_save to save the entity but
             // we need a place to handle new entites and id concerns.
@@ -129,6 +207,12 @@ function mem_store(options) {
                         do_save(id, true);
                     });
                 }
+            }
+            function isNewEntityBeingCreated(msg) {
+                assert_1.default('ent' in msg, 'msg.ent');
+                assert_1.default(msg.ent, 'msg.ent');
+                const ent = msg.ent;
+                return ent && ent.id === null || ent.id === undefined;
             }
         },
         load: function (msg, reply) {
