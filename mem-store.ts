@@ -1,8 +1,11 @@
 /* Copyright (c) 2010-2020 Richard Rodger and other contributors, MIT License */
 'use strict'
 
+import Assert from 'assert'
+import * as Common from './lib/common'
+
 let internals = {
-  name: 'mem-store',
+  name: 'mem-store'
 }
 
 module.exports = mem_store
@@ -66,8 +69,7 @@ function mem_store(options: any) {
       // check if we are in create mode,
       // if we are do a create, otherwise
       // we will do a save instead
-      let create = ent.id == null
-      if (create) {
+      if (isNewEntityBeingCreated(msg)) {
         create_new()
       } else {
         do_save()
@@ -106,18 +108,97 @@ function mem_store(options: any) {
         if (shouldMerge) {
           mement = Object.assign(prev || {}, mement)
         }
-        prev = entmap[base][name][mement.id] = mement
 
-        seneca.log.debug(function () {
-          return [
-            'save/' + (create ? 'insert' : 'update'),
-            ent.canon$({ string: 1 }),
-            mement,
-            desc,
-          ]
+        return upsertIfRequested(msg, function (err: Error, ctx: UpsertIfRequestedContext) {
+          if (err) {
+            return reply(err)
+          }
+
+          const { did_update } = ctx
+
+          if (did_update) {
+            const { out } = ctx
+            return reply(null, out)
+          }
+
+
+          prev = entmap[base][name][mement.id] = mement
+
+          seneca.log.debug(function () {
+            return [
+              'save/' + (isNewEntityBeingCreated(msg) ? 'insert' : 'update'),
+              ent.canon$({ string: 1 }),
+              mement,
+              desc,
+            ]
+          })
+
+          return reply(null, ent.make$(prev))
         })
 
-        reply(null, ent.make$(prev))
+
+        type UpsertIfRequestedContext = { did_update: boolean, out?: any }
+
+        type UpsertIfRequestedCallback = (
+          err:     Error | null,
+          result?: UpsertIfRequestedContext 
+        ) => any
+
+        function upsertIfRequested(msg: any, reply: UpsertIfRequestedCallback) {
+          // This is the query passed to the .save$ method.
+          //
+          const query_for_save = msg.q
+
+
+          if (isNewEntityBeingCreated(msg) && Array.isArray(query_for_save.upsert$)) {
+            const upsert_on = Common.clean(query_for_save.upsert$)
+
+
+            if (upsert_on.length > 0) {
+              if (!(base in entmap)) {
+                return reply(null, { did_update: false, out: null })
+              }
+
+              if (!(name in entmap[base])) {
+                return reply(null, { did_update: false, out: null })
+              }
+
+
+              const collection = entmap[base][name]
+              const docs = Object.values(collection)
+              const public_entdata = msg.ent.data$(false)
+
+
+              const doc_to_update = docs.find((doc: any) => {
+                return upsert_on.every((p: string) => {
+                  return p in public_entdata && public_entdata[p] === doc[p]
+                })
+              })
+
+              if (!doc_to_update) {
+                return reply(null, { did_update: false, out: null })
+              }
+
+
+              return msg.ent.make$(doc_to_update)
+                .data$(public_entdata)
+                .save$((err: Error | null, out: any) => {
+                  if (err) {
+                    return reply(err)
+                  }
+
+                  return reply(null, {
+                    did_update: true,
+                    out
+                  })
+              })
+            } else {
+              return reply(null, { did_update: false, out: null })
+            }
+          } else {
+            return reply(null, { did_update: false, out: null })
+          }
+        }
       }
 
       // We will still use do_save to save the entity but
@@ -160,6 +241,15 @@ function mem_store(options: any) {
             do_save(id, true)
           })
         }
+      }
+
+      function isNewEntityBeingCreated(msg: any) : boolean {
+        Assert('ent' in msg, 'msg.ent');
+        Assert(msg.ent, 'msg.ent');
+
+        const ent = msg.ent;
+
+        return ent && ent.id === null || ent.id === undefined;
       }
     },
 
@@ -437,3 +527,4 @@ function listents(seneca: any, entmap: any, qent: any, q: any, done: any) {
   // Return the resulting list to the caller.
   done.call(seneca, null, list)
 }
+
