@@ -215,11 +215,10 @@ function mem_store(this: any, options: any) {
       // check if we are in create mode,
       // if we are do a create, otherwise
       // we will do a save instead
-      if (intern.is_new(msg.ent)) {
-        create_new()
-      } else {
-        do_save()
-      }
+      //
+      const is_new = intern.is_new(ent)
+
+      return is_new ? create_new() : do_save()
 
       // The actual save logic for saving or
       // creating and then saving the entity.
