@@ -13,48 +13,43 @@ const intern = {
    */
 
 
+  // NOTE: This function is intended for use by the #save method. This
+  // function returns true when the entity argument is assumed to not yet
+  // exist in the store.
+  //
+  // In terms of code, if client code looks like so:
+  // ```
+  //   seneca.make('product')
+  //     .data$({ label, price })
+  //     .save$(done)
+  // ```
+  //
+  // - `intern.is_new` will be invoked from the #save method and return
+  // true, because the product entity is yet to be saved.
+  //
+  // The following client code will cause `intern.is_new` to return false,
+  // when invoked from the #save method, because the user entity already
+  // exists:
+  // ```
+  //   seneca.make('user')
+  //     .load$(user_id, (err, user) => {
+  //       if (err) return done(err)
+  //
+  //       return user
+  //         .data$({ email, username })
+  //         .save$(done)
+  //     })
+  // ```
+  // 
   is_new(ent: any): boolean {
     return ent && null == ent.id
   },
 
 
-  clean(what: string[] | { [prop: string]: any }): string[] | { [prop: string]: any } {
-    //
-    // NOTE: This function removes any props containing a '$'.
-
-    if (Array.isArray(what)) {
-      return cleanArray(what)
-    }
-
-    return cleanObject(what)
-
-
-    function cleanArray(ary: string[]): string[] {
-      return ary.filter(x => !isPrivateProp(x))
-    }
-
-    function cleanObject(obj: { [prop: string]: any }): { [prop: string]: any } {
-      const out: { [prop: string]: any } = {}
-
-      const public_props = Object.getOwnPropertyNames(what)
-        .filter(p => !isPrivateProp(p))
-
-      for (const p of public_props) {
-        out[p] = obj[p]
-      }
-
-      return out
-    }
-
-    function isPrivateProp(prop: string) : boolean {
-      return prop.includes('$')
-    }
-  },
-
-
-  // Seneca supports a reasonable set of features
+  // NOTE: Seneca supports a reasonable set of features
   // in terms of listing. This function can handle
   // sorting, skiping, limiting and general retrieval.
+  //
   listents(seneca: any, entmap: any, qent: any, q: any, done: any) {
     let list = []
 
@@ -302,7 +297,7 @@ function mem_store(this: any, options: any) {
 
 
           if (intern.is_new(msg.ent) && Array.isArray(query_for_save.upsert$)) {
-            const upsert_on = intern.clean(query_for_save.upsert$)
+            const upsert_on = seneca.util.clean(query_for_save.upsert$)
 
 
             if (upsert_on.length > 0) {
