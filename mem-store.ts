@@ -2,10 +2,164 @@
 'use strict'
 
 import Assert from 'assert'
-import * as Common from './lib/common'
 
 let internals = {
   name: 'mem-store'
+}
+
+const intern = {
+  /* NOTE: `intern` serves as a namespace for utility functions used by
+   * the mem store.
+   */
+
+
+  isNewEntityBeingCreated(msg: any): boolean {
+    Assert('ent' in msg, 'msg.ent')
+    Assert(msg.ent, 'msg.ent')
+
+    const ent = msg.ent
+
+    return ent && ent.id === null || ent.id === undefined
+  },
+
+
+  clean(what: string[] | { [prop: string]: any }): string[] | { [prop: string]: any } {
+    //
+    // NOTE: This function removes any props containing a '$'.
+
+    if (Array.isArray(what)) {
+      return cleanArray(what)
+    }
+
+    return cleanObject(what)
+
+
+    function cleanArray(ary: string[]): string[] {
+      return ary.filter(x => !isPrivateProp(x))
+    }
+
+    function cleanObject(obj: { [prop: string]: any }): { [prop: string]: any } {
+      const out: { [prop: string]: any } = {}
+
+      const public_props = Object.getOwnPropertyNames(what)
+        .filter(p => !isPrivateProp(p))
+
+      for (const p of public_props) {
+        out[p] = obj[p]
+      }
+
+      return out
+    }
+
+    function isPrivateProp(prop: string) : boolean {
+      return prop.includes('$')
+    }
+  },
+
+
+  // Seneca supports a reasonable set of features
+  // in terms of listing. This function can handle
+  // sorting, skiping, limiting and general retrieval.
+  listents(seneca: any, entmap: any, qent: any, q: any, done: any) {
+    let list = []
+
+    let canon = qent.canon$({ object: true })
+    let base = canon.base
+    let name = canon.name
+
+    let entset = entmap[base] ? entmap[base][name] : null
+    let ent
+
+    if (null != entset && null != q) {
+      if ('string' == typeof q) {
+        ent = entset[q]
+        if (ent) {
+          list.push(ent)
+        }
+      } else if (Array.isArray(q)) {
+        q.forEach(function(id) {
+          let ent = entset[id]
+          if (ent) {
+            ent = qent.make$(ent)
+            list.push(ent)
+          }
+        })
+      } else if ('object' === typeof q) {
+        let entids = Object.keys(entset)
+        next_ent: for (let id of entids) {
+          ent = entset[id]
+          for (let p in q) {
+            let qv = q[p] // query val
+            let ev = ent[p] // ent val
+
+            if (-1 === p.indexOf('$')) {
+              if (Array.isArray(qv)) {
+                if (-1 === qv.indexOf(ev)) {
+                  continue next_ent
+                }
+              } else if (null != qv && 'object' === typeof qv) {
+                // mongo style constraints
+                if (
+                  (null != qv.$ne && qv.$ne == ev) ||
+                  (null != qv.$gte && qv.$gte > ev) ||
+                  (null != qv.$gt && qv.$gt >= ev) ||
+                  (null != qv.$lt && qv.$lt <= ev) ||
+                  (null != qv.$lte && qv.$lte < ev) ||
+                  (null != qv.$in && -1 === qv.$in.indexOf(ev)) ||
+                  (null != qv.$nin && -1 !== qv.$nin.indexOf(ev)) ||
+                  false
+                ) {
+                  continue next_ent
+                }
+              } else if (qv !== ev) {
+                continue next_ent
+              }
+            }
+          }
+          ent = qent.make$(ent)
+          list.push(ent)
+        }
+      }
+    }
+
+    // Always sort first, this is the 'expected' behaviour.
+    if (q.sort$) {
+      let sf: any
+      for (sf in q.sort$) {
+        break
+      }
+
+      let sd = q.sort$[sf] < 0 ? -1 : 1
+      list = list.sort(function(a, b) {
+        return sd * (a[sf] < b[sf] ? -1 : a[sf] === b[sf] ? 0 : 1)
+      })
+    }
+
+    // Skip before limiting.
+    if (q.skip$ && q.skip$ > 0) {
+      list = list.slice(q.skip$)
+    }
+
+    // Limited the possibly sorted and skipped list.
+    if (q.limit$ && q.limit$ >= 0) {
+      list = list.slice(0, q.limit$)
+    }
+
+    // Prune fields
+    if (q.fields$) {
+      for (let i = 0; i < list.length; i++) {
+        let entfields = list[i].fields$()
+        for (let j = 0; j < entfields.length; j++) {
+          if ('id' !== entfields[j] && -1 == q.fields$.indexOf(entfields[j])) {
+            delete list[i][entfields[j]]
+          }
+        }
+      }
+    }
+
+    // Return the resulting list to the caller.
+    done.call(seneca, null, list)
+  }
 }
 
 module.exports = mem_store
@@ -15,6 +169,8 @@ module.exports.defaults = {
   'entity-id-exists':
     'Entity of type <%=type%> with id = <%=id%> already exists.',
 }
+
+module.exports.intern = intern
 
 function mem_store(this: any, options: any) {
   let seneca: any = this
@@ -69,7 +225,7 @@ function mem_store(this: any, options: any) {
       // check if we are in create mode,
       // if we are do a create, otherwise
       // we will do a save instead
-      if (isNewEntityBeingCreated(msg)) {
+      if (intern.isNewEntityBeingCreated(msg)) {
         create_new()
       } else {
         do_save()
@@ -126,7 +282,7 @@ function mem_store(this: any, options: any) {
 
           seneca.log.debug(function() {
             return [
-              'save/' + (isNewEntityBeingCreated(msg) ? 'insert' : 'update'),
+              'save/' + (intern.isNewEntityBeingCreated(msg) ? 'insert' : 'update'),
               ent.canon$({ string: 1 }),
               mement,
               desc,
@@ -150,8 +306,8 @@ function mem_store(this: any, options: any) {
           const query_for_save = msg.q
 
 
-          if (isNewEntityBeingCreated(msg) && Array.isArray(query_for_save.upsert$)) {
-            const upsert_on = Common.clean(query_for_save.upsert$)
+          if (intern.isNewEntityBeingCreated(msg) && Array.isArray(query_for_save.upsert$)) {
+            const upsert_on = intern.clean(query_for_save.upsert$)
 
 
             if (upsert_on.length > 0) {
@@ -242,22 +398,13 @@ function mem_store(this: any, options: any) {
           })
         }
       }
-
-      function isNewEntityBeingCreated(msg: any): boolean {
-        Assert('ent' in msg, 'msg.ent');
-        Assert(msg.ent, 'msg.ent');
-
-        const ent = msg.ent;
-
-        return ent && ent.id === null || ent.id === undefined;
-      }
     },
 
     load: function(this: any, msg: any, reply: any) {
       let qent = msg.qent
       let q = msg.q
 
-      listents(this, entmap, qent, q, function(this: any, err: any, list: any[]) {
+      return intern.listents(this, entmap, qent, q, function(this: any, err: any, list: any[]) {
         let ent = list[0] || null
 
         this.log.debug(function() {
@@ -272,7 +419,7 @@ function mem_store(this: any, options: any) {
       let qent = msg.qent
       let q = msg.q
 
-      listents(this, entmap, qent, q, function(this: any, err: any, list: any[]) {
+      return intern.listents(this, entmap, qent, q, function(this: any, err: any, list: any[]) {
         this.log.debug(function() {
           return [
             'list',
@@ -297,7 +444,7 @@ function mem_store(this: any, options: any) {
       // default false
       let load = q.load$ === true
 
-      listents(seneca, entmap, qent, q, function(err: Error, list: any[]) {
+      return intern.listents(seneca, entmap, qent, q, function(err: Error, list: any[]) {
         if (err) {
           return reply(err)
         }
@@ -422,109 +569,5 @@ module.exports.preload = function() {
   }
 
   return meta
-}
-
-// Seneca supports a reasonable set of features
-// in terms of listing. This function can handle
-// sorting, skiping, limiting and general retrieval.
-function listents(seneca: any, entmap: any, qent: any, q: any, done: any) {
-  let list = []
-
-  let canon = qent.canon$({ object: true })
-  let base = canon.base
-  let name = canon.name
-
-  let entset = entmap[base] ? entmap[base][name] : null
-  let ent
-
-  if (null != entset && null != q) {
-    if ('string' == typeof q) {
-      ent = entset[q]
-      if (ent) {
-        list.push(ent)
-      }
-    } else if (Array.isArray(q)) {
-      q.forEach(function(id) {
-        let ent = entset[id]
-        if (ent) {
-          ent = qent.make$(ent)
-          list.push(ent)
-        }
-      })
-    } else if ('object' === typeof q) {
-      let entids = Object.keys(entset)
-      next_ent: for (let id of entids) {
-        ent = entset[id]
-        for (let p in q) {
-          let qv = q[p] // query val
-          let ev = ent[p] // ent val
-
-          if (-1 === p.indexOf('$')) {
-            if (Array.isArray(qv)) {
-              if (-1 === qv.indexOf(ev)) {
-                continue next_ent
-              }
-            } else if (null != qv && 'object' === typeof qv) {
-              // mongo style constraints
-              if (
-                (null != qv.$ne && qv.$ne == ev) ||
-                (null != qv.$gte && qv.$gte > ev) ||
-                (null != qv.$gt && qv.$gt >= ev) ||
-                (null != qv.$lt && qv.$lt <= ev) ||
-                (null != qv.$lte && qv.$lte < ev) ||
-                (null != qv.$in && -1 === qv.$in.indexOf(ev)) ||
-                (null != qv.$nin && -1 !== qv.$nin.indexOf(ev)) ||
-                false
-              ) {
-                continue next_ent
-              }
-            } else if (qv !== ev) {
-              continue next_ent
-            }
-          }
-        }
-        ent = qent.make$(ent)
-        list.push(ent)
-      }
-    }
-  }
-
-  // Always sort first, this is the 'expected' behaviour.
-  if (q.sort$) {
-    let sf: any
-    for (sf in q.sort$) {
-      break
-    }
-
-    let sd = q.sort$[sf] < 0 ? -1 : 1
-    list = list.sort(function(a, b) {
-      return sd * (a[sf] < b[sf] ? -1 : a[sf] === b[sf] ? 0 : 1)
-    })
-  }
-
-  // Skip before limiting.
-  if (q.skip$ && q.skip$ > 0) {
-    list = list.slice(q.skip$)
-  }
-
-  // Limited the possibly sorted and skipped list.
-  if (q.limit$ && q.limit$ >= 0) {
-    list = list.slice(0, q.limit$)
-  }
-
-  // Prune fields
-  if (q.fields$) {
-    for (let i = 0; i < list.length; i++) {
-      let entfields = list[i].fields$()
-      for (let j = 0; j < entfields.length; j++) {
-        if ('id' !== entfields[j] && -1 == q.fields$.indexOf(entfields[j])) {
-          delete list[i][entfields[j]]
-        }
-      }
-    }
-  }
-
-  // Return the resulting list to the caller.
-  done.call(seneca, null, list)
 }
 
