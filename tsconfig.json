@@ -1,15 +1,14 @@
 {
   "compilerOptions": {
-    "outDir": "dist",
-    "target": "ESNext",
+    "esModuleInterop": true,
     "module": "commonjs",
-    "sourceMap": true,
     "noEmitOnError": true,
     "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictPropertyInitialization": true,
-    "esModuleInterop": true,
+    "outDir": "dist",
     "resolveJsonModule": true,
+    "sourceMap": true,
+    "strict": true,
+    "target": "ES2019"
   },
   "exclude": [
     "dist",

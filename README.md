@@ -3,11 +3,12 @@
 
 # seneca-mem-store
 [![npm version][npm-badge]][npm-url]
-![Build](https://github.com/senecajs/seneca-mem-store/workflows/build/badge.svg)
+[![Build](https://github.com/senecajs/seneca-mem-store/workflows/build/badge.svg)][https://github.com/senecajs/seneca-mem-store/actions/workflows/build.yml]
 [![Dependency Status][david-badge]][david-url]
 [![Maintainability](https://api.codeclimate.com/v1/badges/e2cdcc5415161cb378b0/maintainability)](https://codeclimate.com/github/senecajs/seneca-mem-store/maintainability)
+[![DeepScan grade](https://deepscan.io/api/teams/5016/projects/17225/branches/388415/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=5016&pid=17225&bid=388415)
 [![Coveralls][BadgeCoveralls]][Coveralls]
-[![Gitter][gitter-badge]][gitter-url]
+
 
 
 | ![Voxgig](https://www.voxgig.com/res/img/vgt01r.png) | This open source module is sponsored and supported by [Voxgig](https://www.voxgig.com). |

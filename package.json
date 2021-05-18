@@ -20,7 +20,7 @@
   "scripts": {
     "build": "tsc -d",
     "watch": "tsc -w -d",
-    "test": "lab -v -P test -L -t 80 -r console -o stdout -r html -o test/coverage.html -r lcov -o test/lcov.info --sourcemaps --transform node_modules/lab-transform-typescript",
+    "test": "lab -v -P test -L -t 90 -r console -o stdout -r html -o test/coverage.html -r lcov -o test/lcov.info --sourcemaps --transform node_modules/lab-transform-typescript",
     "test-some": "lab -v -P test --sourcemaps --transform node_modules/lab-transform-typescript -g",
     "prettier": "prettier --write --no-semi --single-quote *.ts test/*.js",
     "reset": "npm run clean && npm i && npm run build && npm test",
@@ -41,16 +41,16 @@
     "memory"
   ],
   "devDependencies": {
-    "@hapi/code": "^8.0.2",
-    "@hapi/lab": "^24.1.0",
+    "@hapi/code": "8.0.3",
+    "@hapi/lab": "24.2.1",
     "async": "3.2.0",
-    "lab-transform-typescript": "^3.0.1",
-    "prettier": "^2.2.1",
-    "seneca": "^3.23.0",
-    "seneca-entity": "^11.0.0",
-    "seneca-promisify": "^2.0.0",
-    "seneca-store-test": "3.2.0",
-    "typescript": "^4.1.2"
+    "lab-transform-typescript": "3.0.1",
+    "prettier": "2.3.0",
+    "seneca": "3.23.3",
+    "seneca-entity": "13.0.0",
+    "seneca-promisify": "2.0.0",
+    "seneca-store-test": "senecajs/seneca-store-test",
+    "typescript": "4.2.4"
   },
   "files": [
     "README.md",

@@ -1,6 +1,6 @@
 /*
   MIT License,
-  Copyright (c) 2010-2020, Richard Rodger and other contributors.
+  Copyright (c) 2010-2021, Richard Rodger and other contributors.
 */
 
 'use strict'
@@ -8,7 +8,6 @@
 const Util = require('util')
 
 const Assert = require('assert')
-const Async = require('async')
 const Seneca = require('seneca')
 const Shared = require('seneca-store-test')
 
@@ -16,7 +15,7 @@ const Lab = require('@hapi/lab')
 const Code = require('@hapi/code')
 const { expect } = Code
 const lab = (exports.lab = Lab.script())
-const { describe, before, beforeEach } = lab
+const { describe } = lab
 const it = make_it(lab)
 // const before = lab.before
 

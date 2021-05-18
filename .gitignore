@@ -18,3 +18,5 @@ node_modules
 coverage.html
 
 .history
+yarn.lock
+package-lock.json
