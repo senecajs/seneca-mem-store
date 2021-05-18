@@ -13,13 +13,8 @@ const intern = {
    */
 
 
-  isNewEntityBeingCreated(msg: any): boolean {
-    Assert('ent' in msg, 'msg.ent')
-    Assert(msg.ent, 'msg.ent')
-
-    const ent = msg.ent
-
-    return ent && ent.id === null || ent.id === undefined
+  is_new(ent: any): boolean {
+    return ent && null == ent.id
   },
 
 
@@ -225,7 +220,7 @@ function mem_store(this: any, options: any) {
       // check if we are in create mode,
       // if we are do a create, otherwise
       // we will do a save instead
-      if (intern.isNewEntityBeingCreated(msg)) {
+      if (intern.is_new(msg.ent)) {
         create_new()
       } else {
         do_save()
@@ -282,7 +277,7 @@ function mem_store(this: any, options: any) {
 
           seneca.log.debug(function() {
             return [
-              'save/' + (intern.isNewEntityBeingCreated(msg) ? 'insert' : 'update'),
+              'save/' + (intern.is_new(msg.ent) ? 'insert' : 'update'),
               ent.canon$({ string: 1 }),
               mement,
               desc,
@@ -306,7 +301,7 @@ function mem_store(this: any, options: any) {
           const query_for_save = msg.q
 
 
-          if (intern.isNewEntityBeingCreated(msg) && Array.isArray(query_for_save.upsert$)) {
+          if (intern.is_new(msg.ent) && Array.isArray(query_for_save.upsert$)) {
             const upsert_on = intern.clean(query_for_save.upsert$)
 
 
