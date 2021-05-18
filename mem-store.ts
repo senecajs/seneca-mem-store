@@ -42,7 +42,7 @@ const intern = {
   // ```
   // 
   is_new(ent: any): boolean {
-    return ent && null == ent.id
+    return null != ent && null == ent.id
   },
 
 

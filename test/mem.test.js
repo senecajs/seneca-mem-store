@@ -15,9 +15,8 @@ const Lab = require('@hapi/lab')
 const Code = require('@hapi/code')
 const { expect } = Code
 const lab = (exports.lab = Lab.script())
-const { describe } = lab
+const { describe, beforeEach } = lab
 const it = make_it(lab)
-// const before = lab.before
 
 function makeSenecaForTest() {
   const seneca = Seneca({
@@ -283,6 +282,98 @@ describe('mem-store tests', function () {
                 })
               })
             })
+          })
+        })
+      })
+    })
+  })
+
+  describe('internal utilities', () => {
+    const mem_store = seneca.export('mem-store')
+
+    describe('is_new', () => {
+      describe('export', () => {
+        it('is exported', fin => {
+          expect(null == mem_store.init).to.equal(false)
+
+          const { init } = mem_store
+          expect(null == init.intern).to.equal(false)
+
+          const { intern } = init
+          expect(typeof intern.is_new).to.equal('function')
+
+          fin()
+        })
+      })
+
+      describe('behavior', () => {
+        const { intern } = mem_store.init
+
+        describe('passed a null', () => {
+          it('returns a correct value', fin => {
+            const result = intern.is_new(null)
+            expect(result).to.equal(false)
+
+            fin()
+          })
+        })
+
+        describe('passed an entity that has not been saved yet', () => {
+          let product
+
+          beforeEach(() => {
+            product = seneca.make('product')
+              .data$({ label: 'Legions of Rome' })
+          })
+
+          it('returns a correct value', fin => {
+            const result = intern.is_new(product)
+            expect(result).to.equal(true)
+
+            fin()
+          })
+        })
+
+        describe('passed an entity that has been saved before', () => {
+          let product
+
+          beforeEach(() => {
+            return new Promise((resolve, reject) => {
+              seneca.make('product')
+                .data$({ label: 'Legions of Rome' })
+                .save$((err, out) => {
+                  if (err) {
+                    return reject(err)
+                  }
+
+                  product = out
+
+                  return resolve()
+                })
+            })
+          })
+
+          it('returns a correct value', fin => {
+            const result = intern.is_new(product)
+            expect(result).to.equal(false)
+
+            fin()
+          })
+        })
+
+        describe('passed an entity that has not been saved before, but has an id arg', () => {
+          let product
+
+          beforeEach(() => {
+            product = seneca.make('product')
+              .data$({ id: 'my_precious', label: 'Legions of Rome' })
+          })
+
+          it('returns a correct value', fin => {
+            const result = intern.is_new(product)
+            expect(result).to.equal(false)
+
+            fin()
           })
         })
       })
