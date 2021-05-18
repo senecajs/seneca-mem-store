@@ -254,95 +254,79 @@ function mem_store(this: any, options: any) {
           mement = Object.assign(prev || {}, mement)
         }
 
-        return upsertIfRequested(msg, function(err: any, ctx: UpsertIfRequestedContext): any {
-          if (err) {
-            return reply(err)
+        // TODO: Extract into the `intern` namespace.
+        //
+        if (isUpsertRequested(msg)) {
+          const upsert_on = seneca.util.clean(msg.q.upsert$)
+
+          if (upsert_on.length > 0) {
+            const public_entdata = ent.data$(false)
+
+            const may_match = upsert_on.every((p: string) => p in public_entdata)
+
+            if (may_match) {
+              const match_by = upsert_on.reduce((h: any, p: string) => {
+                h[p] = public_entdata[p]
+                return h
+              }, {})
+
+              // TODO: Extract into the `intern` namespace.
+              //
+              const doc_to_update = findOneDoc(entmap, ent, match_by)
+
+              if (doc_to_update) {
+                Object.assign(doc_to_update, public_entdata)
+                return reply(null, ent.make$(doc_to_update))
+              }
+            }
           }
+        }
 
-          const { did_update } = (ctx as any)
+        prev = entmap[base][name][mement.id] = mement
 
-          if (did_update) {
-            const { out } = (ctx as any)
-            return reply(null, out)
-          }
-
-
-          prev = entmap[base][name][mement.id] = mement
-
-          seneca.log.debug(function() {
-            return [
-              'save/' + (intern.is_new(msg.ent) ? 'insert' : 'update'),
-              ent.canon$({ string: 1 }),
-              mement,
-              desc,
-            ]
-          })
-
-          return reply(null, ent.make$(prev))
+        seneca.log.debug(function() {
+          return [
+            'save/' + (intern.is_new(msg.ent) ? 'insert' : 'update'),
+            ent.canon$({ string: 1 }),
+            mement,
+            desc,
+          ]
         })
 
-
-        type UpsertIfRequestedContext = { did_update: boolean, out?: any } | undefined
-
-        type UpsertIfRequestedCallback = (
-          err: Error | null,
-          result?: UpsertIfRequestedContext
-        ) => any
-
-        function upsertIfRequested(msg: any, reply: UpsertIfRequestedCallback) {
-          // This is the query passed to the .save$ method.
-          //
-          const query_for_save = msg.q
+        return reply(null, ent.make$(prev))
 
 
-          if (intern.is_new(msg.ent) && Array.isArray(query_for_save.upsert$)) {
-            const upsert_on = seneca.util.clean(query_for_save.upsert$)
+        function isUpsertRequested(msg: any): boolean {
+          const { ent, q } = msg
+          return intern.is_new(ent) && Array.isArray(q.upsert$)
+        }
 
+        function findOneDoc(entmap: any, ent: any, filter: any): any {
+          const { base, name } = ent.canon$({ object: true })
 
-            if (upsert_on.length > 0) {
-              if (!(base in entmap)) {
-                return reply(null, { did_update: false, out: null })
-              }
-
-              if (!(name in entmap[base])) {
-                return reply(null, { did_update: false, out: null })
-              }
-
-
-              const collection = entmap[base][name]
-              const docs = Object.values(collection)
-              const public_entdata = msg.ent.data$(false)
-
-
-              const doc_to_update = docs.find((doc: any) => {
-                return upsert_on.every((p: string) => {
-                  return p in public_entdata && public_entdata[p] === doc[p]
-                })
-              })
-
-              if (!doc_to_update) {
-                return reply(null, { did_update: false, out: null })
-              }
-
-
-              return msg.ent.make$(doc_to_update)
-                .data$(public_entdata)
-                .save$((err: Error | null, out: any) => {
-                  if (err) {
-                    return reply(err)
-                  }
-
-                  return reply(null, {
-                    did_update: true,
-                    out
-                  })
-                })
-            } else {
-              return reply(null, { did_update: false, out: null })
-            }
-          } else {
-            return reply(null, { did_update: false, out: null })
+          if (!(base in entmap)) {
+            return null
           }
+
+          if (!(name in entmap[base])) {
+            return null
+          }
+
+          const coll = entmap[base][name]
+          const docs = Object.values(coll)
+          const public_entdata = ent.data$(false) 
+
+          return docs.find((doc: any) => {
+            for (const fp in filter) {
+              if (fp in doc && filter[fp] === doc[fp]) {
+                continue
+              }
+
+              return false
+            }
+            
+            return true
+          })
         }
       }
 
