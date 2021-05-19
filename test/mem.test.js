@@ -488,20 +488,10 @@ describe('mem-store tests', function () {
       describe('passed an entity that has been saved before', () => {
         let product
 
-        beforeEach(() => {
-          return new Promise((resolve, reject) => {
-            seneca.make('product')
-              .data$({ label: 'Legions of Rome' })
-              .save$((err, out) => {
-                if (err) {
-                  return reject(err)
-                }
-
-                product = out
-
-                return resolve()
-              })
-          })
+        beforeEach(async () => {
+          product = await seneca.make('product')
+            .data$({ label: 'Legions of Rome' })
+            .save$()
         })
 
         it('returns a correct value', fin => {
@@ -525,6 +515,98 @@ describe('mem-store tests', function () {
           expect(result).to.equal(false)
 
           fin()
+        })
+      })
+    })
+
+    describe('listents', () => {
+      describe('when the query argument is a string', () => {
+        const ent_base = 'sys'
+        const ent_name = 'product'
+
+
+        const product_id = 'foobaz'
+
+        const product = {
+          id: product_id,
+          label: 'lorem ipsum',
+          price: '2.34'
+        }
+
+
+        describe('when an entity with the same base, name, id exists', () => {
+          let entmap
+
+          beforeEach(async () => {
+            entmap = {
+              [ent_base]: {
+                [ent_name]: {
+                  [product_id]: product
+                }
+              }
+            }
+          })
+
+          const product_ent = seneca.make(ent_base, ent_name)
+
+          it('fetches the entity with the matching id', fin => {
+            intern.listents(
+              seneca,
+              entmap,
+              product_ent,
+              product_id,
+              (err, out) => {
+                if (err) {
+                  return fin(err)
+                }
+
+                expect(out).to.equal([product])
+
+                return fin()
+              })
+          })
+        })
+
+        describe('when an entity with the same base, name, but not id exists', () => {
+          const product_id = 'foobaz'
+
+          const product = {
+            id: product_id,
+            label: 'lorem ipsum',
+            price: '2.34'
+          }
+
+
+          let entmap
+
+          beforeEach(async () => {
+            entmap = {
+              [ent_base]: {
+                [ent_name]: {
+                  [product_id]: product
+                }
+              }
+            }
+          })
+
+          const product_ent = seneca.make(ent_base, ent_name)
+
+          it('cannot match the entity', fin => {
+            intern.listents(
+              seneca,
+              entmap,
+              product_ent,
+              'quix',
+              (err, out) => {
+                if (err) {
+                  return fin(err)
+                }
+
+                expect(out).to.equal([])
+
+                return fin()
+              })
+          })
         })
       })
     })
