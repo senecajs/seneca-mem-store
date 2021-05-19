@@ -290,91 +290,232 @@ describe('mem-store tests', function () {
 
   describe('internal utilities', () => {
     const mem_store = seneca.export('mem-store')
+    const { intern } = mem_store.init
+
+    describe('find_one_doc', () => {
+      describe('no such entities exist', () => {
+        let entmap
+
+        beforeEach(async () => {
+          entmap = {}
+        })
+
+        it('cannot match', fin => {
+          const ent = seneca.make('sys', 'product')
+          const result = intern.find_one_doc(entmap, ent, { label: 'lorem ipsum' })
+
+          expect(result).to.equal(null)
+
+          return fin()
+        })
+      })
+
+      describe('the would-be matching entity shares the base, but has a different name', () => {
+        let entmap
+
+        beforeEach(async () => {
+          entmap = {
+            sys: {
+              artist: {
+                foo: {
+                  id: 'foo',
+                  label: 'lorem ipsum'
+                }
+              }
+            }
+          }
+        })
+
+        it('cannot match', fin => {
+          const ent = seneca.make('sys', 'product')
+          const result = intern.find_one_doc(entmap, ent, { label: 'lorem ipsum' })
+
+          expect(result).to.equal(null)
+
+          return fin()
+        })
+      })
+
+      describe('filter has more fields than the entity', () => {
+        let entmap
+
+        beforeEach(async () => {
+          entmap = {
+            sys: {
+              product: {
+                foo: {
+                  id: 'foo',
+                  label: 'lorem ipsum'
+                }
+              }
+            }
+          }
+        })
+
+        it('cannot match', fin => {
+          const ent = seneca.make('sys', 'product')
+          const result = intern.find_one_doc(entmap, ent, { label: 'lorem ipsum', bar: 'baz' })
+
+          expect(result).to.equal(null)
+
+          return fin()
+        })
+      })
+
+      describe('some field mismatches', () => {
+        let entmap
+
+        beforeEach(async () => {
+          entmap = {
+            sys: {
+              product: {
+                foo: {
+                  id: 'foo',
+                  label: 'lorem ipsum',
+                  price: '2.34'
+                }
+              }
+            }
+          }
+        })
+
+        it('cannot match', fin => {
+          const ent = seneca.make('sys', 'product')
+          const result = intern.find_one_doc(entmap, ent, { label: 'lorem ipsum', price: '0.95' })
+
+          expect(result).to.equal(null)
+
+          return fin()
+        })
+      })
+
+      describe('all fields and values match', () => {
+        const some_product = {
+          id: 'foo',
+          label: 'lorem ipsum',
+          price: '2.34'
+        }
+
+        
+        let entmap
+
+        beforeEach(async () => {
+          entmap = {
+            sys: {
+              product: {
+                foo: some_product
+              }
+            }
+          }
+        })
+
+        it('returns the match', fin => {
+          const ent = seneca.make('sys', 'product')
+          const result = intern.find_one_doc(entmap, ent, { label: 'lorem ipsum', price: '2.34' })
+
+          expect(result).to.equal(some_product)
+
+          return fin()
+        })
+      })
+
+      describe('when the filter is empty', () => {
+        const some_product = {
+          id: 'foo',
+          label: 'lorem ipsum',
+          price: '2.34'
+        }
+
+        
+        let entmap
+
+        beforeEach(async () => {
+          entmap = {
+            sys: {
+              product: {
+                foo: some_product
+              }
+            }
+          }
+        })
+
+        it('returns the first document it comes across', fin => {
+          const ent = seneca.make('sys', 'product')
+          const result = intern.find_one_doc(entmap, ent, {})
+
+          expect(result).to.equal(some_product)
+
+          return fin()
+        })
+      })
+    })
 
     describe('is_new', () => {
-      describe('export', () => {
-        it('is exported', fin => {
-          expect(null == mem_store.init).to.equal(false)
-
-          const { init } = mem_store
-          expect(null == init.intern).to.equal(false)
-
-          const { intern } = init
-          expect(typeof intern.is_new).to.equal('function')
+      describe('passed a null', () => {
+        it('returns a correct value', fin => {
+          const result = intern.is_new(null)
+          expect(result).to.equal(false)
 
           fin()
         })
       })
 
-      describe('behavior', () => {
-        const { intern } = mem_store.init
+      describe('passed an entity that has not been saved yet', () => {
+        let product
 
-        describe('passed a null', () => {
-          it('returns a correct value', fin => {
-            const result = intern.is_new(null)
-            expect(result).to.equal(false)
-
-            fin()
-          })
+        beforeEach(() => {
+          product = seneca.make('product')
+            .data$({ label: 'Legions of Rome' })
         })
 
-        describe('passed an entity that has not been saved yet', () => {
-          let product
+        it('returns a correct value', fin => {
+          const result = intern.is_new(product)
+          expect(result).to.equal(true)
 
-          beforeEach(() => {
-            product = seneca.make('product')
+          fin()
+        })
+      })
+
+      describe('passed an entity that has been saved before', () => {
+        let product
+
+        beforeEach(() => {
+          return new Promise((resolve, reject) => {
+            seneca.make('product')
               .data$({ label: 'Legions of Rome' })
-          })
+              .save$((err, out) => {
+                if (err) {
+                  return reject(err)
+                }
 
-          it('returns a correct value', fin => {
-            const result = intern.is_new(product)
-            expect(result).to.equal(true)
+                product = out
 
-            fin()
-          })
-        })
-
-        describe('passed an entity that has been saved before', () => {
-          let product
-
-          beforeEach(() => {
-            return new Promise((resolve, reject) => {
-              seneca.make('product')
-                .data$({ label: 'Legions of Rome' })
-                .save$((err, out) => {
-                  if (err) {
-                    return reject(err)
-                  }
-
-                  product = out
-
-                  return resolve()
-                })
-            })
-          })
-
-          it('returns a correct value', fin => {
-            const result = intern.is_new(product)
-            expect(result).to.equal(false)
-
-            fin()
+                return resolve()
+              })
           })
         })
 
-        describe('passed an entity that has not been saved before, but has an id arg', () => {
-          let product
+        it('returns a correct value', fin => {
+          const result = intern.is_new(product)
+          expect(result).to.equal(false)
 
-          beforeEach(() => {
-            product = seneca.make('product')
-              .data$({ id: 'my_precious', label: 'Legions of Rome' })
-          })
+          fin()
+        })
+      })
 
-          it('returns a correct value', fin => {
-            const result = intern.is_new(product)
-            expect(result).to.equal(false)
+      describe('passed an entity that has not been saved before, but has an id arg', () => {
+        let product
 
-            fin()
-          })
+        beforeEach(() => {
+          product = seneca.make('product')
+            .data$({ id: 'my_precious', label: 'Legions of Rome' })
+        })
+
+        it('returns a correct value', fin => {
+          const result = intern.is_new(product)
+          expect(result).to.equal(false)
+
+          fin()
         })
       })
     })
