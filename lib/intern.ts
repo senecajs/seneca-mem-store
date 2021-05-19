@@ -83,6 +83,18 @@ export function update_one_doc(entmap: any, ent: any, filter: any, new_attrs: an
 }
 
 
+export function should_merge(ent: any, plugin_opts: any): boolean {
+  if (plugin_opts.merge !== false && ent.merge$ === false) {
+    return false
+  }
+
+  if (plugin_opts.merge === false && ent.merge$ !== true) {
+    return false
+  }
+
+  return true
+}
+
 // NOTE: Seneca supports a reasonable set of features
 // in terms of listing. This function can handle
 // sorting, skiping, limiting and general retrieval.

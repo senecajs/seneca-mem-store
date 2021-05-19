@@ -99,16 +99,10 @@ function mem_store(this: any, options: any) {
           )
         }
 
-        let shouldMerge = true
-        if (options.merge !== false && ent.merge$ === false) {
-          shouldMerge = false
-        }
-        if (options.merge === false && ent.merge$ !== true) {
-          shouldMerge = false
-        }
-
         mement = seneca.util.deep(mement)
-        if (shouldMerge) {
+        const should_merge = Intern.should_merge(ent, options)
+
+        if (should_merge) {
           mement = Object.assign(prev || {}, mement)
         }
 
