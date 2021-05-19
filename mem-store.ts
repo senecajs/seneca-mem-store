@@ -46,6 +46,41 @@ const intern = {
   },
 
 
+  is_upsert_requested(msg: any): boolean {
+    const { ent, q } = msg
+    return intern.is_new(ent) && Array.isArray(q.upsert$)
+  },
+
+
+  find_one_doc(entmap: any, ent: any, filter: any): any {
+    const { base, name } = ent.canon$({ object: true })
+
+    if (!(base in entmap)) {
+      return null
+    }
+
+    if (!(name in entmap[base])) {
+      return null
+    }
+
+    const coll = entmap[base][name]
+    const docs = Object.values(coll)
+    const public_entdata = ent.data$(false) 
+
+    return docs.find((doc: any) => {
+      for (const fp in filter) {
+        if (fp in doc && filter[fp] === doc[fp]) {
+          continue
+        }
+
+        return false
+      }
+      
+      return true
+    })
+  },
+
+
   // NOTE: Seneca supports a reasonable set of features
   // in terms of listing. This function can handle
   // sorting, skiping, limiting and general retrieval.
@@ -254,9 +289,7 @@ function mem_store(this: any, options: any) {
           mement = Object.assign(prev || {}, mement)
         }
 
-        // TODO: Extract into the `intern` namespace.
-        //
-        if (isUpsertRequested(msg)) {
+        if (intern.is_upsert_requested(msg)) {
           const upsert_on = seneca.util.clean(msg.q.upsert$)
 
           if (upsert_on.length > 0) {
@@ -270,9 +303,7 @@ function mem_store(this: any, options: any) {
                 return h
               }, {})
 
-              // TODO: Extract into the `intern` namespace.
-              //
-              const doc_to_update = findOneDoc(entmap, ent, match_by)
+              const doc_to_update = intern.find_one_doc(entmap, ent, match_by)
 
               if (doc_to_update) {
                 Object.assign(doc_to_update, public_entdata)
@@ -294,40 +325,6 @@ function mem_store(this: any, options: any) {
         })
 
         return reply(null, ent.make$(prev))
-
-
-        function isUpsertRequested(msg: any): boolean {
-          const { ent, q } = msg
-          return intern.is_new(ent) && Array.isArray(q.upsert$)
-        }
-
-        function findOneDoc(entmap: any, ent: any, filter: any): any {
-          const { base, name } = ent.canon$({ object: true })
-
-          if (!(base in entmap)) {
-            return null
-          }
-
-          if (!(name in entmap[base])) {
-            return null
-          }
-
-          const coll = entmap[base][name]
-          const docs = Object.values(coll)
-          const public_entdata = ent.data$(false) 
-
-          return docs.find((doc: any) => {
-            for (const fp in filter) {
-              if (fp in doc && filter[fp] === doc[fp]) {
-                continue
-              }
-
-              return false
-            }
-            
-            return true
-          })
-        }
       }
 
       // We will still use do_save to save the entity but
