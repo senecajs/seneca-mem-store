@@ -76,7 +76,7 @@ function mem_store(this: any, options: any) {
       //
       const is_new = Intern.is_new(ent)
 
-      return is_new ? create_new() : do_save()
+      return is_new ? do_create() : do_save()
 
       // The actual save logic for saving or
       // creating and then saving the entity.
@@ -150,7 +150,7 @@ function mem_store(this: any, options: any) {
 
       // We will still use do_save to save the entity but
       // we need a place to handle new entites and id concerns.
-      function create_new() {
+      function do_create() {
         let id
 
         // Check if we already have an id or if
