@@ -1,7 +1,7 @@
 /* Copyright (c) 2010-2020 Richard Rodger and other contributors, MIT License */
 'use strict'
 
-import * as Intern from './lib/intern'
+import { intern } from './lib/intern'
 
 let internals = {
   name: 'mem-store'
@@ -18,7 +18,7 @@ module.exports.defaults = {
 /* NOTE: `intern` serves as a namespace for utility functions used by
  * the mem store.
  */
-module.exports.intern = Intern
+module.exports.intern = intern
 
 function mem_store(this: any, options: any) {
   let seneca: any = this
@@ -74,7 +74,7 @@ function mem_store(this: any, options: any) {
       // if we are do a create, otherwise
       // we will do a save instead
       //
-      const is_new = Intern.is_new(ent)
+      const is_new = intern.is_new(ent)
 
       return is_new ? do_create() : do_save()
 
@@ -99,14 +99,14 @@ function mem_store(this: any, options: any) {
         }
 
         mement = seneca.util.deep(mement)
-        const should_merge = Intern.should_merge(ent, options)
+        const should_merge = intern.should_merge(ent, options)
 
         if (should_merge) {
           mement = Object.assign(prev || {}, mement)
         }
 
-        if (Intern.is_upsert_requested(msg)) {
-          const upsert_on = Intern.clean_array(msg.q.upsert$)
+        if (intern.is_upsert_requested(msg)) {
+          const upsert_on = intern.clean_array(msg.q.upsert$)
 
           if (0 < upsert_on.length) {
             const public_entdata = ent.data$(false)
@@ -118,7 +118,7 @@ function mem_store(this: any, options: any) {
                 return h
               }, {})
 
-              const updated_ent = Intern.update_ent(entmap, ent, match_by, public_entdata)
+              const updated_ent = intern.update_ent(entmap, ent, match_by, public_entdata)
 
               if (updated_ent) {
                 // TODO: DRY up.
@@ -144,7 +144,7 @@ function mem_store(this: any, options: any) {
         //
         seneca.log.debug(function() {
           return [
-            'save/' + (Intern.is_new(msg.ent) ? 'insert' : 'update'),
+            'save/' + (intern.is_new(msg.ent) ? 'insert' : 'update'),
             ent.canon$({ string: 1 }),
             mement,
             desc
@@ -201,7 +201,7 @@ function mem_store(this: any, options: any) {
       let qent = msg.qent
       let q = msg.q
 
-      return Intern.listents(this, entmap, qent, q, function(this: any, err: any, list: any[]) {
+      return intern.listents(this, entmap, qent, q, function(this: any, err: any, list: any[]) {
         let ent = list[0] || null
 
         this.log.debug(function() {
@@ -216,7 +216,7 @@ function mem_store(this: any, options: any) {
       let qent = msg.qent
       let q = msg.q
 
-      return Intern.listents(this, entmap, qent, q, function(this: any, err: any, list: any[]) {
+      return intern.listents(this, entmap, qent, q, function(this: any, err: any, list: any[]) {
         this.log.debug(function() {
           return [
             'list',
@@ -241,7 +241,7 @@ function mem_store(this: any, options: any) {
       // default false
       let load = q.load$ === true
 
-      return Intern.listents(seneca, entmap, qent, q, function(err: Error, list: any[]) {
+      return intern.listents(seneca, entmap, qent, q, function(err: Error, list: any[]) {
         if (err) {
           return reply(err)
         }
