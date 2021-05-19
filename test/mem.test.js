@@ -488,10 +488,20 @@ describe('mem-store tests', function () {
       describe('passed an entity that has been saved before', () => {
         let product
 
-        beforeEach(async () => {
-          product = await seneca.make('product')
-            .data$({ label: 'Legions of Rome' })
-            .save$()
+        beforeEach(() => {
+          return new Promise((resolve, reject) => {
+            seneca.make('product')
+              .data$({ label: 'Legions of Rome' })
+              .save$((err, out) => {
+                if (err) {
+                  return reject(err)
+                }
+
+                product = out
+
+                return resolve()
+              })
+          })
         })
 
         it('returns a correct value', fin => {
