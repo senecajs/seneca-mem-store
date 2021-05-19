@@ -81,6 +81,18 @@ const intern = {
   },
 
 
+  update_one_doc(entmap: any, ent: any, filter: any, new_attrs: any) {
+    const doc_to_update = intern.find_one_doc(entmap, ent, match_by)
+
+    if (doc_to_update) {
+      Object.assign(doc_to_update, new_attrs)
+      return doc_to_update
+    }
+
+    return null
+  }
+
+
   // NOTE: Seneca supports a reasonable set of features
   // in terms of listing. This function can handle
   // sorting, skiping, limiting and general retrieval.
@@ -294,7 +306,6 @@ function mem_store(this: any, options: any) {
 
           if (upsert_on.length > 0) {
             const public_entdata = ent.data$(false)
-
             const may_match = upsert_on.every((p: string) => p in public_entdata)
 
             if (may_match) {
@@ -303,11 +314,10 @@ function mem_store(this: any, options: any) {
                 return h
               }, {})
 
-              const doc_to_update = intern.find_one_doc(entmap, ent, match_by)
+              const updated_doc = intern.update_one_doc(entmap, ent, match_by, public_entdata)
 
-              if (doc_to_update) {
-                Object.assign(doc_to_update, public_entdata)
-                return reply(null, ent.make$(doc_to_update))
+              if (updated_doc) {
+                return reply(null, ent.make$(updated_doc))
               }
             }
           }
