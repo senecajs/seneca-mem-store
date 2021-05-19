@@ -67,7 +67,7 @@ const intern = {
     const docs = Object.values(coll)
     const public_entdata = ent.data$(false) 
 
-    return docs.find((doc: any) => {
+    const doc = docs.find((doc: any) => {
       for (const fp in filter) {
         if (fp in doc && filter[fp] === doc[fp]) {
           continue
@@ -78,11 +78,17 @@ const intern = {
       
       return true
     })
+
+    if (!doc) {
+      return null
+    }
+
+    return doc
   },
 
 
   update_one_doc(entmap: any, ent: any, filter: any, new_attrs: any) {
-    const doc_to_update = intern.find_one_doc(entmap, ent, match_by)
+    const doc_to_update = intern.find_one_doc(entmap, ent, filter)
 
     if (doc_to_update) {
       Object.assign(doc_to_update, new_attrs)
@@ -90,7 +96,7 @@ const intern = {
     }
 
     return null
-  }
+  },
 
 
   // NOTE: Seneca supports a reasonable set of features
