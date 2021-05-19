@@ -94,9 +94,10 @@ function mem_store(this: any, options: any) {
 
         let prev = entmap[base][name][mement.id]
         if (isnew && prev) {
-          return reply(
-            seneca.fail('entity-id-exists', { type: ent.entity$, id: id })
-          )
+          // TODO: Automated tests
+          //
+          seneca.fail('entity-id-exists', { type: ent.entity$, id })
+          return
         }
 
         mement = seneca.util.deep(mement)
