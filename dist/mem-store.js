@@ -1,184 +1,38 @@
 /* Copyright (c) 2010-2020 Richard Rodger and other contributors, MIT License */
 'use strict';
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+const Intern = __importStar(require("./lib/intern"));
 let internals = {
     name: 'mem-store'
-};
-const intern = {
-    /* NOTE: `intern` serves as a namespace for utility functions used by
-     * the mem store.
-     */
-    // NOTE: This function is intended for use by the #save method. This
-    // function returns true when the entity argument is assumed to not yet
-    // exist in the store.
-    //
-    // In terms of code, if client code looks like so:
-    // ```
-    //   seneca.make('product')
-    //     .data$({ label, price })
-    //     .save$(done)
-    // ```
-    //
-    // - `intern.is_new` will be invoked from the #save method and return
-    // true, because the product entity is yet to be saved.
-    //
-    // The following client code will cause `intern.is_new` to return false,
-    // when invoked from the #save method, because the user entity already
-    // exists:
-    // ```
-    //   seneca.make('user')
-    //     .load$(user_id, (err, user) => {
-    //       if (err) return done(err)
-    //
-    //       return user
-    //         .data$({ email, username })
-    //         .save$(done)
-    //     })
-    // ```
-    // 
-    is_new(ent) {
-        return null != ent && null == ent.id;
-    },
-    is_upsert_requested(msg) {
-        const { ent, q } = msg;
-        return intern.is_new(ent) && Array.isArray(q.upsert$);
-    },
-    find_one_doc(entmap, ent, filter) {
-        const { base, name } = ent.canon$({ object: true });
-        if (!(base in entmap)) {
-            return null;
-        }
-        if (!(name in entmap[base])) {
-            return null;
-        }
-        const coll = entmap[base][name];
-        const docs = Object.values(coll);
-        const public_entdata = ent.data$(false);
-        const doc = docs.find((doc) => {
-            for (const fp in filter) {
-                if (fp in doc && filter[fp] === doc[fp]) {
-                    continue;
-                }
-                return false;
-            }
-            return true;
-        });
-        if (!doc) {
-            return null;
-        }
-        return doc;
-    },
-    update_one_doc(entmap, ent, filter, new_attrs) {
-        const doc_to_update = intern.find_one_doc(entmap, ent, filter);
-        if (doc_to_update) {
-            Object.assign(doc_to_update, new_attrs);
-            return doc_to_update;
-        }
-        return null;
-    },
-    // NOTE: Seneca supports a reasonable set of features
-    // in terms of listing. This function can handle
-    // sorting, skiping, limiting and general retrieval.
-    //
-    listents(seneca, entmap, qent, q, done) {
-        let list = [];
-        let canon = qent.canon$({ object: true });
-        let base = canon.base;
-        let name = canon.name;
-        let entset = entmap[base] ? entmap[base][name] : null;
-        let ent;
-        if (null != entset && null != q) {
-            if ('string' == typeof q) {
-                ent = entset[q];
-                if (ent) {
-                    list.push(ent);
-                }
-            }
-            else if (Array.isArray(q)) {
-                q.forEach(function (id) {
-                    let ent = entset[id];
-                    if (ent) {
-                        ent = qent.make$(ent);
-                        list.push(ent);
-                    }
-                });
-            }
-            else if ('object' === typeof q) {
-                let entids = Object.keys(entset);
-                next_ent: for (let id of entids) {
-                    ent = entset[id];
-                    for (let p in q) {
-                        let qv = q[p]; // query val
-                        let ev = ent[p]; // ent val
-                        if (-1 === p.indexOf('$')) {
-                            if (Array.isArray(qv)) {
-                                if (-1 === qv.indexOf(ev)) {
-                                    continue next_ent;
-                                }
-                            }
-                            else if (null != qv && 'object' === typeof qv) {
-                                // mongo style constraints
-                                if ((null != qv.$ne && qv.$ne == ev) ||
-                                    (null != qv.$gte && qv.$gte > ev) ||
-                                    (null != qv.$gt && qv.$gt >= ev) ||
-                                    (null != qv.$lt && qv.$lt <= ev) ||
-                                    (null != qv.$lte && qv.$lte < ev) ||
-                                    (null != qv.$in && -1 === qv.$in.indexOf(ev)) ||
-                                    (null != qv.$nin && -1 !== qv.$nin.indexOf(ev)) ||
-                                    false) {
-                                    continue next_ent;
-                                }
-                            }
-                            else if (qv !== ev) {
-                                continue next_ent;
-                            }
-                        }
-                    }
-                    ent = qent.make$(ent);
-                    list.push(ent);
-                }
-            }
-        }
-        // Always sort first, this is the 'expected' behaviour.
-        if (q.sort$) {
-            let sf;
-            for (sf in q.sort$) {
-                break;
-            }
-            let sd = q.sort$[sf] < 0 ? -1 : 1;
-            list = list.sort(function (a, b) {
-                return sd * (a[sf] < b[sf] ? -1 : a[sf] === b[sf] ? 0 : 1);
-            });
-        }
-        // Skip before limiting.
-        if (q.skip$ && q.skip$ > 0) {
-            list = list.slice(q.skip$);
-        }
-        // Limited the possibly sorted and skipped list.
-        if (q.limit$ && q.limit$ >= 0) {
-            list = list.slice(0, q.limit$);
-        }
-        // Prune fields
-        if (q.fields$) {
-            for (let i = 0; i < list.length; i++) {
-                let entfields = list[i].fields$();
-                for (let j = 0; j < entfields.length; j++) {
-                    if ('id' !== entfields[j] && -1 == q.fields$.indexOf(entfields[j])) {
-                        delete list[i][entfields[j]];
-                    }
-                }
-            }
-        }
-        // Return the resulting list to the caller.
-        done.call(seneca, null, list);
-    }
 };
 module.exports = mem_store;
 Object.defineProperty(module.exports, 'name', { value: 'mem-store' });
 module.exports.defaults = {
     'entity-id-exists': 'Entity of type <%=type%> with id = <%=id%> already exists.',
 };
-module.exports.intern = intern;
+/* NOTE: `intern` serves as a namespace for utility functions used by
+ * the mem store.
+ */
+module.exports.intern = Intern;
 function mem_store(options) {
     let seneca = this;
     let init = seneca.export('entity/init');
@@ -221,8 +75,8 @@ function mem_store(options) {
             // if we are do a create, otherwise
             // we will do a save instead
             //
-            const is_new = intern.is_new(ent);
-            return is_new ? create_new() : do_save();
+            const is_new = Intern.is_new(ent);
+            return is_new ? do_create() : do_save();
             // The actual save logic for saving or
             // creating and then saving the entity.
             function do_save(id, isnew) {
@@ -235,22 +89,19 @@ function mem_store(options) {
                 entmap[base][name] = entmap[base][name] || {};
                 let prev = entmap[base][name][mement.id];
                 if (isnew && prev) {
-                    return reply(seneca.fail('entity-id-exists', { type: ent.entity$, id: id }));
-                }
-                let shouldMerge = true;
-                if (options.merge !== false && ent.merge$ === false) {
-                    shouldMerge = false;
-                }
-                if (options.merge === false && ent.merge$ !== true) {
-                    shouldMerge = false;
+                    // TODO: Automated tests
+                    //
+                    seneca.fail('entity-id-exists', { type: ent.entity$, id });
+                    return;
                 }
                 mement = seneca.util.deep(mement);
-                if (shouldMerge) {
+                const should_merge = Intern.should_merge(ent, options);
+                if (should_merge) {
                     mement = Object.assign(prev || {}, mement);
                 }
-                if (intern.is_upsert_requested(msg)) {
-                    const upsert_on = seneca.util.clean(msg.q.upsert$);
-                    if (upsert_on.length > 0) {
+                if (Intern.is_upsert_requested(msg)) {
+                    const upsert_on = Intern.clean_array(msg.q.upsert$);
+                    if (0 < upsert_on.length) {
                         const public_entdata = ent.data$(false);
                         const may_match = upsert_on.every((p) => p in public_entdata);
                         if (may_match) {
@@ -258,27 +109,39 @@ function mem_store(options) {
                                 h[p] = public_entdata[p];
                                 return h;
                             }, {});
-                            const updated_doc = intern.update_one_doc(entmap, ent, match_by, public_entdata);
-                            if (updated_doc) {
-                                return reply(null, ent.make$(updated_doc));
+                            const updated_ent = Intern.update_ent(entmap, ent, match_by, public_entdata);
+                            if (updated_ent) {
+                                // TODO: DRY up.
+                                //
+                                seneca.log.debug(function () {
+                                    return [
+                                        'save/upsert',
+                                        updated_ent.canon$({ string: 1 }),
+                                        updated_ent,
+                                        desc
+                                    ];
+                                });
+                                return reply(null, updated_ent);
                             }
                         }
                     }
                 }
                 prev = entmap[base][name][mement.id] = mement;
+                // TODO: DRY up.
+                //
                 seneca.log.debug(function () {
                     return [
-                        'save/' + (intern.is_new(msg.ent) ? 'insert' : 'update'),
+                        'save/' + (Intern.is_new(msg.ent) ? 'insert' : 'update'),
                         ent.canon$({ string: 1 }),
                         mement,
-                        desc,
+                        desc
                     ];
                 });
                 return reply(null, ent.make$(prev));
             }
             // We will still use do_save to save the entity but
             // we need a place to handle new entites and id concerns.
-            function create_new() {
+            function do_create() {
                 let id;
                 // Check if we already have an id or if
                 // we need to generate a new one.
@@ -318,7 +181,7 @@ function mem_store(options) {
         load: function (msg, reply) {
             let qent = msg.qent;
             let q = msg.q;
-            return intern.listents(this, entmap, qent, q, function (err, list) {
+            return Intern.listents(this, entmap, qent, q, function (err, list) {
                 let ent = list[0] || null;
                 this.log.debug(function () {
                     return ['load', q, qent.canon$({ string: 1 }), ent, desc];
@@ -329,7 +192,7 @@ function mem_store(options) {
         list: function (msg, reply) {
             let qent = msg.qent;
             let q = msg.q;
-            return intern.listents(this, entmap, qent, q, function (err, list) {
+            return Intern.listents(this, entmap, qent, q, function (err, list) {
                 this.log.debug(function () {
                     return [
                         'list',
@@ -350,7 +213,7 @@ function mem_store(options) {
             let all = q.all$;
             // default false
             let load = q.load$ === true;
-            return intern.listents(seneca, entmap, qent, q, function (err, list) {
+            return Intern.listents(seneca, entmap, qent, q, function (err, list) {
                 if (err) {
                     return reply(err);
                 }
