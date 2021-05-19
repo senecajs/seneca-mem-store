@@ -624,7 +624,6 @@ describe('mem-store tests', function () {
   })
 })
 
-
 describe('edge cases', function () {
   let seneca
 
@@ -639,13 +638,26 @@ describe('edge cases', function () {
   }))
 
   describe('when trying to create the entity with the same id', () => {
-    const my_product_id = 'MyPreciousId'
+    const seneca = makeSenecaForTest()
+
+    before(() => new Promise(fin => seneca.ready(fin)))
+
 
     it('crashes', fin => {
-      seneca.test(err => {
-        expect(err.message).to.include('seneca: entity-id-exists')
+      seneca.test(fin)
+
+
+      const fail = seneca.fail
+
+      seneca.fail = function (...args) {
+        expect(args.length > 0).to.equal(true)
+        expect(args[0]).to.equal('entity-id-exists')
+
         return fin()
-      })
+      }
+
+
+      const my_product_id = 'MyPreciousId'
 
       seneca.make('sys', 'product')
         .data$({ id: my_product_id, label: 'lorem ipsum' })
