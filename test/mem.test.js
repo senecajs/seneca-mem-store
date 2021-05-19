@@ -293,6 +293,10 @@ describe('mem-store tests', function () {
     const { intern } = mem_store.init
 
     describe('find_one_doc', () => {
+      const ent_base = 'sys'
+      const ent_name = 'product'
+
+
       describe('no such entities exist', () => {
         let entmap
 
@@ -302,7 +306,8 @@ describe('mem-store tests', function () {
 
         it('cannot match', fin => {
           const ent = seneca.make('sys', 'product')
-          const result = intern.find_one_doc(entmap, ent, { label: 'lorem ipsum' })
+          const filter = { label: 'lorem ipsum' }
+          const result = intern.find_one_doc(entmap, ent, filter)
 
           expect(result).to.equal(null)
 
@@ -310,12 +315,12 @@ describe('mem-store tests', function () {
         })
       })
 
-      describe('the would-be matching entity shares the base, but has a different name', () => {
+      describe('same entity base, different entity name', () => {
         let entmap
 
         beforeEach(async () => {
           entmap = {
-            sys: {
+            [ent_base]: {
               artist: {
                 foo: {
                   id: 'foo',
@@ -327,8 +332,9 @@ describe('mem-store tests', function () {
         })
 
         it('cannot match', fin => {
-          const ent = seneca.make('sys', 'product')
-          const result = intern.find_one_doc(entmap, ent, { label: 'lorem ipsum' })
+          const ent = seneca.make(ent_base, 'product')
+          const filter = { label: 'lorem ipsum' }
+          const result = intern.find_one_doc(entmap, ent, filter)
 
           expect(result).to.equal(null)
 
@@ -341,8 +347,8 @@ describe('mem-store tests', function () {
 
         beforeEach(async () => {
           entmap = {
-            sys: {
-              product: {
+            [ent_base]: {
+              [ent_name]: {
                 foo: {
                   id: 'foo',
                   label: 'lorem ipsum'
@@ -353,8 +359,9 @@ describe('mem-store tests', function () {
         })
 
         it('cannot match', fin => {
-          const ent = seneca.make('sys', 'product')
-          const result = intern.find_one_doc(entmap, ent, { label: 'lorem ipsum', bar: 'baz' })
+          const ent = seneca.make(ent_base, ent_name)
+          const filter = { label: 'lorem ipsum', bar: 'baz' }
+          const result = intern.find_one_doc(entmap, ent, filter)
 
           expect(result).to.equal(null)
 
@@ -367,8 +374,8 @@ describe('mem-store tests', function () {
 
         beforeEach(async () => {
           entmap = {
-            sys: {
-              product: {
+            [ent_base]: {
+              [ent_name]: {
                 foo: {
                   id: 'foo',
                   label: 'lorem ipsum',
@@ -380,8 +387,9 @@ describe('mem-store tests', function () {
         })
 
         it('cannot match', fin => {
-          const ent = seneca.make('sys', 'product')
-          const result = intern.find_one_doc(entmap, ent, { label: 'lorem ipsum', price: '0.95' })
+          const ent = seneca.make(ent_base, ent_name)
+          const filter = { label: 'lorem ipsum', price: '0.95' }
+          const result = intern.find_one_doc(entmap, ent, filter)
 
           expect(result).to.equal(null)
 
@@ -410,8 +418,9 @@ describe('mem-store tests', function () {
         })
 
         it('returns the match', fin => {
-          const ent = seneca.make('sys', 'product')
-          const result = intern.find_one_doc(entmap, ent, { label: 'lorem ipsum', price: '2.34' })
+          const ent = seneca.make(ent_base, ent_name)
+          const filter = { label: 'lorem ipsum', price: '2.34' }
+          const result = intern.find_one_doc(entmap, ent, filter)
 
           expect(result).to.equal(some_product)
 
@@ -440,7 +449,7 @@ describe('mem-store tests', function () {
         })
 
         it('returns the first document it comes across', fin => {
-          const ent = seneca.make('sys', 'product')
+          const ent = seneca.make(ent_base, ent_name)
           const result = intern.find_one_doc(entmap, ent, {})
 
           expect(result).to.equal(some_product)
@@ -503,7 +512,7 @@ describe('mem-store tests', function () {
         })
       })
 
-      describe('passed an entity that has not been saved before, but has an id arg', () => {
+      describe('passed a new entity, but also an id arg', () => {
         let product
 
         beforeEach(() => {
