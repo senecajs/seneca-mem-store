@@ -122,6 +122,15 @@ function mem_store(this: any, options: any) {
               const updated_doc = Intern.update_one_doc(entmap, ent, match_by, public_entdata)
 
               if (updated_doc) {
+                seneca.log.debug(function() {
+                  return [
+                    'save/upsert',
+                    updated_doc.canon$({ string: 1 }),
+                    updated_doc,
+                    desc
+                  ]
+                })
+
                 return reply(null, ent.make$(updated_doc))
               }
             }
@@ -135,7 +144,7 @@ function mem_store(this: any, options: any) {
             'save/' + (Intern.is_new(msg.ent) ? 'insert' : 'update'),
             ent.canon$({ string: 1 }),
             mement,
-            desc,
+            desc
           ]
         })
 
