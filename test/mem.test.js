@@ -288,11 +288,42 @@ describe('mem-store tests', function () {
     })
   })
 
+  describe('additional #save tests', () => {
+    describe('when trying to create the entity with the same id', () => {
+      const my_product_id = 'MyPreciousId'
+
+      it('crashes', fin => {
+        seneca.test(err => {
+          expect(err.message).to.include('seneca: entity-id-exists')
+          return fin()
+        })
+
+        seneca.make('sys', 'product')
+          .data$({ id: my_product_id, label: 'lorem ipsum' })
+          .save$((err, _out) => {
+            if (err) {
+              return fin(err)
+            }
+
+            seneca.make('sys', 'product')
+              .data$({ id$: my_product_id, label: 'nauta sagittas portat' })
+              .save$((err, _out) => {
+                if (err) {
+                  return fin(err)
+                }
+
+                return fin(new Error('Expected an error to be thrown'))
+              })
+          })
+      })
+    })
+  })
+
   describe('internal utilities', () => {
     const mem_store = seneca.export('mem-store')
     const { intern } = mem_store.init
 
-    describe('find_one_doc', () => {
+    describe('find_ent', () => {
       const ent_base = 'sys'
       const ent_name = 'product'
 
@@ -307,7 +338,7 @@ describe('mem-store tests', function () {
         it('cannot match', fin => {
           const ent = seneca.make('sys', 'product')
           const filter = { label: 'lorem ipsum' }
-          const result = intern.find_one_doc(entmap, ent, filter)
+          const result = intern.find_ent(entmap, ent, filter)
 
           expect(result).to.equal(null)
 
@@ -334,7 +365,7 @@ describe('mem-store tests', function () {
         it('cannot match', fin => {
           const ent = seneca.make(ent_base, 'product')
           const filter = { label: 'lorem ipsum' }
-          const result = intern.find_one_doc(entmap, ent, filter)
+          const result = intern.find_ent(entmap, ent, filter)
 
           expect(result).to.equal(null)
 
@@ -361,7 +392,7 @@ describe('mem-store tests', function () {
         it('cannot match', fin => {
           const ent = seneca.make(ent_base, ent_name)
           const filter = { label: 'lorem ipsum', bar: 'baz' }
-          const result = intern.find_one_doc(entmap, ent, filter)
+          const result = intern.find_ent(entmap, ent, filter)
 
           expect(result).to.equal(null)
 
@@ -389,7 +420,7 @@ describe('mem-store tests', function () {
         it('cannot match', fin => {
           const ent = seneca.make(ent_base, ent_name)
           const filter = { label: 'lorem ipsum', price: '0.95' }
-          const result = intern.find_one_doc(entmap, ent, filter)
+          const result = intern.find_ent(entmap, ent, filter)
 
           expect(result).to.equal(null)
 
@@ -420,7 +451,7 @@ describe('mem-store tests', function () {
         it('returns the match', fin => {
           const ent = seneca.make(ent_base, ent_name)
           const filter = { label: 'lorem ipsum', price: '2.34' }
-          const result = intern.find_one_doc(entmap, ent, filter)
+          const result = intern.find_ent(entmap, ent, filter)
 
           expect(result).to.equal(some_product)
 
@@ -450,7 +481,7 @@ describe('mem-store tests', function () {
 
         it('returns the first document it comes across', fin => {
           const ent = seneca.make(ent_base, ent_name)
-          const result = intern.find_one_doc(entmap, ent, {})
+          const result = intern.find_ent(entmap, ent, {})
 
           expect(result).to.equal(some_product)
 
