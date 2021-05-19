@@ -50,7 +50,6 @@ export function find_one_doc(entmap: any, ent: any, filter: any): any {
 
   const entset = entmap[base][name]
   const docs = Object.values(entset)
-  const public_entdata = ent.data$(false) 
 
   const doc = docs.find((doc: any) => {
     for (const fp in filter) {
