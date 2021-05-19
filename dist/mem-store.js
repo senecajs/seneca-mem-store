@@ -1,38 +1,184 @@
 /* Copyright (c) 2010-2020 Richard Rodger and other contributors, MIT License */
 'use strict';
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const assert_1 = __importDefault(require("assert"));
-const Common = __importStar(require("./lib/common"));
 let internals = {
     name: 'mem-store'
+};
+const intern = {
+    /* NOTE: `intern` serves as a namespace for utility functions used by
+     * the mem store.
+     */
+    // NOTE: This function is intended for use by the #save method. This
+    // function returns true when the entity argument is assumed to not yet
+    // exist in the store.
+    //
+    // In terms of code, if client code looks like so:
+    // ```
+    //   seneca.make('product')
+    //     .data$({ label, price })
+    //     .save$(done)
+    // ```
+    //
+    // - `intern.is_new` will be invoked from the #save method and return
+    // true, because the product entity is yet to be saved.
+    //
+    // The following client code will cause `intern.is_new` to return false,
+    // when invoked from the #save method, because the user entity already
+    // exists:
+    // ```
+    //   seneca.make('user')
+    //     .load$(user_id, (err, user) => {
+    //       if (err) return done(err)
+    //
+    //       return user
+    //         .data$({ email, username })
+    //         .save$(done)
+    //     })
+    // ```
+    // 
+    is_new(ent) {
+        return null != ent && null == ent.id;
+    },
+    is_upsert_requested(msg) {
+        const { ent, q } = msg;
+        return intern.is_new(ent) && Array.isArray(q.upsert$);
+    },
+    find_one_doc(entmap, ent, filter) {
+        const { base, name } = ent.canon$({ object: true });
+        if (!(base in entmap)) {
+            return null;
+        }
+        if (!(name in entmap[base])) {
+            return null;
+        }
+        const coll = entmap[base][name];
+        const docs = Object.values(coll);
+        const public_entdata = ent.data$(false);
+        const doc = docs.find((doc) => {
+            for (const fp in filter) {
+                if (fp in doc && filter[fp] === doc[fp]) {
+                    continue;
+                }
+                return false;
+            }
+            return true;
+        });
+        if (!doc) {
+            return null;
+        }
+        return doc;
+    },
+    update_one_doc(entmap, ent, filter, new_attrs) {
+        const doc_to_update = intern.find_one_doc(entmap, ent, filter);
+        if (doc_to_update) {
+            Object.assign(doc_to_update, new_attrs);
+            return doc_to_update;
+        }
+        return null;
+    },
+    // NOTE: Seneca supports a reasonable set of features
+    // in terms of listing. This function can handle
+    // sorting, skiping, limiting and general retrieval.
+    //
+    listents(seneca, entmap, qent, q, done) {
+        let list = [];
+        let canon = qent.canon$({ object: true });
+        let base = canon.base;
+        let name = canon.name;
+        let entset = entmap[base] ? entmap[base][name] : null;
+        let ent;
+        if (null != entset && null != q) {
+            if ('string' == typeof q) {
+                ent = entset[q];
+                if (ent) {
+                    list.push(ent);
+                }
+            }
+            else if (Array.isArray(q)) {
+                q.forEach(function (id) {
+                    let ent = entset[id];
+                    if (ent) {
+                        ent = qent.make$(ent);
+                        list.push(ent);
+                    }
+                });
+            }
+            else if ('object' === typeof q) {
+                let entids = Object.keys(entset);
+                next_ent: for (let id of entids) {
+                    ent = entset[id];
+                    for (let p in q) {
+                        let qv = q[p]; // query val
+                        let ev = ent[p]; // ent val
+                        if (-1 === p.indexOf('$')) {
+                            if (Array.isArray(qv)) {
+                                if (-1 === qv.indexOf(ev)) {
+                                    continue next_ent;
+                                }
+                            }
+                            else if (null != qv && 'object' === typeof qv) {
+                                // mongo style constraints
+                                if ((null != qv.$ne && qv.$ne == ev) ||
+                                    (null != qv.$gte && qv.$gte > ev) ||
+                                    (null != qv.$gt && qv.$gt >= ev) ||
+                                    (null != qv.$lt && qv.$lt <= ev) ||
+                                    (null != qv.$lte && qv.$lte < ev) ||
+                                    (null != qv.$in && -1 === qv.$in.indexOf(ev)) ||
+                                    (null != qv.$nin && -1 !== qv.$nin.indexOf(ev)) ||
+                                    false) {
+                                    continue next_ent;
+                                }
+                            }
+                            else if (qv !== ev) {
+                                continue next_ent;
+                            }
+                        }
+                    }
+                    ent = qent.make$(ent);
+                    list.push(ent);
+                }
+            }
+        }
+        // Always sort first, this is the 'expected' behaviour.
+        if (q.sort$) {
+            let sf;
+            for (sf in q.sort$) {
+                break;
+            }
+            let sd = q.sort$[sf] < 0 ? -1 : 1;
+            list = list.sort(function (a, b) {
+                return sd * (a[sf] < b[sf] ? -1 : a[sf] === b[sf] ? 0 : 1);
+            });
+        }
+        // Skip before limiting.
+        if (q.skip$ && q.skip$ > 0) {
+            list = list.slice(q.skip$);
+        }
+        // Limited the possibly sorted and skipped list.
+        if (q.limit$ && q.limit$ >= 0) {
+            list = list.slice(0, q.limit$);
+        }
+        // Prune fields
+        if (q.fields$) {
+            for (let i = 0; i < list.length; i++) {
+                let entfields = list[i].fields$();
+                for (let j = 0; j < entfields.length; j++) {
+                    if ('id' !== entfields[j] && -1 == q.fields$.indexOf(entfields[j])) {
+                        delete list[i][entfields[j]];
+                    }
+                }
+            }
+        }
+        // Return the resulting list to the caller.
+        done.call(seneca, null, list);
+    }
 };
 module.exports = mem_store;
 Object.defineProperty(module.exports, 'name', { value: 'mem-store' });
 module.exports.defaults = {
     'entity-id-exists': 'Entity of type <%=type%> with id = <%=id%> already exists.',
 };
+module.exports.intern = intern;
 function mem_store(options) {
     let seneca = this;
     let init = seneca.export('entity/init');
@@ -74,12 +220,9 @@ function mem_store(options) {
             // check if we are in create mode,
             // if we are do a create, otherwise
             // we will do a save instead
-            if (isNewEntityBeingCreated(msg)) {
-                create_new();
-            }
-            else {
-                do_save();
-            }
+            //
+            const is_new = intern.is_new(ent);
+            return is_new ? create_new() : do_save();
             // The actual save logic for saving or
             // creating and then saving the entity.
             function do_save(id, isnew) {
@@ -105,70 +248,33 @@ function mem_store(options) {
                 if (shouldMerge) {
                     mement = Object.assign(prev || {}, mement);
                 }
-                return upsertIfRequested(msg, function (err, ctx) {
-                    if (err) {
-                        return reply(err);
-                    }
-                    const { did_update } = ctx;
-                    if (did_update) {
-                        const { out } = ctx;
-                        return reply(null, out);
-                    }
-                    prev = entmap[base][name][mement.id] = mement;
-                    seneca.log.debug(function () {
-                        return [
-                            'save/' + (isNewEntityBeingCreated(msg) ? 'insert' : 'update'),
-                            ent.canon$({ string: 1 }),
-                            mement,
-                            desc,
-                        ];
-                    });
-                    return reply(null, ent.make$(prev));
-                });
-                function upsertIfRequested(msg, reply) {
-                    // This is the query passed to the .save$ method.
-                    //
-                    const query_for_save = msg.q;
-                    if (isNewEntityBeingCreated(msg) && Array.isArray(query_for_save.upsert$)) {
-                        const upsert_on = Common.clean(query_for_save.upsert$);
-                        if (upsert_on.length > 0) {
-                            if (!(base in entmap)) {
-                                return reply(null, { did_update: false, out: null });
+                if (intern.is_upsert_requested(msg)) {
+                    const upsert_on = seneca.util.clean(msg.q.upsert$);
+                    if (upsert_on.length > 0) {
+                        const public_entdata = ent.data$(false);
+                        const may_match = upsert_on.every((p) => p in public_entdata);
+                        if (may_match) {
+                            const match_by = upsert_on.reduce((h, p) => {
+                                h[p] = public_entdata[p];
+                                return h;
+                            }, {});
+                            const updated_doc = intern.update_one_doc(entmap, ent, match_by, public_entdata);
+                            if (updated_doc) {
+                                return reply(null, ent.make$(updated_doc));
                             }
-                            if (!(name in entmap[base])) {
-                                return reply(null, { did_update: false, out: null });
-                            }
-                            const collection = entmap[base][name];
-                            const docs = Object.values(collection);
-                            const public_entdata = msg.ent.data$(false);
-                            const doc_to_update = docs.find((doc) => {
-                                return upsert_on.every((p) => {
-                                    return p in public_entdata && public_entdata[p] === doc[p];
-                                });
-                            });
-                            if (!doc_to_update) {
-                                return reply(null, { did_update: false, out: null });
-                            }
-                            return msg.ent.make$(doc_to_update)
-                                .data$(public_entdata)
-                                .save$((err, out) => {
-                                if (err) {
-                                    return reply(err);
-                                }
-                                return reply(null, {
-                                    did_update: true,
-                                    out
-                                });
-                            });
                         }
-                        else {
-                            return reply(null, { did_update: false, out: null });
-                        }
-                    }
-                    else {
-                        return reply(null, { did_update: false, out: null });
                     }
                 }
+                prev = entmap[base][name][mement.id] = mement;
+                seneca.log.debug(function () {
+                    return [
+                        'save/' + (intern.is_new(msg.ent) ? 'insert' : 'update'),
+                        ent.canon$({ string: 1 }),
+                        mement,
+                        desc,
+                    ];
+                });
+                return reply(null, ent.make$(prev));
             }
             // We will still use do_save to save the entity but
             // we need a place to handle new entites and id concerns.
@@ -208,17 +314,11 @@ function mem_store(options) {
                     });
                 }
             }
-            function isNewEntityBeingCreated(msg) {
-                assert_1.default('ent' in msg, 'msg.ent');
-                assert_1.default(msg.ent, 'msg.ent');
-                const ent = msg.ent;
-                return ent && ent.id === null || ent.id === undefined;
-            }
         },
         load: function (msg, reply) {
             let qent = msg.qent;
             let q = msg.q;
-            listents(this, entmap, qent, q, function (err, list) {
+            return intern.listents(this, entmap, qent, q, function (err, list) {
                 let ent = list[0] || null;
                 this.log.debug(function () {
                     return ['load', q, qent.canon$({ string: 1 }), ent, desc];
@@ -229,7 +329,7 @@ function mem_store(options) {
         list: function (msg, reply) {
             let qent = msg.qent;
             let q = msg.q;
-            listents(this, entmap, qent, q, function (err, list) {
+            return intern.listents(this, entmap, qent, q, function (err, list) {
                 this.log.debug(function () {
                     return [
                         'list',
@@ -250,7 +350,7 @@ function mem_store(options) {
             let all = q.all$;
             // default false
             let load = q.load$ === true;
-            listents(seneca, entmap, qent, q, function (err, list) {
+            return intern.listents(seneca, entmap, qent, q, function (err, list) {
                 if (err) {
                     return reply(err);
                 }
@@ -346,99 +446,4 @@ module.exports.preload = function () {
     };
     return meta;
 };
-// Seneca supports a reasonable set of features
-// in terms of listing. This function can handle
-// sorting, skiping, limiting and general retrieval.
-function listents(seneca, entmap, qent, q, done) {
-    let list = [];
-    let canon = qent.canon$({ object: true });
-    let base = canon.base;
-    let name = canon.name;
-    let entset = entmap[base] ? entmap[base][name] : null;
-    let ent;
-    if (null != entset && null != q) {
-        if ('string' == typeof q) {
-            ent = entset[q];
-            if (ent) {
-                list.push(ent);
-            }
-        }
-        else if (Array.isArray(q)) {
-            q.forEach(function (id) {
-                let ent = entset[id];
-                if (ent) {
-                    ent = qent.make$(ent);
-                    list.push(ent);
-                }
-            });
-        }
-        else if ('object' === typeof q) {
-            let entids = Object.keys(entset);
-            next_ent: for (let id of entids) {
-                ent = entset[id];
-                for (let p in q) {
-                    let qv = q[p]; // query val
-                    let ev = ent[p]; // ent val
-                    if (-1 === p.indexOf('$')) {
-                        if (Array.isArray(qv)) {
-                            if (-1 === qv.indexOf(ev)) {
-                                continue next_ent;
-                            }
-                        }
-                        else if (null != qv && 'object' === typeof qv) {
-                            // mongo style constraints
-                            if ((null != qv.$ne && qv.$ne == ev) ||
-                                (null != qv.$gte && qv.$gte > ev) ||
-                                (null != qv.$gt && qv.$gt >= ev) ||
-                                (null != qv.$lt && qv.$lt <= ev) ||
-                                (null != qv.$lte && qv.$lte < ev) ||
-                                (null != qv.$in && -1 === qv.$in.indexOf(ev)) ||
-                                (null != qv.$nin && -1 !== qv.$nin.indexOf(ev)) ||
-                                false) {
-                                continue next_ent;
-                            }
-                        }
-                        else if (qv !== ev) {
-                            continue next_ent;
-                        }
-                    }
-                }
-                ent = qent.make$(ent);
-                list.push(ent);
-            }
-        }
-    }
-    // Always sort first, this is the 'expected' behaviour.
-    if (q.sort$) {
-        let sf;
-        for (sf in q.sort$) {
-            break;
-        }
-        let sd = q.sort$[sf] < 0 ? -1 : 1;
-        list = list.sort(function (a, b) {
-            return sd * (a[sf] < b[sf] ? -1 : a[sf] === b[sf] ? 0 : 1);
-        });
-    }
-    // Skip before limiting.
-    if (q.skip$ && q.skip$ > 0) {
-        list = list.slice(q.skip$);
-    }
-    // Limited the possibly sorted and skipped list.
-    if (q.limit$ && q.limit$ >= 0) {
-        list = list.slice(0, q.limit$);
-    }
-    // Prune fields
-    if (q.fields$) {
-        for (let i = 0; i < list.length; i++) {
-            let entfields = list[i].fields$();
-            for (let j = 0; j < entfields.length; j++) {
-                if ('id' !== entfields[j] && -1 == q.fields$.indexOf(entfields[j])) {
-                    delete list[i][entfields[j]];
-                }
-            }
-        }
-    }
-    // Return the resulting list to the caller.
-    done.call(seneca, null, list);
-}
 //# sourceMappingURL=mem-store.js.map
