@@ -37,8 +37,8 @@ export function is_upsert_requested(msg: any): boolean {
 }
 
 
-export function find_one_doc(entmap: any, ent: any, filter: any): any {
-  const { base, name } = ent.canon$({ object: true })
+export function find_ent(entmap: any, base_ent: any, filter: any): any {
+  const { base, name } = base_ent.canon$({ object: true })
 
   if (!(base in entmap)) {
     return null
@@ -49,11 +49,11 @@ export function find_one_doc(entmap: any, ent: any, filter: any): any {
   }
 
   const entset = entmap[base][name]
-  const docs = Object.values(entset)
+  const ents = Object.values(entset)
 
-  const doc = docs.find((doc: any) => {
+  const ent = ents.find((ent: any) => {
     for (const fp in filter) {
-      if (fp in doc && filter[fp] === doc[fp]) {
+      if (fp in ent && filter[fp] === ent[fp]) {
         continue
       }
 
@@ -63,20 +63,20 @@ export function find_one_doc(entmap: any, ent: any, filter: any): any {
     return true
   })
 
-  if (!doc) {
+  if (!ent) {
     return null
   }
 
-  return doc
+  return ent
 }
 
 
-export function update_one_doc(entmap: any, ent: any, filter: any, new_attrs: any) {
-  const doc_to_update = find_one_doc(entmap, ent, filter)
+export function update_ent(entmap: any, base_ent: any, filter: any, new_attrs: any) {
+  const ent_to_update = find_ent(entmap, base_ent, filter)
 
-  if (doc_to_update) {
-    Object.assign(doc_to_update, new_attrs)
-    return doc_to_update
+  if (ent_to_update) {
+    Object.assign(ent_to_update, new_attrs)
+    return ent_to_update
   }
 
   return null

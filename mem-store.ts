@@ -119,19 +119,21 @@ function mem_store(this: any, options: any) {
                 return h
               }, {})
 
-              const updated_doc = Intern.update_one_doc(entmap, ent, match_by, public_entdata)
+              const updated_ent = Intern.update_ent(entmap, ent, match_by, public_entdata)
 
-              if (updated_doc) {
+              if (updated_ent) {
+                // TODO: DRY up.
+                //
                 seneca.log.debug(function() {
                   return [
                     'save/upsert',
-                    updated_doc.canon$({ string: 1 }),
-                    updated_doc,
+                    updated_ent.canon$({ string: 1 }),
+                    updated_ent,
                     desc
                   ]
                 })
 
-                return reply(null, ent.make$(updated_doc))
+                return reply(null, updated_ent)
               }
             }
           }
@@ -139,6 +141,8 @@ function mem_store(this: any, options: any) {
 
         prev = entmap[base][name][mement.id] = mement
 
+        // TODO: DRY up.
+        //
         seneca.log.debug(function() {
           return [
             'save/' + (Intern.is_new(msg.ent) ? 'insert' : 'update'),
