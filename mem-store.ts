@@ -109,7 +109,7 @@ function mem_store(this: any, options: any) {
         if (Intern.is_upsert_requested(msg)) {
           const upsert_on = seneca.util.clean(msg.q.upsert$)
 
-          if (upsert_on.length > 0) {
+          if (0 < upsert_on.length) {
             const public_entdata = ent.data$(false)
             const may_match = upsert_on.every((p: string) => p in public_entdata)
 
