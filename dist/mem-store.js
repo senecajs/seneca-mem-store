@@ -89,9 +89,7 @@ function mem_store(options) {
                 entmap[base][name] = entmap[base][name] || {};
                 let prev = entmap[base][name][mement.id];
                 if (isnew && prev) {
-                    // TODO: Automated tests
-                    //
-                    seneca.fail('entity-id-exists', { type: ent.entity$, id });
+                    seneca.fail('entity-id-exists', { type: ent.entity$, id: mement.id });
                     return;
                 }
                 mement = seneca.util.deep(mement);
