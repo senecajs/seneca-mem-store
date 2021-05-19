@@ -15,16 +15,17 @@ const Lab = require('@hapi/lab')
 const Code = require('@hapi/code')
 const { expect } = Code
 const lab = (exports.lab = Lab.script())
-const { describe, beforeEach } = lab
+const { describe, beforeEach, before } = lab
 const it = make_it(lab)
 
-function makeSenecaForTest() {
+function makeSenecaForTest(opts = {}) {
   const seneca = Seneca({
     log: 'silent',
-    default_plugins: { 'mem-store': false },
+    default_plugins: { 'mem-store': false }
   })
 
-  seneca.use({ name: '..', tag: '1' })
+  const { mem_store_opts = {} } = opts
+  seneca.use({ name: '..', tag: '1' }, mem_store_opts)
 
   if (seneca.version >= '2.0.0') {
     seneca.use('entity', { mem_store: false })
@@ -289,6 +290,18 @@ describe('mem-store tests', function () {
   })
 
   describe('additional #save tests', () => {
+    let seneca
+
+    beforeEach(() => {
+      // NOTE: This is how we are ensuring a clear mem store for each test.
+      //
+      seneca = makeSenecaForTest()
+    })
+
+    beforeEach(() => new Promise(fin => {
+      seneca.ready(fin)
+    }))
+
     describe('when trying to create the entity with the same id', () => {
       const my_product_id = 'MyPreciousId'
 
@@ -313,6 +326,84 @@ describe('mem-store tests', function () {
                 }
 
                 return fin(new Error('Expected an error to be thrown'))
+              })
+          })
+      })
+    })
+
+    describe('when data.id$ is null', () => {
+      beforeEach(() => {
+        return seneca.make('sys', 'product')
+          .data$({ id$: null, label: 'lorem ipsum' })
+          .save$()
+      })
+
+      it('generates an id and creates a new entity', fin => {
+        seneca.test(fin)
+
+        seneca.make('sys', 'product')
+          .load$(null, (err, out) => {
+            if (err) {
+              return fin(err)
+            }
+
+            expect(out).to.be.undefined()
+
+            return seneca.make('sys', 'product')
+              .list$((err, products) => {
+                if (err) {
+                  return fin(err)
+                }
+
+                expect(products.length).to.equal(1)
+
+                expect(typeof products[0].id).to.equal('string')
+                expect(products[0].label).to.equal('lorem ipsum')
+
+                return fin()
+              })
+          })
+      })
+    })
+
+    describe('when "generate_id" returns null', () => {
+      const seneca = makeSenecaForTest({
+        mem_store_opts: {
+          generate_id(_ent) {
+            return null
+          }
+        }
+      })
+
+      beforeEach(() => {
+        return seneca.make('sys', 'product')
+          .data$({ label: 'lorem ipsum' })
+          .save$()
+      })
+
+      it('generates a new id and creates a new entity', fin => {
+        seneca.test(fin)
+
+        seneca.make('sys', 'product')
+          .load$(null, (err, out) => {
+            if (err) {
+              return fin(err)
+            }
+
+            expect(out).to.be.undefined()
+
+            return seneca.make('sys', 'product')
+              .list$((err, products) => {
+                if (err) {
+                  return fin(err)
+                }
+
+                expect(products.length).to.equal(1)
+
+                expect(typeof products[0].id).to.equal('string')
+                expect(products[0].label).to.equal('lorem ipsum')
+
+                return fin()
               })
           })
       })

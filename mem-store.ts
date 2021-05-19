@@ -83,7 +83,7 @@ function mem_store(this: any, options: any) {
       function do_save(id?: any, isnew?: boolean) {
         let mement = ent.data$(true, 'string')
 
-        if (undefined !== id) {
+        if (null != id) {
           mement.id = id
         }
 
@@ -161,7 +161,7 @@ function mem_store(this: any, options: any) {
 
         // Check if we already have an id or if
         // we need to generate a new one.
-        if (undefined !== ent.id$) {
+        if (null != ent.id$) {
           // Take a copy of the existing id and
           // delete it from the ent object. Do
           // save will handle the id for us.
@@ -175,7 +175,7 @@ function mem_store(this: any, options: any) {
         // Generate a new id
         id = options.generate_id ? options.generate_id(ent) : void 0
 
-        if (undefined !== id) {
+        if (null !== id) {
           return do_save(id, true)
         } else {
           let gen_id = {
