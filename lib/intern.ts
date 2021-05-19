@@ -95,6 +95,7 @@ export function should_merge(ent: any, plugin_opts: any): boolean {
   return true
 }
 
+
 // NOTE: Seneca supports a reasonable set of features
 // in terms of listing. This function can handle
 // sorting, skiping, limiting and general retrieval.
