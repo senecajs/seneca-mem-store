@@ -108,7 +108,7 @@ function mem_store(this: any, options: any) {
         }
 
         if (Intern.is_upsert_requested(msg)) {
-          const upsert_on = seneca.util.clean(msg.q.upsert$)
+          const upsert_on = Intern.clean_array(msg.q.upsert$)
 
           if (0 < upsert_on.length) {
             const public_entdata = ent.data$(false)

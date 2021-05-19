@@ -201,3 +201,8 @@ export function listents(seneca: any, entmap: any, qent: any, q: any, done: any)
   done.call(seneca, null, list)
 }
 
+export function clean_array(ary: string[]): string[] {
+  const isPublicProp = (prop: string): boolean => !prop.includes('$')
+  return ary.filter(isPublicProp)
+}
+
