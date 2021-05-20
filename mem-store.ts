@@ -110,9 +110,9 @@ function mem_store(this: any, options: any) {
 
           if (0 < upsert_on.length) {
             const public_entdata = ent.data$(false)
-            const may_match = upsert_on.every((p: string) => p in public_entdata)
+            const has_upsert_fields = upsert_on.every((p: string) => p in public_entdata)
 
-            if (may_match) {
+            if (has_upsert_fields) {
               const match_by = upsert_on.reduce((h: any, p: string) => {
                 h[p] = public_entdata[p]
                 return h
