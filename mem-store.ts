@@ -119,16 +119,7 @@ function mem_store(this: any, options: any) {
               const updated_ent = intern.update_ent(entmap, ent, match_by, public_entdata)
 
               if (updated_ent) {
-                // TODO: DRY up.
-                //
-                seneca.log.debug(function() {
-                  return [
-                    'save/upsert',
-                    updated_ent.canon$({ string: 1 }),
-                    updated_ent,
-                    desc
-                  ]
-                })
+                seneca.log.debug(debug_log('save/upsert', updated_ent, updated_ent))
 
                 return reply(null, updated_ent)
               }
@@ -138,18 +129,23 @@ function mem_store(this: any, options: any) {
 
         prev = entmap[base][name][mement.id] = mement
 
-        // TODO: DRY up.
-        //
-        seneca.log.debug(function() {
-          return [
-            'save/' + (intern.is_new(msg.ent) ? 'insert' : 'update'),
+        seneca.log.debug(debug_log(
+          'save/' + (intern.is_new(msg.ent) ? 'insert' : 'update'),
+          ent,
+          mement
+        ))
+
+        return reply(null, ent.make$(prev))
+
+
+        function debug_log(msg: string, ent: any, mement: any): Function {
+          return () => [
+            msg,
             ent.canon$({ string: 1 }),
             mement,
             desc
           ]
-        })
-
-        return reply(null, ent.make$(prev))
+        }
       }
 
       // We will still use do_save to save the entity but
