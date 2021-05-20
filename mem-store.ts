@@ -81,27 +81,8 @@ function mem_store(this: any, options: any) {
       // The actual save logic for saving or
       // creating and then saving the entity.
       function do_save(id?: any, isnew?: boolean) {
-        let mement = ent.data$(true, 'string')
-
-        if (null != id) {
-          mement.id = id
-        }
-
         entmap[base] = entmap[base] || {}
         entmap[base][name] = entmap[base][name] || {}
-
-        let prev = entmap[base][name][mement.id]
-        if (isnew && prev) {
-          seneca.fail('entity-id-exists', { type: ent.entity$, id: mement.id })
-          return
-        }
-
-        mement = seneca.util.deep(mement)
-        const should_merge = intern.should_merge(ent, options)
-
-        if (should_merge) {
-          mement = Object.assign(prev || {}, mement)
-        }
 
         if (intern.is_upsert_requested(msg)) {
           const upsert_on = intern.clean_array(msg.q.upsert$)
@@ -126,6 +107,27 @@ function mem_store(this: any, options: any) {
             }
           }
         }
+
+
+        let mement = ent.data$(true, 'string')
+
+        if (null != id) {
+          mement.id = id
+        }
+
+        let prev = entmap[base][name][mement.id]
+        if (isnew && prev) {
+          seneca.fail('entity-id-exists', { type: ent.entity$, id: mement.id })
+          return
+        }
+
+        mement = seneca.util.deep(mement)
+        const should_merge = intern.should_merge(ent, options)
+
+        if (should_merge) {
+          mement = Object.assign(prev || {}, mement)
+        }
+
 
         prev = entmap[base][name][mement.id] = mement
 
