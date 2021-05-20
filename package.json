@@ -48,6 +48,7 @@
     "prettier": "2.3.0",
     "seneca": "3.23.3",
     "seneca-entity": "13.0.0",
+    "seneca-plugin-validator": "0.6.1",
     "seneca-promisify": "2.0.0",
     "seneca-store-test": "senecajs/seneca-store-test",
     "typescript": "4.2.4"

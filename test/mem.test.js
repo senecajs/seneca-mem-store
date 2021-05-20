@@ -10,6 +10,8 @@ const Util = require('util')
 const Assert = require('assert')
 const Seneca = require('seneca')
 const Shared = require('seneca-store-test')
+const Path = require('path')
+const MakePluginValidator = require('seneca-plugin-validator')
 
 const Lab = require('@hapi/lab')
 const Code = require('@hapi/code')
@@ -63,6 +65,14 @@ const test_opts = {
 
 Shared.test.init(lab, test_opts)
 Shared.test.keyvalue(lab, test_opts)
+
+describe('mem-store', () => {
+  it('is a plugin', fin => {
+    const validatePlugin = MakePluginValidator(require('..'), module)
+
+    validatePlugin().then(fin).catch(fin)
+  })
+})
 
 describe('mem-store tests', function () {
   Shared.basictest({
