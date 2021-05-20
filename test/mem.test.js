@@ -624,7 +624,7 @@ describe('mem-store tests', function () {
   })
 })
 
-describe('edge cases', function () {
+describe('additional mem-store tests', function () {
   let seneca
 
   beforeEach(() => {
@@ -647,10 +647,8 @@ describe('edge cases', function () {
       seneca.test(fin)
 
 
-      const fail = seneca.fail
-
       seneca.fail = function (...args) {
-        expect(args.length > 0).to.equal(true)
+        expect(0 < args.length).to.equal(true)
         expect(args[0]).to.equal('entity-id-exists')
 
         return fin()
@@ -756,6 +754,51 @@ describe('edge cases', function () {
         })
     })
   })
+
+  describe('the "entity$" field when saving an entity', () => {
+    it('stores the "entity$" field with each entity', fin => {
+      const product_ent = seneca.entity('default_zone', 'sys', 'product')
+
+      product_ent
+        .data$({})
+        .save$((err, saved_product) => {
+          if (err) {
+            return fin(err)
+          }
+
+          if (null == saved_product) {
+            return fin(new Error('Expected the product to be saved'))
+          }
+
+          if (null == saved_product.id) {
+            return fin(new Error('Expected the saved product to have an id'))
+          }
+
+          try {
+            expect(saved_product.entity$).to.equal('default_zone/sys/product')
+          } catch (err) {
+            return fin(err)
+          }
+
+          const { id: product_id } = saved_product
+
+          product_ent
+            .load$(product_id, (err, product) => {
+              if (err) {
+                return fin(err)
+              }
+
+              try {
+                expect(product.entity$).to.equal('default_zone/sys/product')
+              } catch (err) {
+                return fin(err)
+              }
+
+              return fin()
+            })
+        })
+    })
+  })
 })
 
 function make_it(lab) {
@@ -774,3 +817,4 @@ function make_it(lab) {
     )
   }
 }
+

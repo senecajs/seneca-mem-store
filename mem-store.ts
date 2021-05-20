@@ -87,8 +87,6 @@ function mem_store(this: any, options: any) {
           mement.id = id
         }
 
-        mement.entity$ = ent.entity$
-
         entmap[base] = entmap[base] || {}
         entmap[base][name] = entmap[base][name] || {}
 
