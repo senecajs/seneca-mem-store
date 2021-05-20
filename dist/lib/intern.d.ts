@@ -1,7 +1,9 @@
-export declare function is_new(ent: any): boolean;
-export declare function is_upsert_requested(msg: any): boolean;
-export declare function find_ent(entmap: any, base_ent: any, filter: any): any;
-export declare function update_ent(entmap: any, base_ent: any, filter: any, new_attrs: any): any;
-export declare function should_merge(ent: any, plugin_opts: any): boolean;
-export declare function listents(seneca: any, entmap: any, qent: any, q: any, done: any): void;
-export declare function clean_array(ary: string[]): string[];
+export declare class intern {
+    static is_new(ent: any): boolean;
+    static is_upsert_requested(msg: any): boolean;
+    static find_ent(entmap: any, base_ent: any, filter: any): any;
+    static update_ent(entmap: any, base_ent: any, filter: any, new_attrs: any): any;
+    static should_merge(ent: any, plugin_opts: any): boolean;
+    static listents(seneca: any, entmap: any, qent: any, q: any, done: any): void;
+    static clean_array(ary: string[]): string[];
+}

@@ -1,26 +1,7 @@
 /* Copyright (c) 2010-2020 Richard Rodger and other contributors, MIT License */
 'use strict';
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const Intern = __importStar(require("./lib/intern"));
+const intern_1 = require("./lib/intern");
 let internals = {
     name: 'mem-store'
 };
@@ -32,7 +13,7 @@ module.exports.defaults = {
 /* NOTE: `intern` serves as a namespace for utility functions used by
  * the mem store.
  */
-module.exports.intern = Intern;
+module.exports.intern = intern_1.intern;
 function mem_store(options) {
     let seneca = this;
     let init = seneca.export('entity/init');
@@ -75,67 +56,65 @@ function mem_store(options) {
             // if we are do a create, otherwise
             // we will do a save instead
             //
-            const is_new = Intern.is_new(ent);
+            const is_new = intern_1.intern.is_new(ent);
             return is_new ? do_create() : do_save();
             // The actual save logic for saving or
             // creating and then saving the entity.
             function do_save(id, isnew) {
+                entmap[base] = entmap[base] || {};
+                entmap[base][name] = entmap[base][name] || {};
+                // NOTE: It looks like `ent` is stripped of any private fields
+                // at this point, hence the `ent.data$(true)` does not actually
+                // leak private fields into saved entities. The line of code in
+                // the snippet below, for example, does not save the user.psst$
+                // field along with the entity:
+                //
+                // app.make('user').data$({ psst$: 'private' }).save$()
+                //
+                // This can be verified by logging the mement object below.
+                //
                 let mement = ent.data$(true, 'string');
+                if (intern_1.intern.is_upsert_requested(msg)) {
+                    const upsert_on = intern_1.intern.clean_array(msg.q.upsert$);
+                    if (0 < upsert_on.length) {
+                        const has_upsert_fields = upsert_on.every((p) => p in mement);
+                        if (has_upsert_fields) {
+                            const match_by = upsert_on.reduce((h, p) => {
+                                h[p] = mement[p];
+                                return h;
+                            }, {});
+                            const updated_ent = intern_1.intern.update_ent(entmap, ent, match_by, mement);
+                            if (updated_ent) {
+                                seneca.log.debug(debug_log('save/upsert', updated_ent, updated_ent));
+                                return reply(null, updated_ent);
+                            }
+                        }
+                    }
+                }
                 if (null != id) {
                     mement.id = id;
                 }
-                mement.entity$ = ent.entity$;
-                entmap[base] = entmap[base] || {};
-                entmap[base][name] = entmap[base][name] || {};
                 let prev = entmap[base][name][mement.id];
                 if (isnew && prev) {
                     seneca.fail('entity-id-exists', { type: ent.entity$, id: mement.id });
                     return;
                 }
                 mement = seneca.util.deep(mement);
-                const should_merge = Intern.should_merge(ent, options);
+                const should_merge = intern_1.intern.should_merge(ent, options);
                 if (should_merge) {
                     mement = Object.assign(prev || {}, mement);
                 }
-                if (Intern.is_upsert_requested(msg)) {
-                    const upsert_on = Intern.clean_array(msg.q.upsert$);
-                    if (0 < upsert_on.length) {
-                        const public_entdata = ent.data$(false);
-                        const may_match = upsert_on.every((p) => p in public_entdata);
-                        if (may_match) {
-                            const match_by = upsert_on.reduce((h, p) => {
-                                h[p] = public_entdata[p];
-                                return h;
-                            }, {});
-                            const updated_ent = Intern.update_ent(entmap, ent, match_by, public_entdata);
-                            if (updated_ent) {
-                                // TODO: DRY up.
-                                //
-                                seneca.log.debug(function () {
-                                    return [
-                                        'save/upsert',
-                                        updated_ent.canon$({ string: 1 }),
-                                        updated_ent,
-                                        desc
-                                    ];
-                                });
-                                return reply(null, updated_ent);
-                            }
-                        }
-                    }
-                }
                 prev = entmap[base][name][mement.id] = mement;
-                // TODO: DRY up.
-                //
-                seneca.log.debug(function () {
-                    return [
-                        'save/' + (Intern.is_new(msg.ent) ? 'insert' : 'update'),
+                seneca.log.debug(debug_log('save/' + (intern_1.intern.is_new(msg.ent) ? 'insert' : 'update'), ent, mement));
+                return reply(null, ent.make$(prev));
+                function debug_log(msg, ent, mement) {
+                    return () => [
+                        msg,
                         ent.canon$({ string: 1 }),
                         mement,
                         desc
                     ];
-                });
-                return reply(null, ent.make$(prev));
+                }
             }
             // We will still use do_save to save the entity but
             // we need a place to handle new entites and id concerns.
@@ -179,7 +158,7 @@ function mem_store(options) {
         load: function (msg, reply) {
             let qent = msg.qent;
             let q = msg.q;
-            return Intern.listents(this, entmap, qent, q, function (err, list) {
+            return intern_1.intern.listents(this, entmap, qent, q, function (err, list) {
                 let ent = list[0] || null;
                 this.log.debug(function () {
                     return ['load', q, qent.canon$({ string: 1 }), ent, desc];
@@ -190,7 +169,7 @@ function mem_store(options) {
         list: function (msg, reply) {
             let qent = msg.qent;
             let q = msg.q;
-            return Intern.listents(this, entmap, qent, q, function (err, list) {
+            return intern_1.intern.listents(this, entmap, qent, q, function (err, list) {
                 this.log.debug(function () {
                     return [
                         'list',
@@ -211,7 +190,7 @@ function mem_store(options) {
             let all = q.all$;
             // default false
             let load = q.load$ === true;
-            return Intern.listents(seneca, entmap, qent, q, function (err, list) {
+            return intern_1.intern.listents(seneca, entmap, qent, q, function (err, list) {
                 if (err) {
                     return reply(err);
                 }
