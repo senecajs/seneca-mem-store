@@ -84,20 +84,33 @@ function mem_store(this: any, options: any) {
         entmap[base] = entmap[base] || {}
         entmap[base][name] = entmap[base][name] || {}
 
+
+        // NOTE: It looks like `ent` is stripped of any private fields
+        // at this point, hence the `ent.data$(true)` does not actually
+        // leak private fields into saved entities. The line of code in
+        // the snippet below, for example, does not save the user.psst$
+        // field along with the entity:
+        //
+        // app.make('user').data$({ psst$: 'private' }).save$()
+        //
+        // This can be verified by logging the mement object below.
+        //
+        let mement = ent.data$(true, 'string')
+
+
         if (intern.is_upsert_requested(msg)) {
           const upsert_on = intern.clean_array(msg.q.upsert$)
 
           if (0 < upsert_on.length) {
-            const public_entdata = ent.data$(false)
-            const has_upsert_fields = upsert_on.every((p: string) => p in public_entdata)
+            const has_upsert_fields = upsert_on.every((p: string) => p in mement)
 
             if (has_upsert_fields) {
               const match_by = upsert_on.reduce((h: any, p: string) => {
-                h[p] = public_entdata[p]
+                h[p] = mement[p]
                 return h
               }, {})
 
-              const updated_ent = intern.update_ent(entmap, ent, match_by, public_entdata)
+              const updated_ent = intern.update_ent(entmap, ent, match_by, mement)
 
               if (updated_ent) {
                 seneca.log.debug(debug_log('save/upsert', updated_ent, updated_ent))
@@ -108,8 +121,6 @@ function mem_store(this: any, options: any) {
           }
         }
 
-
-        let mement = ent.data$(true, 'string')
 
         if (null != id) {
           mement.id = id
