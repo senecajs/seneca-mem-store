@@ -110,7 +110,7 @@ function mem_store(this: any, options: any) {
                 return h
               }, {})
 
-              const updated_ent = intern.update_ent(entmap, ent, match_by, mement)
+              const updated_ent = intern.update_mement(entmap, ent, match_by, mement)
 
               if (updated_ent) {
                 seneca.log.debug(debug_log('save/upsert', updated_ent, updated_ent))

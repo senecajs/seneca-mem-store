@@ -303,7 +303,7 @@ describe('mem-store tests', function () {
     const mem_store = seneca.export('mem-store')
     const { intern } = mem_store.init
 
-    describe('find_ent', () => {
+    describe('find_mement', () => {
       const ent_base = 'sys'
       const ent_name = 'product'
 
@@ -318,7 +318,7 @@ describe('mem-store tests', function () {
         it('cannot match', fin => {
           const ent = seneca.make('sys', 'product')
           const filter = { label: 'lorem ipsum' }
-          const result = intern.find_ent(entmap, ent, filter)
+          const result = intern.find_mement(entmap, ent, filter)
 
           expect(result).to.equal(null)
 
@@ -345,7 +345,7 @@ describe('mem-store tests', function () {
         it('cannot match', fin => {
           const ent = seneca.make(ent_base, 'product')
           const filter = { label: 'lorem ipsum' }
-          const result = intern.find_ent(entmap, ent, filter)
+          const result = intern.find_mement(entmap, ent, filter)
 
           expect(result).to.equal(null)
 
@@ -372,7 +372,7 @@ describe('mem-store tests', function () {
         it('cannot match', fin => {
           const ent = seneca.make(ent_base, ent_name)
           const filter = { label: 'lorem ipsum', bar: 'baz' }
-          const result = intern.find_ent(entmap, ent, filter)
+          const result = intern.find_mement(entmap, ent, filter)
 
           expect(result).to.equal(null)
 
@@ -400,7 +400,7 @@ describe('mem-store tests', function () {
         it('cannot match', fin => {
           const ent = seneca.make(ent_base, ent_name)
           const filter = { label: 'lorem ipsum', price: '0.95' }
-          const result = intern.find_ent(entmap, ent, filter)
+          const result = intern.find_mement(entmap, ent, filter)
 
           expect(result).to.equal(null)
 
@@ -431,7 +431,7 @@ describe('mem-store tests', function () {
         it('returns the match', fin => {
           const ent = seneca.make(ent_base, ent_name)
           const filter = { label: 'lorem ipsum', price: '2.34' }
-          const result = intern.find_ent(entmap, ent, filter)
+          const result = intern.find_mement(entmap, ent, filter)
 
           expect(result).to.equal(some_product)
 
@@ -461,7 +461,7 @@ describe('mem-store tests', function () {
 
         it('returns the first document it comes across', fin => {
           const ent = seneca.make(ent_base, ent_name)
-          const result = intern.find_ent(entmap, ent, {})
+          const result = intern.find_mement(entmap, ent, {})
 
           expect(result).to.equal(some_product)
 

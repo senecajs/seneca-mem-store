@@ -38,7 +38,7 @@ export class intern {
   }
 
 
-  static find_ent(entmap: any, base_ent: any, filter: any): any {
+  static find_mement(entmap: any, base_ent: any, filter: any): any {
     const { base, name } = base_ent.canon$({ object: true })
 
     if (!(base in entmap)) {
@@ -72,8 +72,8 @@ export class intern {
   }
 
 
-  static update_ent(entmap: any, base_ent: any, filter: any, new_attrs: any) {
-    const ent_to_update = intern.find_ent(entmap, base_ent, filter)
+  static update_mement(entmap: any, base_ent: any, filter: any, new_attrs: any) {
+    const ent_to_update = intern.find_mement(entmap, base_ent, filter)
 
     if (ent_to_update) {
       Object.assign(ent_to_update, new_attrs)
