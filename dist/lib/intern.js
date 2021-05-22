@@ -37,7 +37,7 @@ class intern {
         const { ent, q } = msg;
         return intern.is_new(ent) && Array.isArray(q.upsert$);
     }
-    static find_ent(entmap, base_ent, filter) {
+    static find_mement(entmap, base_ent, filter) {
         const { base, name } = base_ent.canon$({ object: true });
         if (!(base in entmap)) {
             return null;
@@ -61,8 +61,8 @@ class intern {
         }
         return ent;
     }
-    static update_ent(entmap, base_ent, filter, new_attrs) {
-        const ent_to_update = intern.find_ent(entmap, base_ent, filter);
+    static update_mement(entmap, base_ent, filter, new_attrs) {
+        const ent_to_update = intern.find_mement(entmap, base_ent, filter);
         if (ent_to_update) {
             Object.assign(ent_to_update, new_attrs);
             return ent_to_update;

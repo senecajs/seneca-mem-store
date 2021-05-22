@@ -83,7 +83,7 @@ function mem_store(options) {
                                 h[p] = mement[p];
                                 return h;
                             }, {});
-                            const updated_ent = intern_1.intern.update_ent(entmap, ent, match_by, mement);
+                            const updated_ent = intern_1.intern.update_mement(entmap, ent, match_by, mement);
                             if (updated_ent) {
                                 seneca.log.debug(debug_log('save/upsert', updated_ent, updated_ent));
                                 return reply(null, updated_ent);
