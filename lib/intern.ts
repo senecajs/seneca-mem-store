@@ -40,16 +40,12 @@ export class intern {
 
   static find_mement(entmap: any, base_ent: any, filter: any): any {
     const { base, name } = base_ent.canon$({ object: true })
+    const entset = entmap[base] && entmap[base][name]
 
-    if (!(base in entmap)) {
+    if (null == entset) {
       return null
     }
 
-    if (!(name in entmap[base])) {
-      return null
-    }
-
-    const entset = entmap[base][name]
     const ents = Object.values(entset)
 
     const ent = ents.find((ent: any) => {
