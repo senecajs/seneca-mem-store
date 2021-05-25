@@ -88,15 +88,7 @@ export class intern {
 
 
   static should_merge(ent: any, plugin_opts: any): boolean {
-    if (plugin_opts.merge !== false && ent.merge$ === false) {
-      return false
-    }
-
-    if (plugin_opts.merge === false && ent.merge$ !== true) {
-      return false
-    }
-
-    return true
+    return !(false === plugin_opts.merge || false === ent.merge$)
   }
 
 
