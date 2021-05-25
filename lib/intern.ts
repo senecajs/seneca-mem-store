@@ -46,9 +46,22 @@ export class intern {
       return null
     }
 
-    const ents = Object.values(entset)
 
-    const ent = ents.find((ent: any) => {
+    let out = null
+
+    for (const ent_id in entset) {
+      const mement = entset[ent_id]
+
+      if (matches(mement, filter)) {
+        out = mement
+        break
+      }
+    }
+
+    return out
+
+
+    function matches(ent: any, filter: any): boolean {
       for (const fp in filter) {
         if (fp in ent && filter[fp] === ent[fp]) {
           continue
@@ -58,13 +71,7 @@ export class intern {
       }
       
       return true
-    })
-
-    if (!ent) {
-      return null
     }
-
-    return ent
   }
 
 
