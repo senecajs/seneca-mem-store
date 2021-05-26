@@ -10,7 +10,6 @@ const Util = require('util')
 const Assert = require('assert')
 const Seneca = require('seneca')
 const Shared = require('seneca-store-test')
-const Path = require('path')
 const MakePluginValidator = require('seneca-plugin-validator')
 
 const Lab = require('@hapi/lab')
