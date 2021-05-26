@@ -95,11 +95,35 @@ function mem_store(this: any, options: any) {
         //
         // This can be verified by logging the mement object below.
         //
-        let mement = ent.data$(true, 'string')
+        const mement = ent.data$(true, 'string')
 
+
+        let result_ent: any = null
+        let operation: string | null = null
 
         if (intern.is_upsert_requested(msg)) {
-          const upsert_on = intern.clean_array(msg.q.upsert$)
+          operation = 'upsert'
+          result_ent = try_upsert(mement, msg)
+        }
+
+        if (null == result_ent) {
+          operation = intern.is_new(msg.ent) ? 'insert' : 'update'
+          result_ent = complete_save(mement, msg, id, isnew)
+        }
+
+        seneca.log.debug(() => [
+          'save/' + operation,
+          ent.canon$({ string: 1 }),
+          result_ent,
+          desc
+        ])
+
+        return reply(null, ent.make$(result_ent))
+
+
+        function try_upsert(mement: any, msg: any) {
+          const { q, ent } = msg
+          const upsert_on = intern.clean_array(q.upsert$)
 
           if (0 < upsert_on.length) {
             const has_upsert_fields = upsert_on.every((p: string) => p in mement)
@@ -112,52 +136,41 @@ function mem_store(this: any, options: any) {
 
               const updated_ent = intern.update_mement(entmap, ent, match_by, mement)
 
-              if (updated_ent) {
-                seneca.log.debug(debug_log('save/upsert', updated_ent, updated_ent))
+              // TODO: Make sure client cannot manipulate memory directly via updated_ent.
+              //
 
-                return reply(null, updated_ent)
-              }
+              return updated_ent
             }
           }
+
+          return null
         }
 
 
-        if (null != id) {
-          mement.id = id
-        }
+        function complete_save(mement: any, msg: any, id?: any, isnew?: boolean) {
+          const { ent } = msg
 
-        let prev = entmap[base][name][mement.id]
-        if (isnew && prev) {
-          seneca.fail('entity-id-exists', { type: ent.entity$, id: mement.id })
-          return
-        }
+          if (null != id) {
+            mement.id = id
+          }
 
-        mement = seneca.util.deep(mement)
-        const should_merge = intern.should_merge(ent, options)
+          const prev = entmap[base][name][mement.id]
+          if (isnew && prev) {
+            seneca.fail('entity-id-exists', { type: ent.entity$, id: mement.id })
+            return
+          }
 
-        if (should_merge) {
-          mement = Object.assign(prev || {}, mement)
-        }
+          mement = seneca.util.deep(mement)
+          const should_merge = intern.should_merge(ent, options)
 
-
-        prev = entmap[base][name][mement.id] = mement
-
-        seneca.log.debug(debug_log(
-          'save/' + (intern.is_new(msg.ent) ? 'insert' : 'update'),
-          ent,
-          mement
-        ))
-
-        return reply(null, ent.make$(prev))
+          if (should_merge) {
+            mement = Object.assign(prev || {}, mement)
+          }
 
 
-        function debug_log(msg: string, ent: any, mement: any): Function {
-          return () => [
-            msg,
-            ent.canon$({ string: 1 }),
-            mement,
-            desc
-          ]
+          entmap[base][name][mement.id] = mement
+
+          return mement
         }
       }
 
