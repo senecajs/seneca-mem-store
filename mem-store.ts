@@ -101,7 +101,7 @@ function mem_store(this: any, options: any) {
         let mement_ptr: any = null
         let operation: string | null = null
 
-        if (intern.is_upsert_requested(msg)) {
+        if (intern.is_upsert(msg)) {
           operation = 'upsert'
           mement_ptr = try_upsert(mement, msg)
         }
