@@ -73,9 +73,28 @@ function mem_store(options) {
                 //
                 // This can be verified by logging the mement object below.
                 //
-                let mement = ent.data$(true, 'string');
-                if (intern_1.intern.is_upsert_requested(msg)) {
-                    const upsert_on = intern_1.intern.clean_array(msg.q.upsert$);
+                const mement = ent.data$(true, 'string');
+                let mement_ptr = null;
+                let operation = null;
+                if (intern_1.intern.is_upsert(msg)) {
+                    operation = 'upsert';
+                    mement_ptr = try_upsert(mement, msg);
+                }
+                if (null == mement_ptr) {
+                    operation = intern_1.intern.is_new(msg.ent) ? 'insert' : 'update';
+                    mement_ptr = complete_save(mement, msg, id, isnew);
+                }
+                seneca.log.debug(() => [
+                    'save/' + operation,
+                    ent.canon$({ string: 1 }),
+                    mement_ptr,
+                    desc
+                ]);
+                const result_mement = seneca.util.deep(mement_ptr);
+                return reply(null, ent.make$(result_mement));
+                function try_upsert(mement, msg) {
+                    const { q, ent } = msg;
+                    const upsert_on = intern_1.intern.clean_array(q.upsert$);
                     if (0 < upsert_on.length) {
                         const has_upsert_fields = upsert_on.every((p) => p in mement);
                         if (has_upsert_fields) {
@@ -84,36 +103,27 @@ function mem_store(options) {
                                 return h;
                             }, {});
                             const updated_ent = intern_1.intern.update_mement(entmap, ent, match_by, mement);
-                            if (updated_ent) {
-                                seneca.log.debug(debug_log('save/upsert', updated_ent, updated_ent));
-                                return reply(null, updated_ent);
-                            }
+                            return updated_ent;
                         }
                     }
+                    return null;
                 }
-                if (null != id) {
-                    mement.id = id;
-                }
-                let prev = entmap[base][name][mement.id];
-                if (isnew && prev) {
-                    seneca.fail('entity-id-exists', { type: ent.entity$, id: mement.id });
-                    return;
-                }
-                mement = seneca.util.deep(mement);
-                const should_merge = intern_1.intern.should_merge(ent, options);
-                if (should_merge) {
-                    mement = Object.assign(prev || {}, mement);
-                }
-                prev = entmap[base][name][mement.id] = mement;
-                seneca.log.debug(debug_log('save/' + (intern_1.intern.is_new(msg.ent) ? 'insert' : 'update'), ent, mement));
-                return reply(null, ent.make$(prev));
-                function debug_log(msg, ent, mement) {
-                    return () => [
-                        msg,
-                        ent.canon$({ string: 1 }),
-                        mement,
-                        desc
-                    ];
+                function complete_save(mement, msg, id, isnew) {
+                    const { ent } = msg;
+                    if (null != id) {
+                        mement.id = id;
+                    }
+                    const prev = entmap[base][name][mement.id];
+                    if (isnew && prev) {
+                        seneca.fail('entity-id-exists', { type: ent.entity$, id: mement.id });
+                        return;
+                    }
+                    const should_merge = intern_1.intern.should_merge(ent, options);
+                    if (should_merge) {
+                        mement = Object.assign(prev || {}, mement);
+                    }
+                    entmap[base][name][mement.id] = mement;
+                    return mement;
                 }
             }
             // We will still use do_save to save the entity but

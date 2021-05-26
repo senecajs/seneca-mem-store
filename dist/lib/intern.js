@@ -33,21 +33,26 @@ class intern {
         // 
         return null != ent && null == ent.id;
     }
-    static is_upsert_requested(msg) {
+    static is_upsert(msg) {
         const { ent, q } = msg;
         return intern.is_new(ent) && Array.isArray(q.upsert$);
     }
     static find_mement(entmap, base_ent, filter) {
         const { base, name } = base_ent.canon$({ object: true });
-        if (!(base in entmap)) {
+        const entset = entmap[base] && entmap[base][name];
+        if (null == entset) {
             return null;
         }
-        if (!(name in entmap[base])) {
-            return null;
+        let out = null;
+        for (const ent_id in entset) {
+            const mement = entset[ent_id];
+            if (matches(mement, filter)) {
+                out = mement;
+                break;
+            }
         }
-        const entset = entmap[base][name];
-        const ents = Object.values(entset);
-        const ent = ents.find((ent) => {
+        return out;
+        function matches(ent, filter) {
             for (const fp in filter) {
                 if (fp in ent && filter[fp] === ent[fp]) {
                     continue;
@@ -55,11 +60,7 @@ class intern {
                 return false;
             }
             return true;
-        });
-        if (!ent) {
-            return null;
         }
-        return ent;
     }
     static update_mement(entmap, base_ent, filter, new_attrs) {
         const ent_to_update = intern.find_mement(entmap, base_ent, filter);
@@ -70,13 +71,7 @@ class intern {
         return null;
     }
     static should_merge(ent, plugin_opts) {
-        if (plugin_opts.merge !== false && ent.merge$ === false) {
-            return false;
-        }
-        if (plugin_opts.merge === false && ent.merge$ !== true) {
-            return false;
-        }
-        return true;
+        return !(false === plugin_opts.merge || false === ent.merge$);
     }
     // NOTE: Seneca supports a reasonable set of features
     // in terms of listing. This function can handle
