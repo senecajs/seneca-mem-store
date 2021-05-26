@@ -16,7 +16,7 @@ const Lab = require('@hapi/lab')
 const Code = require('@hapi/code')
 const { expect } = Code
 const lab = (exports.lab = Lab.script())
-const { describe, beforeEach, before } = lab
+const { describe, before } = lab
 const it = make_it(lab)
 
 function makeSenecaForTest(opts = {}) {
@@ -317,7 +317,7 @@ describe('mem-store tests', function () {
       describe('no such entities exist', () => {
         let entmap
 
-        beforeEach(async () => {
+        before(async () => {
           entmap = {}
         })
 
@@ -335,7 +335,7 @@ describe('mem-store tests', function () {
       describe('same entity base, different entity name', () => {
         let entmap
 
-        beforeEach(async () => {
+        before(async () => {
           entmap = {
             [ent_base]: {
               artist: {
@@ -362,7 +362,7 @@ describe('mem-store tests', function () {
       describe('filter has more fields than the entity', () => {
         let entmap
 
-        beforeEach(async () => {
+        before(async () => {
           entmap = {
             [ent_base]: {
               [ent_name]: {
@@ -389,7 +389,7 @@ describe('mem-store tests', function () {
       describe('some field mismatches', () => {
         let entmap
 
-        beforeEach(async () => {
+        before(async () => {
           entmap = {
             [ent_base]: {
               [ent_name]: {
@@ -424,7 +424,7 @@ describe('mem-store tests', function () {
         
         let entmap
 
-        beforeEach(async () => {
+        before(async () => {
           entmap = {
             sys: {
               product: {
@@ -455,7 +455,7 @@ describe('mem-store tests', function () {
         
         let entmap
 
-        beforeEach(async () => {
+        before(async () => {
           entmap = {
             sys: {
               product: {
@@ -489,7 +489,7 @@ describe('mem-store tests', function () {
       describe('passed an entity that has not been saved yet', () => {
         let product
 
-        beforeEach(() => {
+        before(() => {
           product = seneca.make('product')
             .data$({ label: 'Legions of Rome' })
         })
@@ -505,7 +505,7 @@ describe('mem-store tests', function () {
       describe('passed an entity that has been saved before', () => {
         let product
 
-        beforeEach(() => {
+        before(() => {
           return new Promise((resolve, reject) => {
             seneca.make('product')
               .data$({ label: 'Legions of Rome' })
@@ -532,7 +532,7 @@ describe('mem-store tests', function () {
       describe('passed a new entity, but also an id arg', () => {
         let product
 
-        beforeEach(() => {
+        before(() => {
           product = seneca.make('product')
             .data$({ id: 'my_precious', label: 'Legions of Rome' })
         })
@@ -564,7 +564,7 @@ describe('mem-store tests', function () {
         describe('when an entity with the same base, name, id exists', () => {
           let entmap
 
-          beforeEach(async () => {
+          before(async () => {
             entmap = {
               [ent_base]: {
                 [ent_name]: {
@@ -606,7 +606,7 @@ describe('mem-store tests', function () {
 
           let entmap
 
-          beforeEach(async () => {
+          before(async () => {
             entmap = {
               [ent_base]: {
                 [ent_name]: {
@@ -643,13 +643,13 @@ describe('mem-store tests', function () {
 describe('additional mem-store tests', function () {
   let seneca
 
-  beforeEach(() => {
+  before(() => {
     // NOTE: This is how we are ensuring a clear mem store for each test.
     //
     seneca = makeSenecaForTest()
   })
 
-  beforeEach(() => new Promise(fin => {
+  before(() => new Promise(fin => {
     seneca.ready(fin)
   }))
 
@@ -694,7 +694,7 @@ describe('additional mem-store tests', function () {
   })
 
   describe('when data.id$ is null', () => {
-    beforeEach(() => {
+    before(() => {
       return seneca.make('sys', 'product')
         .data$({ id$: null, label: 'lorem ipsum' })
         .save$()
@@ -737,7 +737,7 @@ describe('additional mem-store tests', function () {
       }
     })
 
-    beforeEach(() => {
+    before(() => {
       return seneca.make('sys', 'product')
         .data$({ label: 'lorem ipsum' })
         .save$()
