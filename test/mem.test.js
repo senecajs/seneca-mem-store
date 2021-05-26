@@ -28,7 +28,7 @@ function makeSenecaForTest(opts = {}) {
   const { mem_store_opts = {} } = opts
   seneca.use({ name: '..', tag: '1' }, mem_store_opts)
 
-  if (seneca.version >= '2.0.0') {
+  if ('2.0.0' <= seneca.version) {
     seneca.use('entity', { mem_store: false })
   }
 
@@ -46,7 +46,7 @@ const senecaMerge = Seneca({
 })
 senecaMerge.use({ name: '..', tag: '1' }, { merge: false })
 
-if (seneca.version >= '2.0.0') {
+if ('2.0.0' <= seneca.version) {
   seneca.use('entity', { mem_store: false })
   senecaMerge.use('entity', { mem_store: false })
 }
@@ -170,7 +170,14 @@ describe('mem-store tests', function () {
 
                   seneca.act('role:mem-store, cmd:export', function (err, out) {
                     Assert.equal(
-                      '{"foo":{"bar":{"aaa":{"id":"aaa","a":2},"bbb":{"id":"bbb","a":3}}}}',
+                      JSON.stringify({
+                        foo: {
+                          bar: {
+                            aaa: { id: 'aaa', a: 2 },
+                            bbb: { id: 'bbb', a: 3 }
+                          }
+                        }
+                      }),
                       out.json
                     )
                     fin()
@@ -587,7 +594,7 @@ describe('mem-store tests', function () {
           })
         })
 
-        describe('when an entity with the same base, name, but not id exists', () => {
+        describe('entity with the same base, name, but not id exists', () => {
           const product_id = 'foobaz'
 
           const product = {
