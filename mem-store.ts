@@ -98,27 +98,29 @@ function mem_store(this: any, options: any) {
         const mement = ent.data$(true, 'string')
 
 
-        let result_ent: any = null
+        let mement_ptr: any = null
         let operation: string | null = null
 
         if (intern.is_upsert_requested(msg)) {
           operation = 'upsert'
-          result_ent = try_upsert(mement, msg)
+          mement_ptr = try_upsert(mement, msg)
         }
 
-        if (null == result_ent) {
+        if (null == mement_ptr) {
           operation = intern.is_new(msg.ent) ? 'insert' : 'update'
-          result_ent = complete_save(mement, msg, id, isnew)
+          mement_ptr = complete_save(mement, msg, id, isnew)
         }
 
         seneca.log.debug(() => [
           'save/' + operation,
           ent.canon$({ string: 1 }),
-          result_ent,
+          mement_ptr,
           desc
         ])
 
-        return reply(null, ent.make$(result_ent))
+        const result_mement = seneca.util.deep(mement_ptr)
+
+        return reply(null, ent.make$(result_mement))
 
 
         function try_upsert(mement: any, msg: any) {
@@ -135,9 +137,6 @@ function mem_store(this: any, options: any) {
               }, {})
 
               const updated_ent = intern.update_mement(entmap, ent, match_by, mement)
-
-              // TODO: Make sure client cannot manipulate memory directly via updated_ent.
-              //
 
               return updated_ent
             }
@@ -160,7 +159,6 @@ function mem_store(this: any, options: any) {
             return
           }
 
-          mement = seneca.util.deep(mement)
           const should_merge = intern.should_merge(ent, options)
 
           if (should_merge) {
