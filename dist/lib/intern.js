@@ -137,7 +137,7 @@ class intern {
             }
         }
         // Always sort first, this is the 'expected' behaviour.
-        if (q.sort$) {
+        if (null != q && q.sort$) {
             let sf;
             for (sf in q.sort$) {
                 break;
@@ -148,15 +148,15 @@ class intern {
             });
         }
         // Skip before limiting.
-        if (q.skip$ && q.skip$ > 0) {
+        if (null != q && q.skip$ && q.skip$ > 0) {
             list = list.slice(q.skip$);
         }
         // Limited the possibly sorted and skipped list.
-        if (q.limit$ && q.limit$ >= 0) {
+        if (null != q && q.limit$ && q.limit$ >= 0) {
             list = list.slice(0, q.limit$);
         }
         // Prune fields
-        if (q.fields$) {
+        if (null != q && q.fields$) {
             for (let i = 0; i < list.length; i++) {
                 let entfields = list[i].fields$();
                 for (let j = 0; j < entfields.length; j++) {
