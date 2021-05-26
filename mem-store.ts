@@ -149,15 +149,19 @@ function mem_store(this: any, options: any) {
         function complete_save(mement: any, msg: any, id?: any, isnew?: boolean) {
           const { ent } = msg
 
+
           if (null != id) {
             mement.id = id
           }
 
+
           const prev = entmap[base][name][mement.id]
+
           if (isnew && prev) {
             seneca.fail('entity-id-exists', { type: ent.entity$, id: mement.id })
             return
           }
+
 
           const should_merge = intern.should_merge(ent, options)
 

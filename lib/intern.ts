@@ -32,7 +32,7 @@ export class intern {
   }
 
 
-  static is_upsert_requested(msg: any): boolean {
+  static is_upsert(msg: any): boolean {
     const { ent, q } = msg
     return intern.is_new(ent) && Array.isArray(q.upsert$)
   }
