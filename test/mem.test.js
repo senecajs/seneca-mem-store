@@ -641,18 +641,6 @@ describe('mem-store tests', function () {
 })
 
 describe('additional mem-store tests', function () {
-  let seneca
-
-  before(() => {
-    // NOTE: This is how we are ensuring a clear mem store for each test.
-    //
-    seneca = makeSenecaForTest()
-  })
-
-  before(() => new Promise(fin => {
-    seneca.ready(fin)
-  }))
-
   describe('when trying to create the entity with the same id', () => {
     const seneca = makeSenecaForTest()
 
@@ -694,6 +682,11 @@ describe('additional mem-store tests', function () {
   })
 
   describe('when data.id$ is null', () => {
+    const seneca = makeSenecaForTest()
+
+    before(() => new Promise(fin => seneca.ready(fin)))
+
+
     before(() => {
       return seneca.make('sys', 'product')
         .data$({ id$: null, label: 'lorem ipsum' })
@@ -737,6 +730,9 @@ describe('additional mem-store tests', function () {
       }
     })
 
+    before(() => new Promise(fin => seneca.ready(fin)))
+
+
     before(() => {
       return seneca.make('sys', 'product')
         .data$({ label: 'lorem ipsum' })
@@ -772,6 +768,11 @@ describe('additional mem-store tests', function () {
   })
 
   describe('the "entity$" field when saving an entity', () => {
+    const seneca = makeSenecaForTest()
+
+    before(() => new Promise(fin => seneca.ready(fin)))
+
+
     it('stores the "entity$" field with each entity', fin => {
       const product_ent = seneca.entity('default_zone', 'sys', 'product')
 
