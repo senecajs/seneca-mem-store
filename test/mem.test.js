@@ -1196,7 +1196,14 @@ describe('additional mem-store tests', () => {
               expect(save_log).to.exist()
               expect(save_log.data.length).to.equal(6)
 
-              const [, , log_ent_canon, log_length, log_first_ent, log_desc] = save_log.data
+              const [
+                ,
+                ,
+                log_ent_canon,
+                log_length,
+                log_first_ent,
+                log_desc
+              ] = save_log.data
 
               expect(log_ent_canon).to.equal('-/-/products')
               expect(log_length).to.equal(0)
