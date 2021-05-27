@@ -84,14 +84,10 @@ function mem_store(options) {
                     operation = intern_1.intern.is_new(msg.ent) ? 'insert' : 'update';
                     mement_ptr = complete_save(mement, msg, id, isnew);
                 }
-                seneca.log.debug(() => [
-                    'save/' + operation,
-                    ent.canon$({ string: 1 }),
-                    mement_ptr,
-                    desc
-                ]);
                 const result_mement = seneca.util.deep(mement_ptr);
-                return reply(null, ent.make$(result_mement));
+                const result_ent = ent.make$(result_mement);
+                seneca.log.debug('save/' + operation, ent.canon$({ string: 1 }), mement_ptr, desc);
+                return reply(null, result_ent);
                 function try_upsert(mement, msg) {
                     const { q, ent } = msg;
                     const upsert_on = intern_1.intern.clean_array(q.upsert$);
@@ -170,9 +166,7 @@ function mem_store(options) {
             let q = msg.q;
             return intern_1.intern.listents(this, entmap, qent, q, function (err, list) {
                 let ent = list[0] || null;
-                this.log.debug(function () {
-                    return ['load', q, qent.canon$({ string: 1 }), ent, desc];
-                });
+                this.log.debug('load', q, qent.canon$({ string: 1 }), ent, desc);
                 reply(err, ent);
             });
         },
@@ -180,16 +174,7 @@ function mem_store(options) {
             let qent = msg.qent;
             let q = msg.q;
             return intern_1.intern.listents(this, entmap, qent, q, function (err, list) {
-                this.log.debug(function () {
-                    return [
-                        'list',
-                        q,
-                        qent.canon$({ string: 1 }),
-                        list.length,
-                        list[0],
-                        desc,
-                    ];
-                });
+                this.log.debug('list', q, qent.canon$({ string: 1 }), list.length, list[0], desc);
                 reply(err, list);
             });
         },
@@ -211,15 +196,7 @@ function mem_store(options) {
                         object: true,
                     });
                     delete entmap[canon.base][canon.name][ent.id];
-                    seneca.log.debug(function () {
-                        return [
-                            'remove/' + (all ? 'all' : 'one'),
-                            q,
-                            qent.canon$({ string: 1 }),
-                            ent,
-                            desc,
-                        ];
-                    });
+                    seneca.log.debug('remove/' + (all ? 'all' : 'one'), q, qent.canon$({ string: 1 }), ent, desc);
                 });
                 let ent = (!all && load && list[0]) || null;
                 reply(null, ent);
