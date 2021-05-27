@@ -111,6 +111,10 @@ function mem_store(this: any, options: any) {
           mement_ptr = complete_save(mement, msg, id, isnew)
         }
 
+
+        const result_mement = seneca.util.deep(mement_ptr)
+        const result_ent = ent.make$(result_mement)
+
         seneca.log.debug(() => [
           'save/' + operation,
           ent.canon$({ string: 1 }),
@@ -118,9 +122,7 @@ function mem_store(this: any, options: any) {
           desc
         ])
 
-        const result_mement = seneca.util.deep(mement_ptr)
-
-        return reply(null, ent.make$(result_mement))
+        return reply(null, result_ent)
 
 
         function try_upsert(mement: any, msg: any) {
