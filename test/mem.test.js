@@ -16,14 +16,22 @@ const Lab = require('@hapi/lab')
 const Code = require('@hapi/code')
 const { expect } = Code
 const lab = (exports.lab = Lab.script())
-const { describe, before } = lab
+const { describe, before, after } = lab
 const it = make_it(lab)
 
 function makeSenecaForTest(opts = {}) {
-  const seneca = Seneca({
-    log: 'silent',
-    default_plugins: { 'mem-store': false }
-  })
+  const { seneca_opts = {} } = opts
+
+  const seneca = Seneca(
+    Object.assign(
+      {
+        log: 'silent',
+        default_plugins: { 'mem-store': false }
+      },
+      seneca_opts
+    )
+  )
+
 
   const { mem_store_opts = {} } = opts
   seneca.use({ name: '..', tag: '1' }, mem_store_opts)
@@ -734,180 +742,283 @@ describe('mem-store tests', function () {
   })
 })
 
-describe('additional mem-store tests', function () {
-  describe('when trying to create the entity with the same id', () => {
-    const seneca = makeSenecaForTest()
+describe('additional mem-store tests', () => {
+  describe('#save', () => {
+    describe('logging', () => {
+      before(() => {
+        bufferSenecaLogsOnStdout()
+      })
 
-    before(() => new Promise(fin => seneca.ready(fin)))
-
-
-    it('crashes', fin => {
-      seneca.test(fin)
-
-
-      seneca.fail = function (...args) {
-        expect(0 < args.length).to.equal(true)
-        expect(args[0]).to.equal('entity-id-exists')
-
-        return fin()
-      }
+      after(() => {
+        // NOTE: Restore the stdout here too, in case an uncaught error
+        // is thrown.
+        //
+        restoreStdout()
+      })
 
 
-      const my_product_id = 'MyPreciousId'
+      let seneca
 
-      seneca.make('sys', 'product')
-        .data$({ id: my_product_id, label: 'lorem ipsum' })
-        .save$((err, _out) => {
-          if (err) {
-            return fin(err)
+      before(() => {
+        seneca = makeSenecaForTest({ seneca_opts: { log: 'debug' } })
+      })
+
+      before(() => new Promise(fin => seneca.ready(fin)))
+
+
+      it('logs the operation', fin => {
+        const done = (err = null) => {
+          // NOTE: This allows test output to show after the test ends.
+          //
+          restoreStdout()
+
+          return fin(err)
+        }
+
+        const product_ent = seneca.make('products')
+
+        product_ent
+          .save$((err, product) => {
+            if (err) {
+              return done(err)
+            }
+
+            try {
+              const debug_logs = all_logs
+                .filter(log => 'debug' === log.level_name)
+
+              const save_log = debug_logs.find(log => {
+                return Array.isArray(log.data) &&
+                  'string' === typeof log.data[0] &&
+                  log.data[0].startsWith('save/')
+              })
+
+
+              expect(save_log).to.exist()
+              expect(save_log.data.length).to.equal(4)
+
+              const [, log_ent_canon, log_mement, log_desc] = save_log.data
+
+              expect(log_ent_canon).to.equal('-/-/products')
+
+              expect(log_mement).to.contain({
+                entity$: '-/-/products',
+                id: product.id
+              })
+
+              expect(log_desc).to.startWith('mem-store')
+            } catch (err) {
+              return done(err)
+            }
+
+            return done()
+          })
+      })
+
+      const writeToStdout = process.stdout.write
+      const all_logs = []
+
+      function bufferSenecaLogsOnStdout() {
+        process.stdout.write = out => {
+          const log = (() => {
+            try {
+              return JSON.parse(out)
+            } catch (_err) {
+              return null
+            }
+          })()
+
+
+          const is_log = (null == log) || !('level_name' in log)
+
+          if (is_log) {
+            return writeToStdout.call(process.stdout, out)
           }
 
-          seneca.make('sys', 'product')
-            .data$({ id$: my_product_id, label: 'nauta sagittas portat' })
-            .save$((err, _out) => {
-              if (err) {
-                return fin(err)
-              }
 
-              return fin(new Error('Expected an error to be thrown'))
-            })
-        })
-    })
-  })
-
-  describe('when data.id$ is null', () => {
-    const seneca = makeSenecaForTest()
-
-    before(() => new Promise(fin => seneca.ready(fin)))
-
-
-    before(() => {
-      return seneca.make('sys', 'product')
-        .data$({ id$: null, label: 'lorem ipsum' })
-        .save$()
-    })
-
-    it('generates an id and creates a new entity', fin => {
-      seneca.test(fin)
-
-      seneca.make('sys', 'product')
-        .load$(null, (err, out) => {
-          if (err) {
-            return fin(err)
-          }
-
-          expect(out).to.be.undefined()
-
-          return seneca.make('sys', 'product')
-            .list$((err, products) => {
-              if (err) {
-                return fin(err)
-              }
-
-              expect(products.length).to.equal(1)
-
-              expect(typeof products[0].id).to.equal('string')
-              expect(products[0].label).to.equal('lorem ipsum')
-
-              return fin()
-            })
-        })
-    })
-  })
-
-  describe('when "generate_id" returns null', () => {
-    const seneca = makeSenecaForTest({
-      mem_store_opts: {
-        generate_id(_ent) {
-          return null
+          all_logs.push(log)
         }
       }
+
+      function restoreStdout() {
+        process.stdout.write = writeToStdout
+      }
     })
 
-    before(() => new Promise(fin => seneca.ready(fin)))
+    describe('when trying to create the entity with the same id', () => {
+      const seneca = makeSenecaForTest()
+
+      before(() => new Promise(fin => seneca.ready(fin)))
 
 
-    before(() => {
-      return seneca.make('sys', 'product')
-        .data$({ label: 'lorem ipsum' })
-        .save$()
+      it('crashes', fin => {
+        seneca.test(fin)
+
+
+        seneca.fail = function (...args) {
+          expect(0 < args.length).to.equal(true)
+          expect(args[0]).to.equal('entity-id-exists')
+
+          return fin()
+        }
+
+
+        const my_product_id = 'MyPreciousId'
+
+        seneca.make('sys', 'product')
+          .data$({ id: my_product_id, label: 'lorem ipsum' })
+          .save$((err, _out) => {
+            if (err) {
+              return fin(err)
+            }
+
+            seneca.make('sys', 'product')
+              .data$({ id$: my_product_id, label: 'nauta sagittas portat' })
+              .save$((err, _out) => {
+                if (err) {
+                  return fin(err)
+                }
+
+                return fin(new Error('Expected an error to be thrown'))
+              })
+          })
+      })
     })
 
-    it('generates a new id and creates a new entity', fin => {
-      seneca.test(fin)
+    describe('when data.id$ is null', () => {
+      const seneca = makeSenecaForTest()
 
-      seneca.make('sys', 'product')
-        .load$(null, (err, out) => {
-          if (err) {
-            return fin(err)
-          }
+      before(() => new Promise(fin => seneca.ready(fin)))
 
-          expect(out).to.be.undefined()
 
-          return seneca.make('sys', 'product')
-            .list$((err, products) => {
-              if (err) {
-                return fin(err)
-              }
+      before(() => {
+        return seneca.make('sys', 'product')
+          .data$({ id$: null, label: 'lorem ipsum' })
+          .save$()
+      })
 
-              expect(products.length).to.equal(1)
+      it('generates an id and creates a new entity', fin => {
+        seneca.test(fin)
 
-              expect(typeof products[0].id).to.equal('string')
-              expect(products[0].label).to.equal('lorem ipsum')
+        seneca.make('sys', 'product')
+          .load$(null, (err, out) => {
+            if (err) {
+              return fin(err)
+            }
 
-              return fin()
-            })
-        })
+            expect(out).to.be.undefined()
+
+            return seneca.make('sys', 'product')
+              .list$((err, products) => {
+                if (err) {
+                  return fin(err)
+                }
+
+                expect(products.length).to.equal(1)
+
+                expect(typeof products[0].id).to.equal('string')
+                expect(products[0].label).to.equal('lorem ipsum')
+
+                return fin()
+              })
+          })
+      })
     })
-  })
 
-  describe('the "entity$" field when saving an entity', () => {
-    const seneca = makeSenecaForTest()
-
-    before(() => new Promise(fin => seneca.ready(fin)))
-
-
-    it('stores the "entity$" field with each entity', fin => {
-      const product_ent = seneca.entity('default_zone', 'sys', 'product')
-
-      product_ent
-        .data$({})
-        .save$((err, saved_product) => {
-          if (err) {
-            return fin(err)
+    describe('when "generate_id" returns null', () => {
+      const seneca = makeSenecaForTest({
+        mem_store_opts: {
+          generate_id(_ent) {
+            return null
           }
+        }
+      })
 
-          if (null == saved_product) {
-            return fin(new Error('Expected the product to be saved'))
-          }
+      before(() => new Promise(fin => seneca.ready(fin)))
 
-          if (null == saved_product.id) {
-            return fin(new Error('Expected the saved product to have an id'))
-          }
 
-          try {
-            expect(saved_product.entity$).to.equal('default_zone/sys/product')
-          } catch (err) {
-            return fin(err)
-          }
+      before(() => {
+        return seneca.make('sys', 'product')
+          .data$({ label: 'lorem ipsum' })
+          .save$()
+      })
 
-          const { id: product_id } = saved_product
+      it('generates a new id and creates a new entity', fin => {
+        seneca.test(fin)
 
-          product_ent
-            .load$(product_id, (err, product) => {
-              if (err) {
-                return fin(err)
-              }
+        seneca.make('sys', 'product')
+          .load$(null, (err, out) => {
+            if (err) {
+              return fin(err)
+            }
 
-              try {
-                expect(product.entity$).to.equal('default_zone/sys/product')
-              } catch (err) {
-                return fin(err)
-              }
+            expect(out).to.be.undefined()
 
-              return fin()
-            })
-        })
+            return seneca.make('sys', 'product')
+              .list$((err, products) => {
+                if (err) {
+                  return fin(err)
+                }
+
+                expect(products.length).to.equal(1)
+
+                expect(typeof products[0].id).to.equal('string')
+                expect(products[0].label).to.equal('lorem ipsum')
+
+                return fin()
+              })
+          })
+      })
+    })
+
+    describe('the "entity$" field when saving an entity', () => {
+      const seneca = makeSenecaForTest()
+
+      before(() => new Promise(fin => seneca.ready(fin)))
+
+
+      it('stores the "entity$" field with each entity', fin => {
+        const product_ent = seneca.entity('default_zone', 'sys', 'product')
+
+        product_ent
+          .data$({})
+          .save$((err, saved_product) => {
+            if (err) {
+              return fin(err)
+            }
+
+            if (null == saved_product) {
+              return fin(new Error('Expected the product to be saved'))
+            }
+
+            if (null == saved_product.id) {
+              return fin(new Error('Expected the saved product to have an id'))
+            }
+
+            try {
+              expect(saved_product.entity$).to.equal('default_zone/sys/product')
+            } catch (err) {
+              return fin(err)
+            }
+
+            const { id: product_id } = saved_product
+
+            product_ent
+              .load$(product_id, (err, product) => {
+                if (err) {
+                  return fin(err)
+                }
+
+                try {
+                  expect(product.entity$).to.equal('default_zone/sys/product')
+                } catch (err) {
+                  return fin(err)
+                }
+
+                return fin()
+              })
+          })
+      })
     })
   })
 })

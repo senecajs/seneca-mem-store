@@ -115,12 +115,12 @@ function mem_store(this: any, options: any) {
         const result_mement = seneca.util.deep(mement_ptr)
         const result_ent = ent.make$(result_mement)
 
-        seneca.log.debug(() => [
+        seneca.log.debug(
           'save/' + operation,
           ent.canon$({ string: 1 }),
           mement_ptr,
           desc
-        ])
+        )
 
         return reply(null, result_ent)
 
