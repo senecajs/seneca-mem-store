@@ -1,3 +1,8 @@
+#### 6.0.0 - 2021-05-24
+
+* Added upsert support
+
+
 #### 5.0.0 - 2020-12-09
 
 * Convert to typescript
