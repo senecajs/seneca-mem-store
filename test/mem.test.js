@@ -947,15 +947,16 @@ describe('additional mem-store tests', () => {
 
 
       testThatLogging('logs the operation', fin => {
-        const product_ent = seneca.make('products')
-
-        product_ent
+        seneca.make('products')
           .save$((err, product) => {
             if (err) {
               return fin(err)
             }
 
             try {
+              expect(product).to.exist()
+
+
               const debug_logs = all_logs
                 .filter(log => 'debug' === log.level_name)
 
@@ -1031,9 +1032,7 @@ describe('additional mem-store tests', () => {
 
 
       testThatLogging('logs the operation', fin => {
-        const product_ent = seneca.make('products')
-
-        product_ent
+        seneca.make('products')
           .load$(product_id, (err, product) => {
             if (err) {
               return fin(err)
@@ -1046,22 +1045,162 @@ describe('additional mem-store tests', () => {
               const save_log = debug_logs.find(log => {
                 return Array.isArray(log.data) &&
                   'string' === typeof log.data[0] &&
-                  log.data[0].startsWith('load')
+                  'load' === log.data[0]
               })
 
 
               expect(save_log).to.exist()
               expect(save_log.data.length).to.equal(5)
 
-              const [, , log_ent_canon, log_mement, log_desc] = save_log.data
+              const [, , log_ent_canon, log_ent, log_desc] = save_log.data
 
               expect(log_ent_canon).to.equal('-/-/products')
 
-              expect(log_mement).to.contain({
+              expect(log_ent).to.contain({
                 entity$: '-/-/products',
-                id: product.id
+                id: product_id
               })
 
+              expect(log_desc).to.startWith('mem-store')
+
+              return fin()
+            } catch (err) {
+              return fin(err)
+            }
+          })
+      })
+    })
+
+    describe('#remove', () => {
+      const all_logs = []
+
+      before(() => {
+        bufferSenecaLogsOnStdout(all_logs)
+      })
+
+      after(() => {
+        // NOTE: Restore the stdout here too, in case an uncaught error
+        // is thrown.
+        //
+        restoreStdout()
+      })
+
+
+      let seneca
+
+      before(() => {
+        seneca = makeSenecaForTestOfLogging()
+      })
+
+      before(() => new Promise(fin => seneca.ready(fin)))
+
+
+      let product_id
+
+      before(() => new Promise((resolve, reject) => {
+        seneca.make('products')
+          .save$((err, product) => {
+            if (err) {
+              return reject(err)
+            }
+
+            product_id = product.id
+
+            return resolve()
+          })
+      }))
+
+
+      testThatLogging('logs the operation', fin => {
+        seneca.make('products')
+          .remove$(product_id, (err, product) => {
+            if (err) {
+              return fin(err)
+            }
+
+            try {
+              const debug_logs = all_logs
+                .filter(log => 'debug' === log.level_name)
+
+              const save_log = debug_logs.find(log => {
+                return Array.isArray(log.data) &&
+                  'string' === typeof log.data[0] &&
+                  log.data[0].startsWith('remove/')
+              })
+
+
+              expect(save_log).to.exist()
+              expect(save_log.data.length).to.equal(5)
+
+              const [, , log_ent_canon, log_ent, log_desc] = save_log.data
+
+              expect(log_ent_canon).to.equal('-/-/products')
+
+              expect(log_ent).to.contain({
+                entity$: '-/-/products',
+                id: product_id
+              })
+
+              expect(log_desc).to.startWith('mem-store')
+
+              return fin()
+            } catch (err) {
+              return fin(err)
+            }
+          })
+      })
+    })
+
+    describe('#list', () => {
+      const all_logs = []
+
+      before(() => {
+        bufferSenecaLogsOnStdout(all_logs)
+      })
+
+      after(() => {
+        // NOTE: Restore the stdout here too, in case an uncaught error
+        // is thrown.
+        //
+        restoreStdout()
+      })
+
+
+      let seneca
+
+      before(() => {
+        seneca = makeSenecaForTestOfLogging()
+      })
+
+      before(() => new Promise(fin => seneca.ready(fin)))
+
+
+      testThatLogging('logs the operation', fin => {
+        seneca.make('products')
+          .list$((err, product) => {
+            if (err) {
+              return fin(err)
+            }
+
+            try {
+              const debug_logs = all_logs
+                .filter(log => 'debug' === log.level_name)
+
+              const save_log = debug_logs.find(log => {
+                return Array.isArray(log.data) &&
+                  'string' === typeof log.data[0] &&
+                  'list' === log.data[0]
+              })
+
+
+              expect(save_log).to.exist()
+              expect(save_log.data.length).to.equal(6)
+
+              const [, , log_ent_canon, log_length, log_first_ent, log_desc] = save_log.data
+
+              expect(log_ent_canon).to.equal('-/-/products')
+              expect(log_length).to.equal(0)
+              expect(log_first_ent).to.be.null()
               expect(log_desc).to.startWith('mem-store')
 
               return fin()

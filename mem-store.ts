@@ -239,16 +239,14 @@ function mem_store(this: any, options: any) {
       let q = msg.q
 
       return intern.listents(this, entmap, qent, q, function(this: any, err: any, list: any[]) {
-        this.log.debug(function() {
-          return [
-            'list',
-            q,
-            qent.canon$({ string: 1 }),
-            list.length,
-            list[0],
-            desc,
-          ]
-        })
+        this.log.debug(
+          'list',
+          q,
+          qent.canon$({ string: 1 }),
+          list.length,
+          list[0],
+          desc
+        )
 
         reply(err, list)
       })
@@ -278,15 +276,13 @@ function mem_store(this: any, options: any) {
 
           delete entmap[canon.base][canon.name][ent.id]
 
-          seneca.log.debug(function() {
-            return [
-              'remove/' + (all ? 'all' : 'one'),
-              q,
-              qent.canon$({ string: 1 }),
-              ent,
-              desc,
-            ]
-          })
+          seneca.log.debug(
+            'remove/' + (all ? 'all' : 'one'),
+            q,
+            qent.canon$({ string: 1 }),
+            ent,
+            desc
+          )
         })
 
         let ent = (!all && load && list[0]) || null
