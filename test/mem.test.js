@@ -636,6 +636,100 @@ describe('mem-store tests', function () {
           })
         })
       })
+
+      describe('when the query argument is an array', () => {
+        const ent_base = 'sys'
+        const ent_name = 'product'
+
+
+        const product_id = 'foobaz'
+
+        const product = {
+          id: product_id,
+          label: 'lorem ipsum',
+          price: '2.34'
+        }
+
+
+        describe('when an item in the array is null', () => {
+          let entmap
+
+          before(async () => {
+            entmap = {
+              [ent_base]: {
+                [ent_name]: {
+                  [product_id]: product
+                }
+              }
+            }
+          })
+
+          const product_ent = seneca.make(ent_base, ent_name)
+
+          it('ignores the null', fin => {
+            intern.listents(
+              seneca,
+              entmap,
+              product_ent,
+              [null],
+              (err, out) => {
+                if (err) {
+                  return fin(err)
+                }
+
+                expect(out).to.equal([])
+
+                return fin()
+              })
+          })
+        })
+      })
+
+      describe('when the query argument is null', () => {
+        const product_id = 'aaaa'
+
+        const product = {
+          id: product_id,
+          label: 'lorem ipsum',
+          price: '2.34'
+        }
+
+
+        const ent_base = 'sys'
+        const ent_name = 'product'
+
+        let entmap
+
+        before(async () => {
+          entmap = {
+            [ent_base]: {
+              [ent_name]: {
+                [product_id]: product
+              }
+            }
+          }
+        })
+
+
+        const product_ent = seneca.make(ent_base, ent_name)
+
+        it('returns an empty list', fin => {
+          intern.listents(
+            seneca,
+            entmap,
+            product_ent,
+            null,
+            (err, out) => {
+              if (err) {
+                return fin(err)
+              }
+
+              expect(out).to.equal([])
+
+              return fin()
+            })
+        })
+      })
     })
   })
 })
