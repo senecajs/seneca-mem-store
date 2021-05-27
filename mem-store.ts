@@ -228,9 +228,7 @@ function mem_store(this: any, options: any) {
       return intern.listents(this, entmap, qent, q, function(this: any, err: any, list: any[]) {
         let ent = list[0] || null
 
-        this.log.debug(function() {
-          return ['load', q, qent.canon$({ string: 1 }), ent, desc]
-        })
+        this.log.debug('load', q, qent.canon$({ string: 1 }), ent, desc)
 
         reply(err, ent)
       })
