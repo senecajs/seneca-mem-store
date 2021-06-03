@@ -21,3 +21,5 @@ coverage.html
 yarn.lock
 package-lock.json
 lcov.info
+
+dist/
