@@ -111,16 +111,18 @@ function mem_store(this: any, options: any) {
           mement_ptr = complete_save(mement, msg, id, isnew)
         }
 
-        seneca.log.debug(() => [
+
+        const result_mement = seneca.util.deep(mement_ptr)
+        const result_ent = ent.make$(result_mement)
+
+        seneca.log.debug(
           'save/' + operation,
           ent.canon$({ string: 1 }),
           mement_ptr,
           desc
-        ])
+        )
 
-        const result_mement = seneca.util.deep(mement_ptr)
-
-        return reply(null, ent.make$(result_mement))
+        return reply(null, result_ent)
 
 
         function try_upsert(mement: any, msg: any) {
@@ -226,9 +228,7 @@ function mem_store(this: any, options: any) {
       return intern.listents(this, entmap, qent, q, function(this: any, err: any, list: any[]) {
         let ent = list[0] || null
 
-        this.log.debug(function() {
-          return ['load', q, qent.canon$({ string: 1 }), ent, desc]
-        })
+        this.log.debug('load', q, qent.canon$({ string: 1 }), ent, desc)
 
         reply(err, ent)
       })
@@ -239,16 +239,14 @@ function mem_store(this: any, options: any) {
       let q = msg.q
 
       return intern.listents(this, entmap, qent, q, function(this: any, err: any, list: any[]) {
-        this.log.debug(function() {
-          return [
-            'list',
-            q,
-            qent.canon$({ string: 1 }),
-            list.length,
-            list[0],
-            desc,
-          ]
-        })
+        this.log.debug(
+          'list',
+          q,
+          qent.canon$({ string: 1 }),
+          list.length,
+          list[0],
+          desc
+        )
 
         reply(err, list)
       })
@@ -278,15 +276,13 @@ function mem_store(this: any, options: any) {
 
           delete entmap[canon.base][canon.name][ent.id]
 
-          seneca.log.debug(function() {
-            return [
-              'remove/' + (all ? 'all' : 'one'),
-              q,
-              qent.canon$({ string: 1 }),
-              ent,
-              desc,
-            ]
-          })
+          seneca.log.debug(
+            'remove/' + (all ? 'all' : 'one'),
+            q,
+            qent.canon$({ string: 1 }),
+            ent,
+            desc
+          )
         })
 
         let ent = (!all && load && list[0]) || null

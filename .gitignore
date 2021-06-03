@@ -20,3 +20,4 @@ coverage.html
 .history
 yarn.lock
 package-lock.json
+lcov.info
