@@ -21,3 +21,4 @@ coverage.html
 yarn.lock
 package-lock.json
 lcov.info
+test/coverage.html
