@@ -4,7 +4,7 @@
 import { intern } from './lib/intern'
 
 let internals = {
-  name: 'mem-store'
+  name: 'mem-store',
 }
 
 module.exports = mem_store
@@ -56,7 +56,7 @@ function mem_store(this: any, options: any) {
     // use in seneca.use(), eg seneca.use('mem-store').
     name: internals.name,
 
-    save: function(this: any, msg: any, reply: any) {
+    save: function (this: any, msg: any, reply: any) {
       // Take a reference to Seneca
       // and the entity to save
       let seneca = this
@@ -84,7 +84,6 @@ function mem_store(this: any, options: any) {
         entmap[base] = entmap[base] || {}
         entmap[base][name] = entmap[base][name] || {}
 
-
         // NOTE: It looks like `ent` is stripped of any private fields
         // at this point, hence the `ent.data$(true)` does not actually
         // leak private fields into saved entities. The line of code in
@@ -96,7 +95,6 @@ function mem_store(this: any, options: any) {
         // This can be verified by logging the mement object below.
         //
         const mement = ent.data$(true, 'string')
-
 
         let mement_ptr: any = null
         let operation: string | null = null
@@ -111,7 +109,6 @@ function mem_store(this: any, options: any) {
           mement_ptr = complete_save(mement, msg, id, isnew)
         }
 
-
         const result_mement = seneca.util.deep(mement_ptr)
         const result_ent = ent.make$(result_mement)
 
@@ -124,13 +121,14 @@ function mem_store(this: any, options: any) {
 
         return reply(null, result_ent)
 
-
         function try_upsert(mement: any, msg: any) {
           const { q, ent } = msg
           const upsert_on = intern.clean_array(q.upsert$)
 
           if (0 < upsert_on.length) {
-            const has_upsert_fields = upsert_on.every((p: string) => p in mement)
+            const has_upsert_fields = upsert_on.every(
+              (p: string) => p in mement
+            )
 
             if (has_upsert_fields) {
               const match_by = upsert_on.reduce((h: any, p: string) => {
@@ -138,7 +136,12 @@ function mem_store(this: any, options: any) {
                 return h
               }, {})
 
-              const updated_ent = intern.update_mement(entmap, ent, match_by, mement)
+              const updated_ent = intern.update_mement(
+                entmap,
+                ent,
+                match_by,
+                mement
+              )
 
               return updated_ent
             }
@@ -147,30 +150,33 @@ function mem_store(this: any, options: any) {
           return null
         }
 
-
-        function complete_save(mement: any, msg: any, id?: any, isnew?: boolean) {
+        function complete_save(
+          mement: any,
+          msg: any,
+          id?: any,
+          isnew?: boolean
+        ) {
           const { ent } = msg
-
 
           if (null != id) {
             mement.id = id
           }
 
-
           const prev = entmap[base][name][mement.id]
 
           if (isnew && prev) {
-            seneca.fail('entity-id-exists', { type: ent.entity$, id: mement.id })
+            seneca.fail('entity-id-exists', {
+              type: ent.entity$,
+              id: mement.id,
+            })
             return
           }
-
 
           const should_merge = intern.should_merge(ent, options)
 
           if (should_merge) {
             mement = Object.assign(prev || {}, mement)
           }
-
 
           entmap[base][name][mement.id] = mement
 
@@ -213,7 +219,7 @@ function mem_store(this: any, options: any) {
           // When we get a respones we will use the id param
           // as our entity id, if this fails we just fail and
           // call reply() as we have no way to save without an id
-          seneca.act(gen_id, function(err: Error, id: string) {
+          seneca.act(gen_id, function (err: Error, id: string) {
             if (err) return reply(err)
             do_save(id, true)
           })
@@ -221,38 +227,50 @@ function mem_store(this: any, options: any) {
       }
     },
 
-    load: function(this: any, msg: any, reply: any) {
+    load: function (this: any, msg: any, reply: any) {
       let qent = msg.qent
       let q = msg.q
 
-      return intern.listents(this, entmap, qent, q, function(this: any, err: any, list: any[]) {
-        let ent = list[0] || null
+      return intern.listents(
+        this,
+        entmap,
+        qent,
+        q,
+        function (this: any, err: any, list: any[]) {
+          let ent = list[0] || null
 
-        this.log.debug('load', q, qent.canon$({ string: 1 }), ent, desc)
+          this.log.debug('load', q, qent.canon$({ string: 1 }), ent, desc)
 
-        reply(err, ent)
-      })
+          reply(err, ent)
+        }
+      )
     },
 
-    list: function(msg: any, reply: any) {
+    list: function (msg: any, reply: any) {
       let qent = msg.qent
       let q = msg.q
 
-      return intern.listents(this, entmap, qent, q, function(this: any, err: any, list: any[]) {
-        this.log.debug(
-          'list',
-          q,
-          qent.canon$({ string: 1 }),
-          list.length,
-          list[0],
-          desc
-        )
+      return intern.listents(
+        this,
+        entmap,
+        qent,
+        q,
+        function (this: any, err: any, list: any[]) {
+          this.log.debug(
+            'list',
+            q,
+            qent.canon$({ string: 1 }),
+            list.length,
+            list[0],
+            desc
+          )
 
-        reply(err, list)
-      })
+          reply(err, list)
+        }
+      )
     },
 
-    remove: function(this: any, msg: any, reply: any) {
+    remove: function (this: any, msg: any, reply: any) {
       let seneca = this
       let qent = msg.qent
       let q = msg.q
@@ -261,37 +279,43 @@ function mem_store(this: any, options: any) {
       // default false
       let load = q.load$ === true
 
-      return intern.listents(seneca, entmap, qent, q, function(err: Error, list: any[]) {
-        if (err) {
-          return reply(err)
-        }
+      return intern.listents(
+        seneca,
+        entmap,
+        qent,
+        q,
+        function (err: Error, list: any[]) {
+          if (err) {
+            return reply(err)
+          }
 
-        list = list || []
-        list = all ? list : list.slice(0, 1)
+          list = list || []
+          list = all ? list : list.slice(0, 1)
 
-        list.forEach(function(ent) {
-          let canon = qent.canon$({
-            object: true,
+          list.forEach(function (ent) {
+            let canon = qent.canon$({
+              object: true,
+            })
+
+            delete entmap[canon.base][canon.name][ent.id]
+
+            seneca.log.debug(
+              'remove/' + (all ? 'all' : 'one'),
+              q,
+              qent.canon$({ string: 1 }),
+              ent,
+              desc
+            )
           })
 
-          delete entmap[canon.base][canon.name][ent.id]
+          let ent = (!all && load && list[0]) || null
 
-          seneca.log.debug(
-            'remove/' + (all ? 'all' : 'one'),
-            q,
-            qent.canon$({ string: 1 }),
-            ent,
-            desc
-          )
-        })
-
-        let ent = (!all && load && list[0]) || null
-
-        reply(null, ent)
-      })
+          reply(null, ent)
+        }
+      )
     },
 
-    close: function(this: any, _msg: any, reply: any) {
+    close: function (this: any, _msg: any, reply: any) {
       this.log.debug('close', desc)
       reply()
     },
@@ -299,7 +323,7 @@ function mem_store(this: any, options: any) {
     // .native() is used to handle calls to the underlying driver. Since
     // there is no underlying driver for mem-store we simply return the
     // default entityMap object.
-    native: function(this: any, _msg: any, reply: any) {
+    native: function (this: any, _msg: any, reply: any) {
       reply(null, entmap)
     },
   }
@@ -317,14 +341,14 @@ function mem_store(this: any, options: any) {
 
   seneca.add(
     { role: store.name, cmd: 'dump' },
-    function(_msg: any, reply: any) {
+    function (_msg: any, reply: any) {
       reply(null, entmap)
     }
   )
 
   seneca.add(
     { role: store.name, cmd: 'export' },
-    function(_msg: any, reply: any) {
+    function (_msg: any, reply: any) {
       let entjson = JSON.stringify(entmap)
 
       reply(null, { json: entjson })
@@ -334,7 +358,7 @@ function mem_store(this: any, options: any) {
   // TODO: support direct import of literal objects
   seneca.add(
     { role: store.name, cmd: 'import' },
-    function(this: any, msg: any, reply: any) {
+    function (this: any, msg: any, reply: any) {
       let imported = JSON.parse(msg.json)
       entmap = msg.merge ? this.util.deepextend(entmap, imported) : imported
       reply()
@@ -344,7 +368,7 @@ function mem_store(this: any, options: any) {
   // Seneca will call init:plugin-name for us. This makes
   // this action a great place to do any setup.
   //seneca.add('init:mem-store', function (msg, reply) {
-  seneca.init(function(this: any, reply: any) {
+  seneca.init(function (this: any, reply: any) {
     if (options.web.dump) {
       this.act('role:web', {
         use: {
@@ -371,13 +395,13 @@ function mem_store(this: any, options: any) {
   }
 }
 
-module.exports.preload = function() {
+module.exports.preload = function () {
   let seneca = this
 
   let meta = {
     name: internals.name,
     exportmap: {
-      native: function() {
+      native: function () {
         seneca.export(internals.name + '/native').apply(this, arguments)
       },
     },
@@ -385,4 +409,3 @@ module.exports.preload = function() {
 
   return meta
 }
-
