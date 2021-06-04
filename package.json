@@ -55,8 +55,8 @@
   },
   "files": [
     "README.md",
+    "CHANGES.md",
     "LICENSE",
-    "mem-store.js",
     "dist"
   ]
 }
