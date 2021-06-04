@@ -15,7 +15,8 @@
     "Wyatt Preul (https://github.com/geek)",
     "Paolo Chiodi (https://github.com/paolochiodi)",
     "Shane Lacey (https://github.com/shanel262)",
-    "Oisín Hennessy (https://github.com/code-jace)"
+    "Oisín Hennessy (https://github.com/code-jace)",
+    "Efim Bogdanovsky (https://github.com/lilsweetcaligula)"
   ],
   "scripts": {
     "build": "tsc -d",
@@ -55,8 +56,8 @@
   },
   "files": [
     "README.md",
+    "CHANGES.md",
     "LICENSE",
-    "mem-store.js",
     "dist"
   ]
 }
