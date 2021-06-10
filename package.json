@@ -51,7 +51,7 @@
     "seneca-entity": "13.0.0",
     "seneca-plugin-validator": "0.6.1",
     "seneca-promisify": "2.0.0",
-    "seneca-store-test": "senecajs/seneca-store-test",
+    "seneca-store-test": "4.0.0",
     "typescript": "4.2.4"
   },
   "files": [
