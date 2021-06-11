@@ -20,7 +20,6 @@ module.exports.defaults = {
  */
 module.exports.intern = intern
 
-
 type Options = {
   prefix: string
   idlen: number
@@ -29,9 +28,6 @@ type Options = {
   }
   generate_id: any
 }
-
-
-
 
 function mem_store(this: any, options: Options) {
   let seneca: any = this
