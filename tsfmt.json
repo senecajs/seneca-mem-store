@@ -1,3 +1,4 @@
 {
-  "indentSize": 2
+  "indentSize": 2,
+  "insertSpaceAfterFunctionKeywordForAnonymousFunctions": true
 }

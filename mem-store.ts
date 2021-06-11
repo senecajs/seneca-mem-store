@@ -20,7 +20,20 @@ module.exports.defaults = {
  */
 module.exports.intern = intern
 
-function mem_store(this: any, options: any) {
+
+type Options = {
+  prefix: string
+  idlen: number
+  web: {
+    dump: boolean
+  }
+  generate_id: any
+}
+
+
+
+
+function mem_store(this: any, options: Options) {
   let seneca: any = this
 
   let init = seneca.export('entity/init')
@@ -29,6 +42,7 @@ function mem_store(this: any, options: any) {
   options = seneca.util.deepextend(
     {
       prefix: '/mem-store',
+      idlen: 6,
       web: {
         dump: false,
       },
@@ -336,8 +350,6 @@ function mem_store(this: any, options: any) {
   // int() returns some metadata for us, one of these is the
   // description, we'll take a copy of that here.
   desc = meta.desc
-
-  options.idlen = options.idlen || 6
 
   seneca.add(
     { role: store.name, cmd: 'dump' },
