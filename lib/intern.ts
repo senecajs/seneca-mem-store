@@ -69,7 +69,7 @@ export class intern {
 
         return false
       }
-      
+
       return true
     }
   }
@@ -199,8 +199,7 @@ export class intern {
 
 
   static clean_array(ary: string[]): string[] {
-    const isPublicProp = (prop: string): boolean => !prop.includes('$')
-    return ary.filter(isPublicProp)
+    return ary.filter((prop: string) => !prop.includes('$'))
   }
 }
 
