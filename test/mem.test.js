@@ -1186,13 +1186,14 @@ describe('additional mem-store tests', () => {
           }
         })()
 
-        const is_log = null == log || !('level_name' in log)
+        const is_log = null != log && 'level_name' in log
 
         if (is_log) {
-          return writeToStdout.call(process.stdout, out)
+          out_logs.push(log)
+          return
         }
 
-        out_logs.push(log)
+        return writeToStdout.call(process.stdout, out)
       }
     }
 
