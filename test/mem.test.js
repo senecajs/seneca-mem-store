@@ -16,7 +16,7 @@ const Lab = require('@hapi/lab')
 const Code = require('@hapi/code')
 const { expect } = Code
 const lab = (exports.lab = Lab.script())
-const { describe, before, after } = lab
+const { describe, before, beforeEach, after } = lab
 const it = make_it(lab)
 
 function makeSenecaForTest(opts = {}) {
@@ -723,8 +723,6 @@ describe('additional mem-store tests', () => {
     describe('when trying to create the entity with the same id', () => {
       const seneca = makeSenecaForTest()
 
-      before(() => new Promise((fin) => seneca.ready(fin)))
-
       it('crashes', (fin) => {
         seneca.test(fin)
 
@@ -761,8 +759,6 @@ describe('additional mem-store tests', () => {
 
     describe('when data.id$ is null', () => {
       const seneca = makeSenecaForTest()
-
-      before(() => new Promise((fin) => seneca.ready(fin)))
 
       before(() => {
         return seneca
@@ -806,8 +802,6 @@ describe('additional mem-store tests', () => {
         },
       })
 
-      before(() => new Promise((fin) => seneca.ready(fin)))
-
       before(() => {
         return seneca
           .make('sys', 'product')
@@ -843,8 +837,6 @@ describe('additional mem-store tests', () => {
 
     describe('the "entity$" field when saving an entity', () => {
       const seneca = makeSenecaForTest()
-
-      before(() => new Promise((fin) => seneca.ready(fin)))
 
       it('stores the "entity$" field with each entity', (fin) => {
         const product_ent = seneca.entity('default_zone', 'sys', 'product')
@@ -888,6 +880,199 @@ describe('additional mem-store tests', () => {
     })
   })
 
+  describe('#load by date', () => {
+    let seneca
+    
+    beforeEach(async () => {
+      seneca = makeSenecaForTest()
+    })
+
+
+    const millenium = new Date(2000, 0, 1)
+    const elvis_bday = new Date(1935, 0, 8)
+    const makeDateSimilar = similar_to => new Date(similar_to)
+
+    beforeEach(() => new Promise((resolve, reject) => {
+      seneca.make('products')
+        .data$({ created_at: elvis_bday })
+        .save$((err, out) => err ? reject(err) : resolve(out))
+    }))
+
+    beforeEach(() => new Promise((resolve, reject) => {
+      seneca.make('products')
+        .data$({ created_at: millenium })
+        .save$((err, out) => err ? reject(err) : resolve(out))
+    }))
+
+
+    it('can query by date', (fin) => {
+      return seneca.make('products')
+        .load$({ created_at: makeDateSimilar(millenium) }, (err, out) => {
+          if (err) {
+            return fin(err)
+          }
+
+          expect(out).to.contain({
+            created_at: millenium
+          })
+
+          return fin()
+        })
+    })
+
+    it('can query by date', (fin) => {
+      return seneca.make('products')
+        .load$({ created_at: makeDateSimilar(elvis_bday) }, (err, out) => {
+          if (err) {
+            return fin(err)
+          }
+
+          expect(out).to.contain({
+            created_at: elvis_bday
+          })
+
+          return fin()
+        })
+    })
+
+    it('fails when trying to compare a date field to anything else', (fin) => {
+      return seneca.make('products')
+        .load$({ created_at: 123 }, (err, out) => {
+          if (err) {
+            return fin(err)
+          }
+
+          expect(out).to.equal(null)
+
+          return fin()
+        })
+    })
+  })
+
+  describe('#list by date', () => {
+    let seneca
+    
+    beforeEach(async () => {
+      seneca = makeSenecaForTest()
+    })
+
+
+    const millenium = new Date(2000, 0, 1)
+    const elvis_bday = new Date(1935, 0, 8)
+    const makeDateSimilar = similar_to => new Date(similar_to)
+
+    beforeEach(() => new Promise((resolve, reject) => {
+      seneca.make('products')
+        .data$({ created_at: elvis_bday })
+        .save$((err, out) => err ? reject(err) : resolve(out))
+    }))
+
+    beforeEach(() => new Promise((resolve, reject) => {
+      seneca.make('products')
+        .data$({ created_at: millenium })
+        .save$((err, out) => err ? reject(err) : resolve(out))
+    }))
+
+
+    it('can query by date', (fin) => {
+      return seneca.make('products')
+        .list$({ created_at: makeDateSimilar(millenium) }, (err, out) => {
+          if (err) {
+            return fin(err)
+          }
+
+          expect(out.length).to.equal(1)
+
+          expect(out[0]).to.contain({
+            created_at: millenium
+          })
+
+          return fin()
+        })
+    })
+
+    it('can query by date', (fin) => {
+      return seneca.make('products')
+        .list$({ created_at: makeDateSimilar(elvis_bday) }, (err, out) => {
+          if (err) {
+            return fin(err)
+          }
+
+          expect(out.length).to.equal(1)
+
+          expect(out[0]).to.contain({
+            created_at: elvis_bday
+          })
+
+          return fin()
+        })
+    })
+  })
+
+  describe('#remove by date', () => {
+    let seneca
+    
+    beforeEach(async () => {
+      seneca = makeSenecaForTest()
+    })
+
+
+    const millenium = new Date(2000, 0, 1)
+    const elvis_bday = new Date(1935, 0, 8)
+    const makeDateSimilar = similar_to => new Date(similar_to)
+
+    beforeEach(() => new Promise((resolve, reject) => {
+      seneca.make('products')
+        .data$({ created_at: elvis_bday })
+        .save$((err, out) => err ? reject(err) : resolve(out))
+    }))
+
+    beforeEach(() => new Promise((resolve, reject) => {
+      seneca.make('products')
+        .data$({ created_at: millenium })
+        .save$((err, out) => err ? reject(err) : resolve(out))
+    }))
+
+
+    it('can query by date', (fin) => {
+      return seneca.make('products')
+        .remove$({ created_at: makeDateSimilar(millenium) }, (err) => {
+          if (err) {
+            return fin(err)
+          }
+
+          return seneca.make('products').list$({}, (err, out) => {
+            expect(out.length).to.equal(1)
+
+            expect(out[0]).to.contain({
+              created_at: elvis_bday
+            })
+
+            return fin()
+          })
+        })
+    })
+
+    it('can query by date', (fin) => {
+      return seneca.make('products')
+        .remove$({ created_at: makeDateSimilar(elvis_bday) }, (err, out) => {
+          if (err) {
+            return fin(err)
+          }
+
+          return seneca.make('products').list$({}, (err, out) => {
+            expect(out.length).to.equal(1)
+
+            expect(out[0]).to.contain({
+              created_at: millenium
+            })
+
+            return fin()
+          })
+        })
+    })
+  })
+
   describe('logging', () => {
     describe('#save', () => {
       const all_logs = []
@@ -908,8 +1093,6 @@ describe('additional mem-store tests', () => {
       before(() => {
         seneca = makeSenecaForTestOfLogging()
       })
-
-      before(() => new Promise((fin) => seneca.ready(fin)))
 
       testThatLogging('logs the operation', (fin) => {
         seneca.make('products').save$((err, product) => {
@@ -973,8 +1156,6 @@ describe('additional mem-store tests', () => {
       before(() => {
         seneca = makeSenecaForTestOfLogging()
       })
-
-      before(() => new Promise((fin) => seneca.ready(fin)))
 
       let product_id
 
@@ -1054,8 +1235,6 @@ describe('additional mem-store tests', () => {
         seneca = makeSenecaForTestOfLogging()
       })
 
-      before(() => new Promise((fin) => seneca.ready(fin)))
-
       let product_id
 
       before(
@@ -1133,8 +1312,6 @@ describe('additional mem-store tests', () => {
       before(() => {
         seneca = makeSenecaForTestOfLogging()
       })
-
-      before(() => new Promise((fin) => seneca.ready(fin)))
 
       testThatLogging('logs the operation', (fin) => {
         seneca.make('products').list$((err, product) => {

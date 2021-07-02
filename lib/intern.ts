@@ -133,7 +133,7 @@ export class intern {
                 if (-1 === qv.indexOf(ev)) {
                   continue next_ent
                 }
-              } else if (null != qv && 'object' === typeof qv) {
+              } else if (intern.is_object(qv)) {
                 // mongo style constraints
                 if (
                   (null != qv.$ne && qv.$ne == ev) ||
@@ -147,8 +147,14 @@ export class intern {
                 ) {
                   continue next_ent
                 }
-              } else if (qv !== ev) {
-                continue next_ent
+              } else {
+                if (intern.is_date(qv)) {
+                  if (!(intern.is_date(ev) && intern.eq_dates(qv, ev))) {
+                    continue next_ent
+                  }
+                } else if (qv !== ev) {
+                  continue next_ent
+                }
               }
             }
           }
@@ -200,6 +206,21 @@ export class intern {
 
   static clean_array(ary: string[]): string[] {
     return ary.filter((prop: string) => !prop.includes('$'))
+  }
+
+
+  static is_object(x: any): boolean {
+    return '[object Object]' === toString.call(x)
+  }
+
+
+  static is_date(x: any): boolean {
+    return '[object Date]' === toString.call(x)
+  }
+
+
+  static eq_dates(lv: Date, rv: Date): boolean {
+    return lv.getTime() === rv.getTime()
   }
 }
 
