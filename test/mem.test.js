@@ -16,7 +16,7 @@ const Lab = require('@hapi/lab')
 const Code = require('@hapi/code')
 const { expect } = Code
 const lab = (exports.lab = Lab.script())
-const { describe, before, beforeEach, after } = lab
+const { describe, before, after } = lab
 const it = make_it(lab)
 
 function makeSenecaForTest(opts = {}) {
@@ -881,33 +881,25 @@ describe('additional mem-store tests', () => {
   })
 
   describe('#load by date', () => {
-    let seneca
-    
-    beforeEach(async () => {
-      seneca = makeSenecaForTest()
-    })
-
-
     const millenium = new Date(2000, 0, 1)
     const elvis_bday = new Date(1935, 0, 8)
-    const makeDateSimilar = similar_to => new Date(similar_to)
-
-    beforeEach(() => new Promise((resolve, reject) => {
-      seneca.make('products')
-        .data$({ created_at: elvis_bday })
-        .save$((err, out) => err ? reject(err) : resolve(out))
-    }))
-
-    beforeEach(() => new Promise((resolve, reject) => {
-      seneca.make('products')
-        .data$({ created_at: millenium })
-        .save$((err, out) => err ? reject(err) : resolve(out))
-    }))
 
 
-    it('can query by date', (fin) => {
+    let seneca
+
+    async function setupTest() {
+      seneca = makeSenecaForTest()
+
+      await saveEnt(seneca.make('products').data$({ created_at: elvis_bday }))
+      await saveEnt(seneca.make('products').data$({ created_at: millenium }))
+    }
+
+
+    it('can query by date', async (fin) => {
+      await setupTest()
+
       return seneca.make('products')
-        .load$({ created_at: makeDateSimilar(millenium) }, (err, out) => {
+        .load$({ created_at: makeDateSimilarTo(millenium) }, (err, out) => {
           if (err) {
             return fin(err)
           }
@@ -920,9 +912,11 @@ describe('additional mem-store tests', () => {
         })
     })
 
-    it('can query by date', (fin) => {
+    it('can query by date', async (fin) => {
+      await setupTest()
+
       return seneca.make('products')
-        .load$({ created_at: makeDateSimilar(elvis_bday) }, (err, out) => {
+        .load$({ created_at: makeDateSimilarTo(elvis_bday) }, (err, out) => {
           if (err) {
             return fin(err)
           }
@@ -950,33 +944,25 @@ describe('additional mem-store tests', () => {
   })
 
   describe('#list by date', () => {
-    let seneca
-    
-    beforeEach(async () => {
-      seneca = makeSenecaForTest()
-    })
-
-
     const millenium = new Date(2000, 0, 1)
     const elvis_bday = new Date(1935, 0, 8)
-    const makeDateSimilar = similar_to => new Date(similar_to)
-
-    beforeEach(() => new Promise((resolve, reject) => {
-      seneca.make('products')
-        .data$({ created_at: elvis_bday })
-        .save$((err, out) => err ? reject(err) : resolve(out))
-    }))
-
-    beforeEach(() => new Promise((resolve, reject) => {
-      seneca.make('products')
-        .data$({ created_at: millenium })
-        .save$((err, out) => err ? reject(err) : resolve(out))
-    }))
 
 
-    it('can query by date', (fin) => {
+    let seneca
+
+    async function setupTest() {
+      seneca = makeSenecaForTest()
+
+      await saveEnt(seneca.make('products').data$({ created_at: elvis_bday }))
+      await saveEnt(seneca.make('products').data$({ created_at: millenium }))
+    }
+
+
+    it('can query by date', async (fin) => {
+      await setupTest()
+
       return seneca.make('products')
-        .list$({ created_at: makeDateSimilar(millenium) }, (err, out) => {
+        .list$({ created_at: makeDateSimilarTo(millenium) }, (err, out) => {
           if (err) {
             return fin(err)
           }
@@ -991,9 +977,11 @@ describe('additional mem-store tests', () => {
         })
     })
 
-    it('can query by date', (fin) => {
+    it('can query by date', async (fin) => {
+      await setupTest()
+
       return seneca.make('products')
-        .list$({ created_at: makeDateSimilar(elvis_bday) }, (err, out) => {
+        .list$({ created_at: makeDateSimilarTo(elvis_bday) }, (err, out) => {
           if (err) {
             return fin(err)
           }
@@ -1010,33 +998,25 @@ describe('additional mem-store tests', () => {
   })
 
   describe('#remove by date', () => {
-    let seneca
-    
-    beforeEach(async () => {
-      seneca = makeSenecaForTest()
-    })
-
-
     const millenium = new Date(2000, 0, 1)
     const elvis_bday = new Date(1935, 0, 8)
-    const makeDateSimilar = similar_to => new Date(similar_to)
-
-    beforeEach(() => new Promise((resolve, reject) => {
-      seneca.make('products')
-        .data$({ created_at: elvis_bday })
-        .save$((err, out) => err ? reject(err) : resolve(out))
-    }))
-
-    beforeEach(() => new Promise((resolve, reject) => {
-      seneca.make('products')
-        .data$({ created_at: millenium })
-        .save$((err, out) => err ? reject(err) : resolve(out))
-    }))
 
 
-    it('can query by date', (fin) => {
+    let seneca
+
+    async function setupTest() {
+      seneca = makeSenecaForTest()
+
+      await saveEnt(seneca.make('products').data$({ created_at: elvis_bday }))
+      await saveEnt(seneca.make('products').data$({ created_at: millenium }))
+    }
+
+
+    it('can query by date', async (fin) => {
+      await setupTest()
+
       return seneca.make('products')
-        .remove$({ created_at: makeDateSimilar(millenium) }, (err) => {
+        .remove$({ created_at: makeDateSimilarTo(millenium) }, (err) => {
           if (err) {
             return fin(err)
           }
@@ -1053,9 +1033,11 @@ describe('additional mem-store tests', () => {
         })
     })
 
-    it('can query by date', (fin) => {
+    it('can query by date', async (fin) => {
+      await setupTest()
+
       return seneca.make('products')
-        .remove$({ created_at: makeDateSimilar(elvis_bday) }, (err, out) => {
+        .remove$({ created_at: makeDateSimilarTo(elvis_bday) }, (err, out) => {
           if (err) {
             return fin(err)
           }
@@ -1412,3 +1394,12 @@ function make_it(lab) {
     )
   }
 }
+
+function saveEnt(ent, save_opts = {}) {
+  return Util.promisify(ent.save$).call(ent, save_opts)
+}
+
+function makeDateSimilarTo(date) {
+  return new Date(date)
+}
+
