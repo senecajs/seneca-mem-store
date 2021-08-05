@@ -103,6 +103,11 @@ describe('mem-store tests', function () {
     script: lab,
   })
 
+  Shared.extended({
+    seneca: makeSenecaForTest(),
+    script: lab
+  })
+
   it('export-native', function (fin) {
     Assert.ok(
       seneca.export('mem-store$1/native') || seneca.export('mem-store/1/native')
