@@ -103,6 +103,11 @@ describe('mem-store tests', function () {
     script: lab,
   })
 
+  Shared.extended({
+    seneca: makeSenecaForTest(),
+    script: lab
+  })
+
   it('export-native', function (fin) {
     Assert.ok(
       seneca.export('mem-store$1/native') || seneca.export('mem-store/1/native')
@@ -590,7 +595,9 @@ describe('mem-store tests', function () {
                   return fin(err)
                 }
 
-                expect(out).to.equal([product])
+                expect(Array.isArray(out)).to.equal(true)
+                expect(out.length).to.equal(1)
+                expect(out[0]).to.contain(product)
 
                 return fin()
               }
@@ -885,6 +892,196 @@ describe('additional mem-store tests', () => {
           })
         })
       })
+    })
+  })
+
+  describe('#load by date', () => {
+    const millenium = new Date(2000, 0, 1)
+    const elvis_bday = new Date(1935, 0, 8)
+
+
+    let seneca
+
+    async function setupTest() {
+      seneca = makeSenecaForTest()
+
+      await saveEnt(seneca.make('products').data$({ created_at: elvis_bday }))
+      await saveEnt(seneca.make('products').data$({ created_at: millenium }))
+    }
+
+
+    it('can query by date', async (fin) => {
+      await setupTest()
+
+      return seneca.make('products')
+        .load$({ created_at: makeDateSimilarTo(millenium) }, (err, out) => {
+          if (err) {
+            return fin(err)
+          }
+
+          expect(out).to.contain({
+            created_at: millenium
+          })
+
+          return fin()
+        })
+    })
+
+    it('can query by date', async (fin) => {
+      await setupTest()
+
+      return seneca.make('products')
+        .load$({ created_at: makeDateSimilarTo(elvis_bday) }, (err, out) => {
+          if (err) {
+            return fin(err)
+          }
+
+          expect(out).to.contain({
+            created_at: elvis_bday
+          })
+
+          return fin()
+        })
+    })
+
+    it('fails when trying to compare a date field to anything else', (fin) => {
+      return seneca.make('products')
+        .load$({ created_at: 123 }, (err, out) => {
+          if (err) {
+            return fin(err)
+          }
+
+          expect(out).to.equal(null)
+
+          return fin()
+        })
+    })
+  })
+
+  describe('#list by date', () => {
+    const millenium = new Date(2000, 0, 1)
+    const elvis_bday = new Date(1935, 0, 8)
+
+
+    let seneca
+
+    async function setupTest() {
+      seneca = makeSenecaForTest()
+
+      await saveEnt(seneca.make('products').data$({ created_at: elvis_bday }))
+      await saveEnt(seneca.make('products').data$({ created_at: millenium }))
+    }
+
+
+    it('can query by date', async (fin) => {
+      await setupTest()
+
+      return seneca.make('products')
+        .list$({ created_at: makeDateSimilarTo(millenium) }, (err, out) => {
+          if (err) {
+            return fin(err)
+          }
+
+          expect(out.length).to.equal(1)
+
+          expect(out[0]).to.contain({
+            created_at: millenium
+          })
+
+          return fin()
+        })
+    })
+
+    it('can query by date', async (fin) => {
+      await setupTest()
+
+      return seneca.make('products')
+        .list$({ created_at: makeDateSimilarTo(elvis_bday) }, (err, out) => {
+          if (err) {
+            return fin(err)
+          }
+
+          expect(out.length).to.equal(1)
+
+          expect(out[0]).to.contain({
+            created_at: elvis_bday
+          })
+
+          return fin()
+        })
+    })
+
+    it('cannot match a non-date field', async (fin) => {
+      await setupTest()
+
+      return seneca.make('products')
+        .list$({ id: makeDateSimilarTo(elvis_bday) }, (err, out) => {
+          if (err) {
+            return fin(err)
+          }
+
+          expect(out.length).to.equal(0)
+
+          return fin()
+        })
+    })
+  })
+
+  describe('#remove by date', () => {
+    const millenium = new Date(2000, 0, 1)
+    const elvis_bday = new Date(1935, 0, 8)
+
+
+    let seneca
+
+    async function setupTest() {
+      seneca = makeSenecaForTest()
+
+      await saveEnt(seneca.make('products').data$({ created_at: elvis_bday }))
+      await saveEnt(seneca.make('products').data$({ created_at: millenium }))
+    }
+
+
+    it('can query by date', async (fin) => {
+      await setupTest()
+
+      return seneca.make('products')
+        .remove$({ created_at: makeDateSimilarTo(millenium) }, (err) => {
+          if (err) {
+            return fin(err)
+          }
+
+          return seneca.make('products').list$({}, (err, out) => {
+            expect(out.length).to.equal(1)
+
+            expect(out[0]).to.contain({
+              created_at: elvis_bday
+            })
+
+            return fin()
+          })
+        })
+    })
+
+    it('can query by date', async (fin) => {
+      await setupTest()
+
+      return seneca.make('products')
+        .remove$({ created_at: makeDateSimilarTo(elvis_bday) }, (err, out) => {
+          if (err) {
+            return fin(err)
+          }
+
+          return seneca.make('products').list$({}, (err, out) => {
+            expect(out.length).to.equal(1)
+
+            expect(out[0]).to.contain({
+              created_at: millenium
+            })
+
+            return fin()
+          })
+        })
     })
   })
 
@@ -1234,4 +1431,11 @@ function make_it(lab) {
       })
     )
   }
+}
+function saveEnt(ent, save_opts = {}) {
+  return Util.promisify(ent.save$).call(ent, save_opts)
+}
+
+function makeDateSimilarTo(date) {
+  return new Date(date)
 }

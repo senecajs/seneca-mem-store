@@ -1,3 +1,5 @@
+const Assert = require('assert')
+
 export class intern {
   static is_new(ent: any): boolean {
     // NOTE: This function is intended for use by the #save method. This
@@ -34,7 +36,10 @@ export class intern {
 
   static is_upsert(msg: any): boolean {
     const { ent, q } = msg
-    return intern.is_new(ent) && Array.isArray(q.upsert$)
+
+    return null != q &&
+      intern.is_new(ent) &&
+      Array.isArray(q.upsert$)
   }
 
 
@@ -92,69 +97,161 @@ export class intern {
   }
 
 
+  static is_object(x: any): boolean {
+    return '[object Object]' === toString.call(x)
+  }
+
+
+  static is_date(x: any): boolean {
+    return '[object Date]' === toString.call(x)
+  }
+
+
+  static eq_dates(lv: Date, rv: Date): boolean {
+    return lv.getTime() === rv.getTime()
+  }
+
+
+  static matches_qobj(q: any, mement: any): boolean {
+    const qprops = Object.keys(q)
+
+
+    // NOTE: If the query is an empty object, then we are matching
+    // all entities.
+
+    if (0 === qprops.length) {
+      return true
+    }
+
+
+    const does_match = qprops.every(qp => {
+      const qv = q[qp]
+
+
+      if ('and$' === qp) {
+        Assert(Array.isArray(qv),
+          'The and$-operator must be an array')
+
+        return qv.every((subq: any) => intern.matches_qobj(subq, mement))
+      }
+
+
+      if ('or$' === qp) {
+        Assert(Array.isArray(qv),
+          'The or$-operator must be an array')
+
+        return qv.some((subq: any) => intern.matches_qobj(subq, mement))
+      }
+
+
+      if (-1 !== qp.indexOf('$')) {
+        //
+        // NOTE: We ignore Seneca qualifiers.
+        //
+        return true
+      }
+
+
+      if (!(qp in mement)) {
+        return false
+      }
+
+
+      const ev = mement[qp]
+
+      if (Array.isArray(qv)) {
+        return -1 !== qv.indexOf(ev)
+      }
+
+
+      if (intern.is_date(qv)) {
+        return intern.is_date(ev) && intern.eq_dates(qv, ev)
+      }
+
+
+      if (intern.is_object(qv)) {
+        const qops = Object.keys(qv)
+
+        const does_satisfy_ops = qops.every(op => {
+          // NOTE: This is the legacy mongo-style constraints.
+          //
+
+          if ('$ne' === op)   return ev != qv[op]
+          if ('$gte' === op)  return ev >= qv[op]
+          if ('$gt' === op)   return ev > qv[op]
+          if ('$lt' === op)   return ev < qv[op]
+          if ('$lte' === op)  return ev <= qv[op]
+          if ('$in' === op)   return qv[op].includes(ev)
+          if ('$nin' === op)  return !qv[op].includes(ev)
+
+          //
+          // NOTE: The definition for the legacy mongo-style constraints
+          // ends here.
+
+
+          if ('eq$' === op)   return ev === qv.eq$
+          if ('ne$' === op)   return ev !== qv.ne$
+          if ('gte$' === op)  return ev >= qv.gte$
+          if ('gt$' === op)   return ev > qv.gt$
+          if ('lt$' === op)   return ev < qv.lt$
+          if ('lte$' === op)  return ev <= qv.lte$
+          if ('in$' === op)   return qv.in$.includes(ev)
+          if ('nin$' === op)  return !qv.nin$.includes(ev)
+
+
+          // NOTE: We ignore unknown constraints.
+          //
+
+          return true
+        })
+
+        return does_satisfy_ops
+      }
+
+
+      return qv === ev
+    })
+
+
+    return does_match
+  }
+
+
   // NOTE: Seneca supports a reasonable set of features
   // in terms of listing. This function can handle
   // sorting, skiping, limiting and general retrieval.
   //
   static listents(seneca: any, entmap: any, qent: any, q: any, done: any) {
-    let list = []
+    let list: any = []
 
-    let canon = qent.canon$({ object: true })
-    let base = canon.base
-    let name = canon.name
+    const canon = qent.canon$({ object: true })
+    const { base, name } = canon
 
-    let entset = entmap[base] ? entmap[base][name] : null
-    let ent
+    const entset = entmap[base] ? entmap[base][name] : null
 
     if (null != entset && null != q) {
       if ('string' == typeof q) {
-        ent = entset[q]
-        if (ent) {
+        const match = entset[q]
+
+        if (match) {
+          const ent = qent.make$(match)
           list.push(ent)
         }
       } else if (Array.isArray(q)) {
-        q.forEach(function(id) {
-          let ent = entset[id]
-          if (ent) {
-            ent = qent.make$(ent)
+        for (const id of q) {
+          const match = entset[id]
+
+          if (match) {
+            const ent = qent.make$(match)
             list.push(ent)
           }
-        })
-      } else if ('object' === typeof q) {
-        let entids = Object.keys(entset)
-        next_ent: for (let id of entids) {
-          ent = entset[id]
-          for (let p in q) {
-            let qv = q[p] // query val
-            let ev = ent[p] // ent val
-
-            if (-1 === p.indexOf('$')) {
-              if (Array.isArray(qv)) {
-                if (-1 === qv.indexOf(ev)) {
-                  continue next_ent
-                }
-              } else if (null != qv && 'object' === typeof qv) {
-                // mongo style constraints
-                if (
-                  (null != qv.$ne && qv.$ne == ev) ||
-                  (null != qv.$gte && qv.$gte > ev) ||
-                  (null != qv.$gt && qv.$gt >= ev) ||
-                  (null != qv.$lt && qv.$lt <= ev) ||
-                  (null != qv.$lte && qv.$lte < ev) ||
-                  (null != qv.$in && -1 === qv.$in.indexOf(ev)) ||
-                  (null != qv.$nin && -1 !== qv.$nin.indexOf(ev)) ||
-                  false
-                ) {
-                  continue next_ent
-                }
-              } else if (qv !== ev) {
-                continue next_ent
-              }
-            }
-          }
-          ent = qent.make$(ent)
-          list.push(ent)
         }
+      } else if ('object' === typeof q) {
+        const mements = Object.values(entset)
+        const matches = mements.filter(mement => intern.matches_qobj(q, mement))
+        const ents = matches.map(match => qent.make$(match))
+
+        list = list.concat(ents)
       }
     }
 
@@ -166,7 +263,7 @@ export class intern {
       }
 
       let sd = q.sort$[sf] < 0 ? -1 : 1
-      list = list.sort(function(a, b) {
+      list = list.sort(function (a: any, b: any) {
         return sd * (a[sf] < b[sf] ? -1 : a[sf] === b[sf] ? 0 : 1)
       })
     }
