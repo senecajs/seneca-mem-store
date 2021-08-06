@@ -166,6 +166,11 @@ export class intern {
       }
 
 
+      if (intern.is_date(qv)) {
+        return intern.is_date(ev) && intern.eq_dates(qv, ev)
+      }
+
+
       if (null != qv && 'object' === typeof qv) {
         const qops = Object.keys(qv)
 
@@ -203,11 +208,6 @@ export class intern {
         })
 
         return does_satisfy_ops
-      }
-
-
-      if (intern.is_date(qv)) {
-        return intern.is_date(ev) && intern.eq_dates(qv, ev)
       }
 
 
@@ -249,11 +249,11 @@ export class intern {
           }
         }
       } else if ('object' === typeof q) {
-        const ents = Object.values(entset)
-        const matches = ents.filter(ent => intern.matches_qobj(q, ent))
-        const out = matches.map(match => qent.make$(match))
+        const mements = Object.values(entset)
+        const matches = mements.filter(mement => intern.matches_qobj(q, mement))
+        const ents = matches.map(match => qent.make$(match))
 
-        list = list.concat(out)
+        list = list.concat(ents)
       }
     }
 
