@@ -595,7 +595,9 @@ describe('mem-store tests', function () {
                   return fin(err)
                 }
 
-                expect(out).to.equal([product])
+                expect(Array.isArray(out)).to.equal(true)
+                expect(out.length).to.equal(1)
+                expect(out[0]).to.contain(product)
 
                 return fin()
               }

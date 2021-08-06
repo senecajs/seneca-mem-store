@@ -236,9 +236,8 @@ export class intern {
         const match = entset[q]
 
         if (match) {
-          // TODO: FIXME:
-          //const ent = qent.make$(match)
-          list.push(match)
+          const ent = qent.make$(match)
+          list.push(ent)
         }
       } else if (Array.isArray(q)) {
         for (const id of q) {
