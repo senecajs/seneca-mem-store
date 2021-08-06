@@ -1,3 +1,5 @@
+const Assert = require('assert')
+
 export class intern {
   static is_new(ent: any): boolean {
     // NOTE: This function is intended for use by the #save method. This
@@ -34,7 +36,10 @@ export class intern {
 
   static is_upsert(msg: any): boolean {
     const { ent, q } = msg
-    return intern.is_new(ent) && Array.isArray(q.upsert$)
+
+    return null != q &&
+      intern.is_new(ent) &&
+      Array.isArray(q.upsert$)
   }
 
 
@@ -108,11 +113,6 @@ export class intern {
 
 
   static matches_qobj(q: any, mement: any): boolean {
-    if (null == q || 'object' !== typeof q) {
-      throw new Error('The q argument must be an object')
-    }
-
-
     const qprops = Object.keys(q)
 
 
@@ -129,20 +129,18 @@ export class intern {
 
 
       if ('and$' === qp) {
-        if (!Array.isArray(qv)) {
-          throw new Error('The and$-operator must be an array')
-        }
+        Assert(Array.isArray(qv),
+          'The and$-operator must be an array')
 
-        return qv.every(subq => intern.matches_qobj(subq, mement))
+        return qv.every((subq: any) => intern.matches_qobj(subq, mement))
       }
 
 
       if ('or$' === qp) {
-        if (!Array.isArray(qv)) {
-          throw new Error('The or$-operator must be an array')
-        }
+        Assert(Array.isArray(qv),
+          'The or$-operator must be an array')
 
-        return qv.some(subq => intern.matches_qobj(subq, mement))
+        return qv.some((subq: any) => intern.matches_qobj(subq, mement))
       }
 
 
@@ -171,7 +169,7 @@ export class intern {
       }
 
 
-      if (null != qv && 'object' === typeof qv) {
+      if (intern.is_object(qv)) {
         const qops = Object.keys(qv)
 
         const does_satisfy_ops = qops.every(op => {

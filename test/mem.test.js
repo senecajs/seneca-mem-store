@@ -1010,6 +1010,21 @@ describe('additional mem-store tests', () => {
           return fin()
         })
     })
+
+    it('cannot match a non-date field', async (fin) => {
+      await setupTest()
+
+      return seneca.make('products')
+        .list$({ id: makeDateSimilarTo(elvis_bday) }, (err, out) => {
+          if (err) {
+            return fin(err)
+          }
+
+          expect(out.length).to.equal(0)
+
+          return fin()
+        })
+    })
   })
 
   describe('#remove by date', () => {
