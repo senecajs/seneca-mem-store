@@ -239,7 +239,7 @@ function mem_store(this: any, options: Options) {
 
     load: function (this: any, msg: any, reply: any) {
       let qent = msg.qent
-      let q = msg.q
+      let q = msg.q || {}
 
       return intern.listents(
         this,
@@ -258,7 +258,7 @@ function mem_store(this: any, options: Options) {
 
     list: function (msg: any, reply: any) {
       let qent = msg.qent
-      let q = msg.q
+      let q = msg.q || {}
 
       return intern.listents(
         this,
@@ -283,7 +283,7 @@ function mem_store(this: any, options: Options) {
     remove: function (this: any, msg: any, reply: any) {
       let seneca = this
       let qent = msg.qent
-      let q = msg.q
+      let q = msg.q || {}
       let all = q.all$
 
       // default false

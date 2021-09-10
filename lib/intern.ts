@@ -34,7 +34,7 @@ export class intern {
 
   static is_upsert(msg: any): boolean {
     const { ent, q } = msg
-    return intern.is_new(ent) && Array.isArray(q.upsert$)
+    return intern.is_new(ent) && (q && Array.isArray(q.upsert$))
   }
 
 
@@ -113,7 +113,7 @@ export class intern {
           list.push(ent)
         }
       } else if (Array.isArray(q)) {
-        q.forEach(function(id) {
+        q.forEach(function (id) {
           let ent = entset[id]
           if (ent) {
             ent = qent.make$(ent)
@@ -172,7 +172,7 @@ export class intern {
       }
 
       let sd = q.sort$[sf] < 0 ? -1 : 1
-      list = list.sort(function(a, b) {
+      list = list.sort(function (a, b) {
         return sd * (a[sf] < b[sf] ? -1 : a[sf] === b[sf] ? 0 : 1)
       })
     }
