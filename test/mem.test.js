@@ -884,7 +884,6 @@ describe('additional mem-store tests', () => {
     const millenium = new Date(2000, 0, 1)
     const elvis_bday = new Date(1935, 0, 8)
 
-
     let seneca
 
     async function setupTest() {
@@ -894,18 +893,18 @@ describe('additional mem-store tests', () => {
       await saveEnt(seneca.make('products').data$({ created_at: millenium }))
     }
 
-
     it('can query by date', async (fin) => {
       await setupTest()
 
-      return seneca.make('products')
+      return seneca
+        .make('products')
         .load$({ created_at: makeDateSimilarTo(millenium) }, (err, out) => {
           if (err) {
             return fin(err)
           }
 
           expect(out).to.contain({
-            created_at: millenium
+            created_at: millenium,
           })
 
           return fin()
@@ -915,14 +914,15 @@ describe('additional mem-store tests', () => {
     it('can query by date', async (fin) => {
       await setupTest()
 
-      return seneca.make('products')
+      return seneca
+        .make('products')
         .load$({ created_at: makeDateSimilarTo(elvis_bday) }, (err, out) => {
           if (err) {
             return fin(err)
           }
 
           expect(out).to.contain({
-            created_at: elvis_bday
+            created_at: elvis_bday,
           })
 
           return fin()
@@ -930,23 +930,21 @@ describe('additional mem-store tests', () => {
     })
 
     it('fails when trying to compare a date field to anything else', (fin) => {
-      return seneca.make('products')
-        .load$({ created_at: 123 }, (err, out) => {
-          if (err) {
-            return fin(err)
-          }
+      return seneca.make('products').load$({ created_at: 123 }, (err, out) => {
+        if (err) {
+          return fin(err)
+        }
 
-          expect(out).to.equal(null)
+        expect(out).to.equal(null)
 
-          return fin()
-        })
+        return fin()
+      })
     })
   })
 
   describe('#list by date', () => {
     const millenium = new Date(2000, 0, 1)
     const elvis_bday = new Date(1935, 0, 8)
-
 
     let seneca
 
@@ -957,11 +955,11 @@ describe('additional mem-store tests', () => {
       await saveEnt(seneca.make('products').data$({ created_at: millenium }))
     }
 
-
     it('can query by date', async (fin) => {
       await setupTest()
 
-      return seneca.make('products')
+      return seneca
+        .make('products')
         .list$({ created_at: makeDateSimilarTo(millenium) }, (err, out) => {
           if (err) {
             return fin(err)
@@ -970,7 +968,7 @@ describe('additional mem-store tests', () => {
           expect(out.length).to.equal(1)
 
           expect(out[0]).to.contain({
-            created_at: millenium
+            created_at: millenium,
           })
 
           return fin()
@@ -980,7 +978,8 @@ describe('additional mem-store tests', () => {
     it('can query by date', async (fin) => {
       await setupTest()
 
-      return seneca.make('products')
+      return seneca
+        .make('products')
         .list$({ created_at: makeDateSimilarTo(elvis_bday) }, (err, out) => {
           if (err) {
             return fin(err)
@@ -989,7 +988,7 @@ describe('additional mem-store tests', () => {
           expect(out.length).to.equal(1)
 
           expect(out[0]).to.contain({
-            created_at: elvis_bday
+            created_at: elvis_bday,
           })
 
           return fin()
@@ -1001,7 +1000,6 @@ describe('additional mem-store tests', () => {
     const millenium = new Date(2000, 0, 1)
     const elvis_bday = new Date(1935, 0, 8)
 
-
     let seneca
 
     async function setupTest() {
@@ -1011,11 +1009,11 @@ describe('additional mem-store tests', () => {
       await saveEnt(seneca.make('products').data$({ created_at: millenium }))
     }
 
-
     it('can query by date', async (fin) => {
       await setupTest()
 
-      return seneca.make('products')
+      return seneca
+        .make('products')
         .remove$({ created_at: makeDateSimilarTo(millenium) }, (err) => {
           if (err) {
             return fin(err)
@@ -1025,7 +1023,7 @@ describe('additional mem-store tests', () => {
             expect(out.length).to.equal(1)
 
             expect(out[0]).to.contain({
-              created_at: elvis_bday
+              created_at: elvis_bday,
             })
 
             return fin()
@@ -1036,7 +1034,8 @@ describe('additional mem-store tests', () => {
     it('can query by date', async (fin) => {
       await setupTest()
 
-      return seneca.make('products')
+      return seneca
+        .make('products')
         .remove$({ created_at: makeDateSimilarTo(elvis_bday) }, (err, out) => {
           if (err) {
             return fin(err)
@@ -1046,7 +1045,7 @@ describe('additional mem-store tests', () => {
             expect(out.length).to.equal(1)
 
             expect(out[0]).to.contain({
-              created_at: millenium
+              created_at: millenium,
             })
 
             return fin()
@@ -1402,4 +1401,3 @@ function saveEnt(ent, save_opts = {}) {
 function makeDateSimilarTo(date) {
   return new Date(date)
 }
-
