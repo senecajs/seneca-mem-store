@@ -58,7 +58,7 @@ if ('2.0.0' <= seneca.version) {
   senecaMerge.use('entity', { mem_store: false })
 }
 
-const seneca_test = Seneca({ require })
+const seneca_test = Seneca() // ({ require })
   .test()
   .use('promisify')
   .use('entity', { mem_store: false })
