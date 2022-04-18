@@ -1,6 +1,6 @@
 {
   "name": "seneca-mem-store",
-  "version": "6.3.0",
+  "version": "6.3.1",
   "description": "Seneca in-memory data storage plugin.",
   "main": "dist/mem-store.js",
   "types": "dist/mem-store.d.ts",
@@ -28,7 +28,7 @@
     "clean": "rm -rf node_modules package-lock.json yarn.lock",
     "repo-tag": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && echo TAG: v$REPO_VERSION && git commit -a -m v$REPO_VERSION && git push && git tag v$REPO_VERSION && git push --tags;",
     "repo-publish": "npm run clean && npm i --registry=http://registry.npmjs.org && npm run repo-publish-quick",
-    "repo-publish-quick": "npm run prettier && npm run build && npm test && npm run repo-tag && npm publish --access public --registry=http://registry.npmjs.org"
+    "repo-publish-quick": "npm run prettier && npm run build && npm test && npm run repo-tag && npm publish --access public --registry=https://registry.npmjs.org"
   },
   "repository": {
     "type": "git",
