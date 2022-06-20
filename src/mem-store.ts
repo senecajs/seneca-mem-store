@@ -1,7 +1,7 @@
-/* Copyright (c) 2010-2020 Richard Rodger and other contributors, MIT License */
+/* Copyright (c) 2010-2022 Richard Rodger and other contributors, MIT License */
 'use strict'
 
-import { intern } from './lib/intern'
+import { intern } from './intern'
 
 let internals = {
   name: 'mem-store',
