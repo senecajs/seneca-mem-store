@@ -1,6 +1,6 @@
 {
   "name": "seneca-mem-store",
-  "version": "6.3.1",
+  "version": "6.4.0",
   "description": "Seneca in-memory data storage plugin.",
   "main": "dist/mem-store.js",
   "types": "dist/mem-store.d.ts",
@@ -23,7 +23,7 @@
     "watch": "tsc -w -d",
     "test": "lab -v -P test -L -t 90 -r console -o stdout -r html -o test/coverage.html -r lcov -o test/lcov.info --sourcemaps --transform node_modules/lab-transform-typescript",
     "test-some": "lab -v -P test --sourcemaps --transform node_modules/lab-transform-typescript -g",
-    "prettier": "prettier --write --no-semi --single-quote *.ts test/*.js",
+    "prettier": "prettier --write --no-semi --single-quote src/**/*.ts test/*.js",
     "reset": "npm run clean && npm i && npm run build && npm test",
     "clean": "rm -rf node_modules package-lock.json yarn.lock",
     "repo-tag": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && echo TAG: v$REPO_VERSION && git commit -a -m v$REPO_VERSION && git push && git tag v$REPO_VERSION && git push --tags;",

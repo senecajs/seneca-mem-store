@@ -27,16 +27,14 @@ export class intern {
     //         .save$(done)
     //     })
     // ```
-    // 
+    //
     return null != ent && null == ent.id
   }
 
-
   static is_upsert(msg: any): boolean {
     const { ent, q } = msg
-    return intern.is_new(ent) && (q && Array.isArray(q.upsert$))
+    return intern.is_new(ent) && q && Array.isArray(q.upsert$)
   }
-
 
   static find_mement(entmap: any, base_ent: any, filter: any): any {
     const { base, name } = base_ent.canon$({ object: true })
@@ -45,7 +43,6 @@ export class intern {
     if (null == entset) {
       return null
     }
-
 
     let out = null
 
@@ -60,7 +57,6 @@ export class intern {
 
     return out
 
-
     function matches(ent: any, filter: any): boolean {
       for (const fp in filter) {
         if (fp in ent && filter[fp] === ent[fp]) {
@@ -74,8 +70,12 @@ export class intern {
     }
   }
 
-
-  static update_mement(entmap: any, base_ent: any, filter: any, new_attrs: any) {
+  static update_mement(
+    entmap: any,
+    base_ent: any,
+    filter: any,
+    new_attrs: any
+  ) {
     const ent_to_update = intern.find_mement(entmap, base_ent, filter)
 
     if (ent_to_update) {
@@ -86,11 +86,9 @@ export class intern {
     return null
   }
 
-
   static should_merge(ent: any, plugin_opts: any): boolean {
     return !(false === plugin_opts.merge || false === ent.merge$)
   }
-
 
   // NOTE: Seneca supports a reasonable set of features
   // in terms of listing. This function can handle
@@ -203,24 +201,19 @@ export class intern {
     done.call(seneca, null, list)
   }
 
-
   static clean_array(ary: string[]): string[] {
     return ary.filter((prop: string) => !prop.includes('$'))
   }
-
 
   static is_object(x: any): boolean {
     return '[object Object]' === toString.call(x)
   }
 
-
   static is_date(x: any): boolean {
     return '[object Date]' === toString.call(x)
   }
-
 
   static eq_dates(lv: Date, rv: Date): boolean {
     return lv.getTime() === rv.getTime()
   }
 }
-
