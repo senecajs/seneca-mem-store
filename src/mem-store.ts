@@ -1,6 +1,9 @@
 /* Copyright (c) 2010-2022 Richard Rodger and other contributors, MIT License */
 'use strict'
 
+// TODO: use `undefined` as no-error value consistently
+
+
 import { intern } from './intern'
 
 let internals = {
