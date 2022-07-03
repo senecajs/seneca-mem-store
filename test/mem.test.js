@@ -1,6 +1,6 @@
 /*
   MIT License,
-  Copyright (c) 2010-2021, Richard Rodger and other contributors.
+  Copyright (c) 2010-2022, Richard Rodger and other contributors.
 */
 
 'use strict'
@@ -775,7 +775,7 @@ describe('additional mem-store tests', () => {
             return fin(err)
           }
 
-          expect(out).to.be.undefined()
+          expect(out).to.be.null()
 
           return seneca.make('sys', 'product').list$((err, products) => {
             if (err) {
@@ -817,7 +817,7 @@ describe('additional mem-store tests', () => {
             return fin(err)
           }
 
-          expect(out).to.be.undefined()
+          expect(out).to.be.null()
 
           return seneca.make('sys', 'product').list$((err, products) => {
             if (err) {

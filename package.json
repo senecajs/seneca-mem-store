@@ -43,7 +43,7 @@
   ],
   "peerDependencies": {
     "seneca": ">=3",
-    "seneca-entity": ">=17"
+    "seneca-entity": ">=18"
   },
   "devDependencies": {
     "@hapi/code": "9.0.1",
@@ -51,11 +51,9 @@
     "async": "3.2.4",
     "lab-transform-typescript": "3.0.1",
     "prettier": "2.7.1",
-    "seneca": "3.28.2",
-    "seneca-entity": "16.3.0",
     "seneca-plugin-validator": "0.6.1",
-    "seneca-promisify": "2.4.1",
-    "seneca-store-test": "4.1.0",
+    "seneca-promisify": "3.0.0",
+    "seneca-store-test": "5.1.0",
     "typescript": "4.7.4"
   },
   "files": [
