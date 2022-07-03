@@ -3,7 +3,6 @@
 
 // TODO: use `undefined` as no-error value consistently
 
-
 import { intern } from './intern'
 
 let internals = {
