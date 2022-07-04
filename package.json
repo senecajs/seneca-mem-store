@@ -25,7 +25,7 @@
     "test-some": "lab -v -P test --sourcemaps --transform node_modules/lab-transform-typescript -g",
     "prettier": "prettier --write --no-semi --single-quote src/**/*.ts test/*.js",
     "reset": "npm run clean && npm i && npm run build && npm test",
-    "clean": "rm -rf node_modules package-lock.json yarn.lock",
+    "clean": "rm -rf node_modules dist package-lock.json yarn.lock",
     "repo-tag": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && echo TAG: v$REPO_VERSION && git commit -a -m v$REPO_VERSION && git push && git tag v$REPO_VERSION && git push --tags;",
     "repo-publish": "npm run clean && npm i --registry=http://registry.npmjs.org && npm run repo-publish-quick",
     "repo-publish-quick": "npm run prettier && npm run build && npm test && npm run repo-tag && npm publish --access public --registry=https://registry.npmjs.org"
@@ -52,7 +52,7 @@
     "lab-transform-typescript": "3.0.1",
     "prettier": "2.7.1",
     "seneca-plugin-validator": "0.6.1",
-    "seneca-promisify": "3.0.0",
+    "seneca-promisify": "3.2.0",
     "seneca-store-test": "5.1.0",
     "typescript": "4.7.4"
   },
