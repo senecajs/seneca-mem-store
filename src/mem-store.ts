@@ -9,19 +9,6 @@ let internals = {
   name: 'mem-store',
 }
 
-module.exports = mem_store
-Object.defineProperty(module.exports, 'name', { value: 'mem-store' })
-
-module.exports.defaults = {
-  'entity-id-exists':
-    'Entity of type <%=type%> with id = <%=id%> already exists.',
-}
-
-/* NOTE: `intern` serves as a namespace for utility functions used by
- * the mem store.
- */
-module.exports.intern = intern
-
 type Options = {
   prefix: string
   idlen: number
@@ -405,7 +392,7 @@ function mem_store(this: any, options: Options) {
   }
 }
 
-module.exports.preload = function () {
+mem_store.preload = function (this: any) {
   let seneca = this
 
   let meta = {
@@ -418,4 +405,22 @@ module.exports.preload = function () {
   }
 
   return meta
+}
+
+mem_store.defaults = {
+  'entity-id-exists':
+    'Entity of type <%=type%> with id = <%=id%> already exists.',
+}
+
+/* NOTE: `intern` serves as a namespace for utility functions used by
+ * the mem store.
+ */
+mem_store.intern = intern
+
+Object.defineProperty(mem_store, 'name', { value: 'mem-store' })
+
+export default mem_store
+
+if ('undefined' !== typeof module) {
+  module.exports = mem_store
 }
