@@ -10,12 +10,12 @@ let internals = {
 }
 
 type Options = {
-  prefix: string
-  idlen: number
-  web: {
+  prefix?: string
+  idlen?: number
+  web?: {
     dump: boolean
   }
-  generate_id: any
+  generate_id?: any
 }
 
 function mem_store(this: any, options: Options) {
@@ -366,7 +366,7 @@ function mem_store(this: any, options: Options) {
   // this action a great place to do any setup.
   //seneca.add('init:mem-store', function (msg, reply) {
   seneca.init(function (this: any, reply: any) {
-    if (options.web.dump) {
+    if (options?.web?.dump) {
       this.act('role:web', {
         use: {
           prefix: options.prefix,

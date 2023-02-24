@@ -233,7 +233,8 @@ function mem_store(options) {
     // this action a great place to do any setup.
     //seneca.add('init:mem-store', function (msg, reply) {
     seneca.init(function (reply) {
-        if (options.web.dump) {
+        var _a;
+        if ((_a = options === null || options === void 0 ? void 0 : options.web) === null || _a === void 0 ? void 0 : _a.dump) {
             this.act('role:web', {
                 use: {
                     prefix: options.prefix,

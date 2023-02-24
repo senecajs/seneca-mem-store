@@ -1,10 +1,10 @@
 type Options = {
-    prefix: string;
-    idlen: number;
-    web: {
+    prefix?: string;
+    idlen?: number;
+    web?: {
         dump: boolean;
     };
-    generate_id: any;
+    generate_id?: any;
 };
 declare function mem_store(this: any, options: Options): {
     name: string;
