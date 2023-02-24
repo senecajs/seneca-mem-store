@@ -1,8 +1,9 @@
 {
   "name": "seneca-mem-store",
-  "version": "7.0.1",
+  "version": "7.0.2",
   "description": "Seneca in-memory data storage plugin.",
   "main": "dist/mem-store.js",
+  "type": "commonjs",
   "types": "dist/mem-store.d.ts",
   "license": "MIT",
   "author": "Richard Rodger (http://richardrodger.com)",
@@ -43,18 +44,18 @@
   ],
   "peerDependencies": {
     "seneca": ">=3",
-    "seneca-entity": ">=18"
+    "seneca-entity": ">=19"
   },
   "devDependencies": {
-    "@hapi/code": "9.0.1",
-    "@hapi/lab": "25.0.1",
+    "@hapi/code": "9.0.3",
+    "@hapi/lab": "25.1.2",
     "async": "3.2.4",
     "lab-transform-typescript": "3.0.1",
-    "prettier": "2.7.1",
+    "prettier": "2.8.4",
     "seneca-plugin-validator": "0.6.1",
-    "seneca-promisify": "3.2.0",
-    "seneca-store-test": "5.1.0",
-    "typescript": "4.7.4"
+    "seneca-promisify": "3.4.0",
+    "seneca-store-test": "5.2.0",
+    "typescript": "4.9.5"
   },
   "files": [
     "README.md",
