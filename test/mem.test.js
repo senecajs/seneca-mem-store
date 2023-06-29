@@ -793,46 +793,22 @@ describe('additional mem-store tests', () => {
       })
     })
 
-    describe('when "generate_id" returns null', () => {
+    it('generate_id-null', (fin) => {
       const seneca = makeSenecaForTest({
         mem_store_opts: {
           generate_id(_ent) {
             return null
           },
         },
-      })
+      }).quiet()
 
-      before(() => {
-        return seneca
-          .make('sys', 'product')
-          .data$({ label: 'lorem ipsum' })
-          .save$()
-      })
-
-      it('generates a new id and creates a new entity', (fin) => {
-        seneca.test(fin)
-
-        seneca.make('sys', 'product').load$(null, (err, out) => {
-          if (err) {
-            return fin(err)
-          }
-
-          expect(out).to.be.null()
-
-          return seneca.make('sys', 'product').list$((err, products) => {
-            if (err) {
-              return fin(err)
-            }
-
-            expect(products.length).to.equal(1)
-
-            expect(typeof products[0].id).to.equal('string')
-            expect(products[0].label).to.equal('lorem ipsum')
-
-            return fin()
-          })
+      seneca
+        .make('sys', 'product')
+        .data$({ label: 'lorem ipsum' })
+        .save$(function (err, out) {
+          expect(err.code).equal('generate-invalid-entity-id')
+          fin()
         })
-      })
     })
 
     describe('the "entity$" field when saving an entity', () => {

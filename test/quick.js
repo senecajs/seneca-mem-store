@@ -3,9 +3,20 @@ const Seneca = require('seneca')
 run()
 
 async function run() {
-  const seneca = Seneca().test().use('promisify').use('entity').use('..')
+  const seneca = Seneca()
+    .test()
+    .use('promisify')
+    .use('entity', { mem_store: false })
+    .use('..')
 
   await seneca.ready()
+
+  console.log(seneca.list())
+  console.log(seneca.find('sys:entity,cmd:load'))
+
+  let role_load = seneca.find('role:entity,cmd:load')
+  console.log(role_load)
+  console.log(role_load.func.toString())
 
   const foo1 = await seneca.entity('foo').data$({ x: 1 }).save$()
   console.log(foo1)

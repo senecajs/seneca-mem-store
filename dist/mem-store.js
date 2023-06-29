@@ -135,25 +135,14 @@ function mem_store(options) {
                 }
                 // Generate a new id
                 id = options.generate_id ? options.generate_id(ent) : void 0;
-                if (null !== id) {
-                    return do_save(id, true);
+                if (null == id) {
+                    seneca.fail('generate-invalid-entity-id', {
+                        type: ent.entity$,
+                        id: id,
+                    });
                 }
                 else {
-                    let gen_id = {
-                        role: 'basic',
-                        cmd: 'generate_id',
-                        name: name,
-                        base: base,
-                        zone: zone,
-                    };
-                    // When we get a respones we will use the id param
-                    // as our entity id, if this fails we just fail and
-                    // call reply() as we have no way to save without an id
-                    seneca.act(gen_id, function (err, id) {
-                        if (err)
-                            return reply(err);
-                        do_save(id, true);
-                    });
+                    return do_save(id, true);
                 }
             }
         },
