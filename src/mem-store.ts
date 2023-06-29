@@ -9,7 +9,6 @@ let internals = {
   name: 'mem-store',
 }
 
-
 type Options = {
   prefix?: string
   idlen?: number

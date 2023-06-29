@@ -1,15 +1,9 @@
 const Seneca = require('seneca')
 
-
 run()
 
 async function run() {
-
-  const seneca = Seneca()
-        .test()
-        .use('promisify')
-        .use('entity')
-        .use('..')
+  const seneca = Seneca().test().use('promisify').use('entity').use('..')
 
   await seneca.ready()
 
@@ -21,5 +15,4 @@ async function run() {
 
   const list = await seneca.entity('foo').list$()
   console.log(list)
-
 }
