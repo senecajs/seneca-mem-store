@@ -74,7 +74,7 @@ export class intern {
     entmap: any,
     base_ent: any,
     filter: any,
-    new_attrs: any
+    new_attrs: any,
   ) {
     const ent_to_update = intern.find_mement(entmap, base_ent, filter)
 

@@ -35,7 +35,7 @@ function mem_store(this: any, options: Options) {
       // TODO: use seneca.export once it allows for null values
       generate_id: seneca.root.private$.exports['entity/generate_id'],
     },
-    options
+    options,
   )
 
   // The calling Seneca instance will provide
@@ -115,7 +115,7 @@ function mem_store(this: any, options: Options) {
           'save/' + operation,
           ent.canon$({ string: 1 }),
           mement_ptr,
-          desc
+          desc,
         )
 
         return reply(null, result_ent)
@@ -126,7 +126,7 @@ function mem_store(this: any, options: Options) {
 
           if (0 < upsert_on.length) {
             const has_upsert_fields = upsert_on.every(
-              (p: string) => p in mement
+              (p: string) => p in mement,
             )
 
             if (has_upsert_fields) {
@@ -139,7 +139,7 @@ function mem_store(this: any, options: Options) {
                 entmap,
                 ent,
                 match_by,
-                mement
+                mement,
               )
 
               return updated_ent
@@ -153,7 +153,7 @@ function mem_store(this: any, options: Options) {
           mement: any,
           msg: any,
           id?: any,
-          isnew?: boolean
+          isnew?: boolean,
         ) {
           const { ent } = msg
 
@@ -230,7 +230,7 @@ function mem_store(this: any, options: Options) {
           this.log.debug('load', q, qent.canon$({ string: 1 }), ent, desc)
 
           reply(err, ent)
-        }
+        },
       )
     },
 
@@ -250,11 +250,11 @@ function mem_store(this: any, options: Options) {
             qent.canon$({ string: 1 }),
             list.length,
             list[0],
-            desc
+            desc,
           )
 
           reply(err, list)
-        }
+        },
       )
     },
 
@@ -292,14 +292,14 @@ function mem_store(this: any, options: Options) {
               q,
               qent.canon$({ string: 1 }),
               ent,
-              desc
+              desc,
             )
           })
 
           let ent = (!all && load && list[0]) || null
 
           reply(null, ent)
-        }
+        },
       )
     },
 
@@ -329,7 +329,7 @@ function mem_store(this: any, options: Options) {
     { role: store.name, cmd: 'dump' },
     function (_msg: any, reply: any) {
       reply(null, entmap)
-    }
+    },
   )
 
   seneca.add(
@@ -338,7 +338,7 @@ function mem_store(this: any, options: Options) {
       let entjson = JSON.stringify(entmap)
 
       reply(null, { json: entjson })
-    }
+    },
   )
 
   // TODO: support direct import of literal objects
@@ -348,7 +348,7 @@ function mem_store(this: any, options: Options) {
       let imported = JSON.parse(msg.json)
       entmap = msg.merge ? this.util.deepextend(entmap, imported) : imported
       reply()
-    }
+    },
   )
 
   // Seneca will call init:plugin-name for us. This makes

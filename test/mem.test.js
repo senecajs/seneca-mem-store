@@ -28,8 +28,8 @@ function makeSenecaForTest(opts = {}) {
         log: 'silent',
         default_plugins: { 'mem-store': false },
       },
-      seneca_opts
-    )
+      seneca_opts,
+    ),
   )
 
   const { mem_store_opts = {} } = opts
@@ -105,7 +105,8 @@ describe('mem-store tests', function () {
 
   it('export-native', function (fin) {
     Assert.ok(
-      seneca.export('mem-store$1/native') || seneca.export('mem-store/1/native')
+      seneca.export('mem-store$1/native') ||
+        seneca.export('mem-store/1/native'),
     )
     fin()
   })
@@ -140,7 +141,7 @@ describe('mem-store tests', function () {
 
               fin()
             })
-          }
+          },
         )
       })
     })
@@ -185,16 +186,16 @@ describe('mem-store tests', function () {
                           },
                         },
                       }),
-                      out.json
+                      out.json,
                     )
                     fin()
                   })
                 })
               })
-            }
+            },
           )
         })
-      }
+      },
     )
   })
 
@@ -221,7 +222,7 @@ describe('mem-store tests', function () {
           function (err, out) {
             expect(out.toString()).equal('$-/-/foo;id=f0;{a:1}')
             fin()
-          }
+          },
         )
       })
     })
@@ -300,7 +301,7 @@ describe('mem-store tests', function () {
                         expect(list.length).equal(4)
 
                         fin()
-                      }
+                      },
                     )
                   })
                 })
@@ -593,7 +594,7 @@ describe('mem-store tests', function () {
                 expect(out).to.equal([product])
 
                 return fin()
-              }
+              },
             )
           })
         })
@@ -1061,7 +1062,7 @@ describe('additional mem-store tests', () => {
             expect(product).to.exist()
 
             const debug_logs = all_logs.filter(
-              (log) => 'debug' === log.level_name
+              (log) => 'debug' === log.level_name,
             )
 
             const save_log = debug_logs.find((log) => {
@@ -1128,7 +1129,7 @@ describe('additional mem-store tests', () => {
 
               return resolve()
             })
-          })
+          }),
       )
 
       testThatLogging('logs the operation', (fin) => {
@@ -1139,7 +1140,7 @@ describe('additional mem-store tests', () => {
 
           try {
             const debug_logs = all_logs.filter(
-              (log) => 'debug' === log.level_name
+              (log) => 'debug' === log.level_name,
             )
 
             const save_log = debug_logs.find((log) => {
@@ -1206,7 +1207,7 @@ describe('additional mem-store tests', () => {
 
               return resolve()
             })
-          })
+          }),
       )
 
       testThatLogging('logs the operation', (fin) => {
@@ -1217,7 +1218,7 @@ describe('additional mem-store tests', () => {
 
           try {
             const debug_logs = all_logs.filter(
-              (log) => 'debug' === log.level_name
+              (log) => 'debug' === log.level_name,
             )
 
             const save_log = debug_logs.find((log) => {
@@ -1278,7 +1279,7 @@ describe('additional mem-store tests', () => {
 
           try {
             const debug_logs = all_logs.filter(
-              (log) => 'debug' === log.level_name
+              (log) => 'debug' === log.level_name,
             )
 
             const save_log = debug_logs.find((log) => {
@@ -1365,7 +1366,7 @@ function make_it(lab) {
       opts,
       Util.promisify(function (x, fin) {
         func(fin)
-      })
+      }),
     )
   }
 }
