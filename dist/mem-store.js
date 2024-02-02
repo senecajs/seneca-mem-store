@@ -100,7 +100,7 @@ function mem_store(options) {
                 function complete_save(mement, msg, id, isnew) {
                     const { ent } = msg;
                     if (null != id) {
-                        mement.id = id;
+                        ent.id = mement.id = id;
                     }
                     const prev = entmap[base][name][mement.id];
                     if (isnew && prev) {
