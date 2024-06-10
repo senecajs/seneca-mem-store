@@ -7,9 +7,7 @@ import { Gubu } from 'gubu'
 
 import { intern } from './intern'
 
-
 const { Default, Skip } = Gubu
-
 
 let internals = {
   name: 'mem-store',
@@ -47,7 +45,6 @@ function mem_store(this: any, options: Options) {
   )
 
   // console.log('OPTIONS', options)
-
 
   // The calling Seneca instance will provide
   // a description for us on init(), it will
@@ -407,8 +404,6 @@ mem_store.preload = function (this: any) {
   return meta
 }
 
-
-
 mem_store.defaults = {
   // TODO: entity
   map: Default(undefined, {}),
@@ -422,8 +417,6 @@ mem_store.defaults = {
   'entity-id-exists':
     'Entity of type <%=type%> with id = <%=id%> already exists.',
 }
-
-
 
 /* NOTE: `intern` serves as a namespace for utility functions used by
  * the mem store.
