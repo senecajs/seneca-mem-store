@@ -3,19 +3,27 @@
 
 // TODO: use `undefined` as no-error value consistently
 
+import { Gubu } from 'gubu'
+
 import { intern } from './intern'
+
+
+const { Default, Skip } = Gubu
+
 
 let internals = {
   name: 'mem-store',
 }
 
 type Options = {
+  map?: any
   prefix?: string
   idlen?: number
   web?: {
     dump: boolean
   }
   generate_id?: any
+  'entity-id-exists': string
 }
 
 function mem_store(this: any, options: Options) {
@@ -26,17 +34,20 @@ function mem_store(this: any, options: Options) {
   // merge default options with any provided by the caller
   options = seneca.util.deepextend(
     {
-      prefix: '/mem-store',
-      idlen: 6,
-      web: {
-        dump: false,
-      },
+      // prefix: '/mem-store',
+      // idlen: 6,
+      // web: {
+      //   dump: false,
+      // },
 
       // TODO: use seneca.export once it allows for null values
       generate_id: seneca.root.private$.exports['entity/generate_id'],
     },
     options,
   )
+
+  // console.log('OPTIONS', options)
+
 
   // The calling Seneca instance will provide
   // a description for us on init(), it will
@@ -396,10 +407,23 @@ mem_store.preload = function (this: any) {
   return meta
 }
 
+
+
 mem_store.defaults = {
+  // TODO: entity
+  map: Default(undefined, {}),
+  prefix: '/mem-store',
+  idlen: 6,
+  web: {
+    dump: false,
+  },
+  merge: true,
+  generate_id: Skip(Function),
   'entity-id-exists':
     'Entity of type <%=type%> with id = <%=id%> already exists.',
 }
+
+
 
 /* NOTE: `intern` serves as a namespace for utility functions used by
  * the mem store.

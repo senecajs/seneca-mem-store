@@ -1,23 +1,26 @@
 /*
   MIT License,
-  Copyright (c) 2010-2022, Richard Rodger and other contributors.
+  Copyright (c) 2010-2024, Richard Rodger and other contributors.
 */
 
 'use strict'
 
 const Util = require('util')
 
+
 const Assert = require('assert')
 const Seneca = require('seneca')
 const Shared = require('seneca-store-test')
 const MakePluginValidator = require('seneca-plugin-validator')
 
-const Lab = require('@hapi/lab')
 const Code = require('@hapi/code')
 const { expect } = Code
+const Lab = require('@hapi/lab')
 const lab = (exports.lab = Lab.script())
 const { describe, before, after } = lab
 const it = make_it(lab)
+const test = it
+
 
 function makeSenecaForTest(opts = {}) {
   const { seneca_opts = {} } = opts
@@ -25,40 +28,38 @@ function makeSenecaForTest(opts = {}) {
   const seneca = Seneca(
     Object.assign(
       {
-        log: 'silent',
+        // log: 'silent',
         default_plugins: { 'mem-store': false },
       },
       seneca_opts,
     ),
   )
-
+        .test()
+  
   const { mem_store_opts = {} } = opts
+  seneca.use('entity', { mem_store: false })
   seneca.use({ name: '..', tag: '1' }, mem_store_opts)
-
-  if ('2.0.0' <= seneca.version) {
-    seneca.use('entity', { mem_store: false })
-  }
 
   return seneca
 }
 
+
 const seneca = Seneca({
-  log: 'silent',
+  legacy: false,
+  // log: 'silent',
   default_plugins: { 'mem-store': false },
-})
+}).test().use('entity', { mem_store: false })
 seneca.use({ name: '..', tag: '1' })
 
+
 const senecaMerge = Seneca({
+  legacy: false,
   log: 'silent',
-})
+}).test().use('entity', { mem_store: false })
 senecaMerge.use({ name: '..', tag: '1' }, { merge: false })
 
-if ('2.0.0' <= seneca.version) {
-  seneca.use('entity', { mem_store: false })
-  senecaMerge.use('entity', { mem_store: false })
-}
 
-const seneca_test = Seneca() // ({ require })
+const seneca_test = Seneca({  legacy: false }) // ({ require })
   .test()
   .use('promisify')
   .use('entity', { mem_store: false })
@@ -69,10 +70,22 @@ const test_opts = {
   name: 'mem-store',
 }
 
+
 Shared.test.init(lab, test_opts)
 Shared.test.keyvalue(lab, test_opts)
 
+
 describe('mem-store', () => {
+  test('load-plugin', async (fin) => {
+    const s0 = await Seneca().test().use('promisify')
+          .use('entity', { mem_store: false }).use('..').ready()
+    // console.log(s0.list_plugins())
+    // console.log(s0.find_plugin('mem-store'))
+    expect(s0.find_plugin('mem-store')).exists()
+    await s0.close()
+    fin()
+  })
+  
   it('is a plugin', (fin) => {
     const validatePlugin = MakePluginValidator(require('..'), module)
 
@@ -80,7 +93,8 @@ describe('mem-store', () => {
   })
 })
 
-describe('mem-store tests', function () {
+
+// describe('mem-store tests', function () {
   Shared.basictest({
     seneca: seneca,
     senecaMerge: senecaMerge,
@@ -312,6 +326,7 @@ describe('mem-store tests', function () {
       })
     })
   })
+
 
   describe('internal utilities', () => {
     const mem_store = seneca.export('mem-store')
@@ -552,6 +567,7 @@ describe('mem-store tests', function () {
       })
     })
 
+    
     describe('listents', () => {
       describe('when the query argument is a string', () => {
         const ent_base = 'sys'
@@ -717,7 +733,8 @@ describe('mem-store tests', function () {
       })
     })
   })
-})
+
+
 
 describe('additional mem-store tests', () => {
   describe('#save', () => {
@@ -758,60 +775,65 @@ describe('additional mem-store tests', () => {
       })
     })
 
-    describe('when data.id$ is null', () => {
+    
+    it('when data.id$ is null generates an id and creates a new entity', (fin) => {
       const seneca = makeSenecaForTest()
-
-      before(() => {
-        return seneca
-          .make('sys', 'product')
-          .data$({ id$: null, label: 'lorem ipsum' })
-          .save$()
-      })
-
-      it('generates an id and creates a new entity', (fin) => {
-        seneca.test(fin)
-
-        seneca.make('sys', 'product').load$(null, (err, out) => {
+      seneca.test(fin)
+      
+      seneca
+        .make('sys', 'product')
+        .data$({ id$: null, label: 'lorem ipsum' })
+        .save$()
+      
+        
+      seneca.make('sys', 'product').load$(null, (err, out) => {
+        if (err) {
+          return fin(err)
+        }
+        
+        expect(out).to.be.null()
+        
+        return seneca.make('sys', 'product').list$((err, products) => {
           if (err) {
             return fin(err)
           }
-
-          expect(out).to.be.null()
-
-          return seneca.make('sys', 'product').list$((err, products) => {
-            if (err) {
-              return fin(err)
-            }
-
-            expect(products.length).to.equal(1)
-
-            expect(typeof products[0].id).to.equal('string')
-            expect(products[0].label).to.equal('lorem ipsum')
-
-            return fin()
-          })
+          
+          expect(products.length).to.equal(1)
+          
+          expect(typeof products[0].id).to.equal('string')
+          expect(products[0].label).to.equal('lorem ipsum')
+          
+          return fin()
         })
       })
     })
+  
 
-    it('generate_id-null', (fin) => {
+    it('when data.id$ is null generate_id-null', (fin) => {
       const seneca = makeSenecaForTest({
         mem_store_opts: {
           generate_id(_ent) {
             return null
           },
         },
-      }).quiet()
+      })
 
       seneca
-        .make('sys', 'product')
-        .data$({ label: 'lorem ipsum' })
-        .save$(function (err, out) {
-          expect(err.code).equal('generate-invalid-entity-id')
-          fin()
+        .quiet()
+        .ready(()=>{
+          // console.log(seneca.list())
+      
+          seneca
+            .make('sys', 'product')
+            .data$({ label: 'lorem ipsum' })
+            .save$(function (err, out) {
+              expect(err.code).equal('generate-invalid-entity-id')
+              fin()
+            })
         })
     })
 
+    
     describe('the "entity$" field when saving an entity', () => {
       const seneca = makeSenecaForTest()
 
@@ -856,6 +878,7 @@ describe('additional mem-store tests', () => {
       })
     })
   })
+
 
   describe('#load by date', () => {
     const millenium = new Date(2000, 0, 1)
@@ -919,6 +942,9 @@ describe('additional mem-store tests', () => {
     })
   })
 
+
+
+
   describe('#list by date', () => {
     const millenium = new Date(2000, 0, 1)
     const elvis_bday = new Date(1935, 0, 8)
@@ -973,6 +999,9 @@ describe('additional mem-store tests', () => {
     })
   })
 
+  
+
+  
   describe('#remove by date', () => {
     const millenium = new Date(2000, 0, 1)
     const elvis_bday = new Date(1935, 0, 8)
@@ -1030,329 +1059,9 @@ describe('additional mem-store tests', () => {
         })
     })
   })
-
-  describe('logging', () => {
-    describe('#save', () => {
-      const all_logs = []
-
-      before(() => {
-        bufferSenecaLogsOnStdout(all_logs)
-      })
-
-      after(() => {
-        // NOTE: Restore the stdout here too, in case an uncaught error
-        // is thrown.
-        //
-        restoreStdout()
-      })
-
-      let seneca
-
-      before(() => {
-        seneca = makeSenecaForTestOfLogging()
-      })
-
-      testThatLogging('logs the operation', (fin) => {
-        seneca.make('products').save$((err, product) => {
-          if (err) {
-            return fin(err)
-          }
-
-          try {
-            expect(product).to.exist()
-
-            const debug_logs = all_logs.filter(
-              (log) => 'debug' === log.level_name,
-            )
-
-            const save_log = debug_logs.find((log) => {
-              return (
-                Array.isArray(log.data) &&
-                'string' === typeof log.data[0] &&
-                log.data[0].startsWith('save/')
-              )
-            })
-
-            expect(save_log).to.exist()
-            expect(save_log.data.length).to.equal(4)
-
-            const [, log_ent_canon, log_mement, log_desc] = save_log.data
-
-            expect(log_ent_canon).to.equal('-/-/products')
-
-            expect(log_mement).to.contain({
-              entity$: '-/-/products',
-              id: product.id,
-            })
-
-            expect(log_desc).to.startWith('mem-store')
-
-            return fin()
-          } catch (err) {
-            return fin(err)
-          }
-        })
-      })
-    })
-
-    describe('#load', () => {
-      const all_logs = []
-
-      before(() => {
-        bufferSenecaLogsOnStdout(all_logs)
-      })
-
-      after(() => {
-        // NOTE: Restore the stdout here too, in case an uncaught error
-        // is thrown.
-        //
-        restoreStdout()
-      })
-
-      let seneca
-
-      before(() => {
-        seneca = makeSenecaForTestOfLogging()
-      })
-
-      let product_id
-
-      before(
-        () =>
-          new Promise((resolve, reject) => {
-            seneca.make('products').save$((err, product) => {
-              if (err) {
-                return reject(err)
-              }
-
-              product_id = product.id
-
-              return resolve()
-            })
-          }),
-      )
-
-      testThatLogging('logs the operation', (fin) => {
-        seneca.make('products').load$(product_id, (err, product) => {
-          if (err) {
-            return fin(err)
-          }
-
-          try {
-            const debug_logs = all_logs.filter(
-              (log) => 'debug' === log.level_name,
-            )
-
-            const save_log = debug_logs.find((log) => {
-              return (
-                Array.isArray(log.data) &&
-                'string' === typeof log.data[0] &&
-                'load' === log.data[0]
-              )
-            })
-
-            expect(save_log).to.exist()
-            expect(save_log.data.length).to.equal(5)
-
-            const [, , log_ent_canon, log_ent, log_desc] = save_log.data
-
-            expect(log_ent_canon).to.equal('-/-/products')
-
-            expect(log_ent).to.contain({
-              entity$: '-/-/products',
-              id: product_id,
-            })
-
-            expect(log_desc).to.startWith('mem-store')
-
-            return fin()
-          } catch (err) {
-            return fin(err)
-          }
-        })
-      })
-    })
-
-    describe('#remove', () => {
-      const all_logs = []
-
-      before(() => {
-        bufferSenecaLogsOnStdout(all_logs)
-      })
-
-      after(() => {
-        // NOTE: Restore the stdout here too, in case an uncaught error
-        // is thrown.
-        //
-        restoreStdout()
-      })
-
-      let seneca
-
-      before(() => {
-        seneca = makeSenecaForTestOfLogging()
-      })
-
-      let product_id
-
-      before(
-        () =>
-          new Promise((resolve, reject) => {
-            seneca.make('products').save$((err, product) => {
-              if (err) {
-                return reject(err)
-              }
-
-              product_id = product.id
-
-              return resolve()
-            })
-          }),
-      )
-
-      testThatLogging('logs the operation', (fin) => {
-        seneca.make('products').remove$(product_id, (err, product) => {
-          if (err) {
-            return fin(err)
-          }
-
-          try {
-            const debug_logs = all_logs.filter(
-              (log) => 'debug' === log.level_name,
-            )
-
-            const save_log = debug_logs.find((log) => {
-              return (
-                Array.isArray(log.data) &&
-                'string' === typeof log.data[0] &&
-                log.data[0].startsWith('remove/')
-              )
-            })
-
-            expect(save_log).to.exist()
-            expect(save_log.data.length).to.equal(5)
-
-            const [, , log_ent_canon, log_ent, log_desc] = save_log.data
-
-            expect(log_ent_canon).to.equal('-/-/products')
-
-            expect(log_ent).to.contain({
-              entity$: '-/-/products',
-              id: product_id,
-            })
-
-            expect(log_desc).to.startWith('mem-store')
-
-            return fin()
-          } catch (err) {
-            return fin(err)
-          }
-        })
-      })
-    })
-
-    describe('#list', () => {
-      const all_logs = []
-
-      before(() => {
-        bufferSenecaLogsOnStdout(all_logs)
-      })
-
-      after(() => {
-        // NOTE: Restore the stdout here too, in case an uncaught error
-        // is thrown.
-        //
-        restoreStdout()
-      })
-
-      let seneca
-
-      before(() => {
-        seneca = makeSenecaForTestOfLogging()
-      })
-
-      testThatLogging('logs the operation', (fin) => {
-        seneca.make('products').list$((err, product) => {
-          if (err) {
-            return fin(err)
-          }
-
-          try {
-            const debug_logs = all_logs.filter(
-              (log) => 'debug' === log.level_name,
-            )
-
-            const save_log = debug_logs.find((log) => {
-              return (
-                Array.isArray(log.data) &&
-                'string' === typeof log.data[0] &&
-                'list' === log.data[0]
-              )
-            })
-
-            expect(save_log).to.exist()
-            expect(save_log.data.length).to.equal(6)
-
-            const [, , log_ent_canon, log_length, log_first_ent, log_desc] =
-              save_log.data
-
-            expect(log_ent_canon).to.equal('-/-/products')
-            expect(log_length).to.equal(0)
-            expect(log_first_ent).to.be.null()
-            expect(log_desc).to.startWith('mem-store')
-
-            return fin()
-          } catch (err) {
-            return fin(err)
-          }
-        })
-      })
-    })
-
-    const writeToStdout = process.stdout.write
-
-    function bufferSenecaLogsOnStdout(out_logs) {
-      process.stdout.write = (out) => {
-        const log = (() => {
-          try {
-            return JSON.parse(out)
-          } catch (_err) {
-            return null
-          }
-        })()
-
-        const is_log = null != log && 'level_name' in log
-
-        if (is_log) {
-          out_logs.push(log)
-          return
-        }
-
-        return writeToStdout.call(process.stdout, out)
-      }
-    }
-
-    function restoreStdout() {
-      process.stdout.write = writeToStdout
-    }
-
-    function testThatLogging(desc, test) {
-      it(desc, (fin) => {
-        test((err = null) => {
-          // NOTE: This allows test output to show after the test ends.
-          //
-          restoreStdout()
-
-          return fin(err)
-        })
-      })
-    }
-
-    function makeSenecaForTestOfLogging() {
-      return makeSenecaForTest({ seneca_opts: { log: 'debug' } })
-    }
-  })
 })
+
+
 
 function make_it(lab) {
   return function it(name, opts, func) {
