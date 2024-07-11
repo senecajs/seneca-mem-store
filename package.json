@@ -1,6 +1,6 @@
 {
   "name": "seneca-mem-store",
-  "version": "9.0.0",
+  "version": "9.1.0",
   "description": "Seneca in-memory data storage plugin.",
   "main": "dist/mem-store.js",
   "type": "commonjs",
@@ -47,18 +47,18 @@
   ],
   "peerDependencies": {
     "seneca": ">=3",
-    "seneca-entity": ">=26"
+    "seneca-entity": ">=27"
   },
   "devDependencies": {
     "@hapi/code": "9.0.3",
     "@hapi/lab": "25.2.0",
     "async": "3.2.5",
     "lab-transform-typescript": "3.0.1",
-    "prettier": "3.3.1",
+    "prettier": "3.3.2",
     "seneca-plugin-validator": "0.6.1",
-    "seneca-promisify": "3.7.1",
+    "seneca-promisify": "3.7.2",
     "seneca-store-test": "5.2.0",
-    "typescript": "5.4.5"
+    "typescript": "5.5.3"
   },
   "files": [
     "README.md",
@@ -68,6 +68,6 @@
     "dist"
   ],
   "dependencies": {
-    "gubu": "^7.1.0"
+    "gubu": "^8.1.0"
   }
 }
