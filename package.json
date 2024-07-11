@@ -1,6 +1,6 @@
 {
   "name": "seneca-mem-store",
-  "version": "9.1.0",
+  "version": "9.2.0",
   "description": "Seneca in-memory data storage plugin.",
   "main": "dist/mem-store.js",
   "type": "commonjs",
@@ -46,7 +46,7 @@
     "memory"
   ],
   "peerDependencies": {
-    "seneca": ">=3",
+    "seneca": ">=3||>=4.0.0-rc2",
     "seneca-entity": ">=27"
   },
   "devDependencies": {
