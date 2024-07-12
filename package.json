@@ -1,6 +1,6 @@
 {
   "name": "seneca-mem-store",
-  "version": "9.2.0",
+  "version": "9.3.0",
   "description": "Seneca in-memory data storage plugin.",
   "main": "dist/mem-store.js",
   "type": "commonjs",
@@ -68,6 +68,6 @@
     "dist"
   ],
   "dependencies": {
-    "gubu": "^8.1.0"
+    "gubu": "^8.2.1"
   }
 }
