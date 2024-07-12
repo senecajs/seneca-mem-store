@@ -166,7 +166,7 @@ function mem_store(this: any, options: Options) {
           const { ent } = msg
 
           if (null != id) {
-            mement.id = id
+            ent.id = mement.id = id
           }
 
           const prev = entmap[base][name][mement.id]
