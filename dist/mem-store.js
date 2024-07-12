@@ -2,7 +2,9 @@
 'use strict';
 Object.defineProperty(exports, "__esModule", { value: true });
 // TODO: use `undefined` as no-error value consistently
+const gubu_1 = require("gubu");
 const intern_1 = require("./intern");
+const { Default, Skip } = gubu_1.Gubu;
 let internals = {
     name: 'mem-store',
 };
@@ -11,14 +13,15 @@ function mem_store(options) {
     let init = seneca.export('entity/init');
     // merge default options with any provided by the caller
     options = seneca.util.deepextend({
-        prefix: '/mem-store',
-        idlen: 6,
-        web: {
-            dump: false,
-        },
+        // prefix: '/mem-store',
+        // idlen: 6,
+        // web: {
+        //   dump: false,
+        // },
         // TODO: use seneca.export once it allows for null values
         generate_id: seneca.root.private$.exports['entity/generate_id'],
     }, options);
+    // console.log('OPTIONS', options)
     // The calling Seneca instance will provide
     // a description for us on init(), it will
     // be used in the logs
@@ -259,6 +262,15 @@ mem_store.preload = function () {
     return meta;
 };
 mem_store.defaults = {
+    // TODO: entity
+    map: Default(undefined, {}),
+    prefix: '/mem-store',
+    idlen: 6,
+    web: {
+        dump: false,
+    },
+    merge: true,
+    generate_id: Skip(Function),
     'entity-id-exists': 'Entity of type <%=type%> with id = <%=id%> already exists.',
 };
 /* NOTE: `intern` serves as a namespace for utility functions used by

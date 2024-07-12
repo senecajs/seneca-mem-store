@@ -1,10 +1,12 @@
 type Options = {
+    map?: any;
     prefix?: string;
     idlen?: number;
     web?: {
         dump: boolean;
     };
     generate_id?: any;
+    'entity-id-exists': string;
 };
 declare function mem_store(this: any, options: Options): {
     name: string;
@@ -21,6 +23,14 @@ declare namespace mem_store {
         };
     };
     var defaults: {
+        map: import("gubu").Node<{}>;
+        prefix: string;
+        idlen: number;
+        web: {
+            dump: boolean;
+        };
+        merge: boolean;
+        generate_id: import("gubu").Node<FunctionConstructor>;
         'entity-id-exists': string;
     };
     var intern: typeof import("./intern").intern;
