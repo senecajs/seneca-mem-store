@@ -1,5 +1,5 @@
 {
-  "name": "seneca-mem-store",
+  "name": "@seneca/mem-store",
   "version": "9.4.0",
   "description": "Seneca in-memory data storage plugin.",
   "main": "dist/mem-store.js",
@@ -16,7 +16,7 @@
     "Wyatt Preul (https://github.com/geek)",
     "Paolo Chiodi (https://github.com/paolochiodi)",
     "Shane Lacey (https://github.com/shanel262)",
-    "Oisín Hennessy (https://github.com/code-jace)",
+    "Ois\u00edn Hennessy (https://github.com/code-jace)",
     "Efim Bogdanovsky (https://github.com/lilsweetcaligula)"
   ],
   "scripts": {
@@ -24,7 +24,6 @@
     "watch": "tsc -w -d",
     "test": "node --enable-source-maps --test",
     "test-some": "node --enable-source-maps --test-name-pattern=\"$npm_config_pattern\" --test test",
-    
     "test-lab": "lab -v -P test -L -t 90 -r console -o stdout -r html -o test/coverage.html -r lcov -o test/lcov.info --sourcemaps --transform node_modules/lab-transform-typescript",
     "test-lab-some": "lab -v -P test --sourcemaps --transform node_modules/lab-transform-typescript -g",
     "prettier": "prettier --write --no-semi --single-quote src/**/*.ts test/*.js",
