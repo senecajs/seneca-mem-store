@@ -1,4 +1,4 @@
-# seneca-mem-store documentation
+# @seneca/mem-store documentation
 
 The documentation follows the [Diátaxis](https://diataxis.fr/)
 structure: tutorials to learn, how-to guides for tasks, reference to

@@ -1,4 +1,4 @@
-// Getting started with seneca-mem-store.
+// Getting started with @seneca/mem-store.
 //
 // In your own project `seneca.use('entity')` loads mem-store automatically.
 // This file loads the plugin from this repository instead, so that the

@@ -11,7 +11,7 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/e2cdcc5415161cb378b0/maintainability)](https://codeclimate.com/github/senecajs/seneca-mem-store/maintainability)
 [![DeepScan grade](https://deepscan.io/api/teams/5016/projects/17225/branches/388415/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=5016&pid=17225&bid=388415)
 
-seneca-mem-store is the in-memory entity store for Seneca. It
+@seneca/mem-store is the in-memory entity store for Seneca. It
 implements the [seneca-entity][seneca-entity-url] store protocol
 (`save$`, `load$`, `list$`, `remove$`) with a plain JavaScript object
 as the database, so data lives only as long as the process. It is the
@@ -30,12 +30,13 @@ action and error.
 ## Install
 
 ```sh
-npm install seneca seneca-entity seneca-mem-store
+npm install seneca seneca-entity @seneca/mem-store
 ```
 
-seneca-entity depends on seneca-mem-store and loads it by default, so
-the explicit install only pins the version. Seneca 4 needs Node.js 22
-or later.
+Versions up to 9.4.0 were published as `seneca-mem-store`; from 9.4.1
+the package is `@seneca/mem-store`. seneca-entity depends on the
+`seneca-mem-store` package and loads it by default, so the explicit
+install only pins the version. Seneca 4 needs Node.js 22 or later.
 
 ## Quick Example
 
@@ -171,9 +172,10 @@ loaded it as a default plugin; today seneca-entity loads it. Version
 0.4 (2015) aligned it with the seneca-store-test specification, version
 5 (2020) converted it to TypeScript and added the comparison
 constraints, version 6 (2021) added upserts, and 9.4.1 adds Seneca 4
-prerelease support.
+prerelease support and moves the package to the `@seneca` scope
+(`@seneca/mem-store`; earlier versions are on npm as `seneca-mem-store`).
 
-| seneca-mem-store 9.4 | Supported | Tested |
+| @seneca/mem-store 9.4 | Supported | Tested |
 | -------------------- | --------- | ------ |
 | Seneca | 3, 4 (peer `>=3 || >=4.0.0-rc2`) | 3.38.0, 4.0.0-rc5, 4.0.0 development version |
 | seneca-entity | 27 or later (peer) | 28.1.0 |

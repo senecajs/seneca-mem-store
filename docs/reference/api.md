@@ -7,7 +7,7 @@ layout of the store object. For the action patterns see
 ## Module
 
 ```js
-const MemStore = require('seneca-mem-store')
+const MemStore = require('@seneca/mem-store')
 ```
 
 `MemStore` is the plugin definition function (`function mem_store(options)`),
@@ -24,8 +24,9 @@ option `mem_store` is `false`.
 | `MemStore.intern` | class with static methods | The internal helpers used by the store: `is_new`, `is_upsert`, `find_mement`, `update_mement`, `should_merge`, `listents`, `clean_array`, `is_object`, `is_date`, `eq_dates`. Exposed for the test suite; no compatibility promise. |
 
 The package is written in TypeScript; `dist/mem-store.d.ts` declares
-the types. `require('seneca-mem-store')` returns the function directly
-(CommonJS `module.exports`), and `.default` is the same function.
+the types. `require('@seneca/mem-store')` returns the function directly
+(CommonJS `module.exports`); there is no `.default` property. TypeScript
+`import MemStore from '@seneca/mem-store'` works with `esModuleInterop`.
 
 The plugin requires seneca-entity (peer dependency, 27 or later) to be
 loaded first: it obtains `entity/init` and `entity/generate_id` from

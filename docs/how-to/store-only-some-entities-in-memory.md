@@ -62,7 +62,7 @@ their entities. To add a second mem-store instance, load the plugin
 again with a tag:
 
 ```js
-const MemStore = require('seneca-mem-store')
+const MemStore = require('@seneca/mem-store')
 
 const seneca = Seneca({ log: 'silent' })
   .use('entity') // default mem-store for everything

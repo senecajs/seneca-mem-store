@@ -1,6 +1,6 @@
 # Getting started
 
-In this tutorial you install seneca-mem-store, save and query a few
+In this tutorial you install @seneca/mem-store, save and query a few
 entities, and look inside the store. It takes about ten minutes. The
 finished program is
 [docs/examples/getting-started.js](../examples/getting-started.js).
@@ -12,11 +12,11 @@ directory:
 
 ```sh
 npm init -y
-npm install seneca seneca-entity seneca-mem-store
+npm install seneca seneca-entity @seneca/mem-store
 ```
 
 seneca-entity provides the entity API (`seneca.entity`, `save$`,
-`load$`, `list$`, `remove$`); seneca-mem-store is the store that keeps
+`load$`, `list$`, `remove$`); @seneca/mem-store is the store that keeps
 the data. seneca-entity depends on seneca-mem-store and loads it by
 default, so the explicit install only pins the version.
 
