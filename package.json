@@ -16,7 +16,7 @@
     "Wyatt Preul (https://github.com/geek)",
     "Paolo Chiodi (https://github.com/paolochiodi)",
     "Shane Lacey (https://github.com/shanel262)",
-    "Ois\u00edn Hennessy (https://github.com/code-jace)",
+    "Oisín Hennessy (https://github.com/code-jace)",
     "Efim Bogdanovsky (https://github.com/lilsweetcaligula)"
   ],
   "scripts": {
@@ -64,7 +64,8 @@
     "CHANGES.md",
     "LICENSE",
     "src",
-    "dist"
+    "dist",
+    "docs"
   ],
   "dependencies": {
     "gubu": "^8.2.1"
