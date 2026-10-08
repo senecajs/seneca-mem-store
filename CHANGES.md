@@ -1,3 +1,22 @@
+## 9.4.1 - 2026-10-07
+
+* Seneca 4 prerelease support: the test suite runs unchanged against
+  seneca 4.0.0-rc5 (now a devDependency) and the unreleased 4.0.0, as
+  well as Seneca 3.38. The peer range is unchanged.
+* Node.js 24 and 22 are the tested versions.
+* `npm run build` works again with current `@types/node`: TypeScript
+  updated to 5.9.
+* Tests keep running with the Node.js test runner (`node --test`), which
+  executes the lab based test file. Unused devDependencies removed
+  (`async`, `lab-transform-typescript`); `seneca` and `seneca-entity`
+  are explicit devDependencies.
+* Documentation reorganized into tutorials, how-to guides, reference and
+  explanation under `docs/`, with runnable examples in `docs/examples`.
+* The CI workflow change (build on `master`, Node.js 24 and 22 matrix)
+  is provided as a patch in `.patches/`.
+* No behaviour changes.
+
+
 ## 6.2.0 - 2021-09-28
 
 * Update deps.
