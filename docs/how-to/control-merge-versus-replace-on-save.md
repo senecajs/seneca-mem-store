@@ -58,14 +58,14 @@ entity that `save$` returns.
 
 ```js
 const seneca = Seneca({ log: 'warn' })
-  .use('entity', { mem_store: false })
-  .use('mem-store', { merge: false })
+  .use('@seneca/entity', { mem_store: false })
+  .use('@seneca/mem-store', { merge: false })
 ```
 
-or, keeping the default load through seneca-entity:
+or, keeping the default load through @seneca/entity:
 
 ```js
-const seneca = Seneca({ plugin: { 'mem-store': { merge: false } } }).use('entity')
+const seneca = Seneca({ plugin: { 'mem-store': { merge: false } } }).use('@seneca/entity')
 ```
 
 Now every update replaces:

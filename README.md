@@ -12,13 +12,13 @@
 [![DeepScan grade](https://deepscan.io/api/teams/5016/projects/17225/branches/388415/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=5016&pid=17225&bid=388415)
 
 @seneca/mem-store is the in-memory entity store for Seneca. It
-implements the [seneca-entity][seneca-entity-url] store protocol
+implements the [@seneca/entity][seneca-entity-url] store protocol
 (`save$`, `load$`, `list$`, `remove$`) with a plain JavaScript object
 as the database, so data lives only as long as the process. It is the
-store that seneca-entity loads by default, and it is meant for
-development, prototypes and tests. It works with Seneca 3 and Seneca 4
-(tested with 3.38 and the 4.0.0 prerelease), seneca-entity 27 or
-later, and Node.js 22 and 24.
+store that @seneca/entity loads by default, and it is meant for
+development, prototypes and tests. It works with Seneca 3.38 and
+Seneca 4 (tested with 3.38.0, 4.0.0-rc5 and 4.0.0), @seneca/entity 29
+or later, and Node.js 22 and 24.
 
 The documentation is in [docs/](docs/README.md): a
 [tutorial](docs/tutorials/getting-started.md), [how-to guides](docs/README.md#how-to-guides),
@@ -30,13 +30,31 @@ action and error.
 ## Install
 
 ```sh
-npm install seneca seneca-entity @seneca/mem-store
+npm install seneca @seneca/entity @seneca/mem-store
 ```
 
-Versions up to 9.4.0 were published as `seneca-mem-store`; from 9.4.1
-the package is `@seneca/mem-store`. seneca-entity depends on the
-`seneca-mem-store` package and loads it by default, so the explicit
-install only pins the version. Seneca 4 needs Node.js 22 or later.
+Versions up to 9.4.0 were published as `seneca-mem-store`; 10.0.0 is
+the first version published as `@seneca/mem-store`. The entity plugin
+moved the same way: versions up to 28.1.0 were published as
+`seneca-entity`, and 29.0.0, the first version that loads on Seneca
+4.0.0, is `@seneca/entity`. @seneca/entity depends on
+@seneca/mem-store and loads it by default, so the explicit install only
+pins the version. Seneca 4.0.0 requires Node.js 24 or later.
+
+Some published plugins still have a peer dependency on `seneca-entity`:
+seneca-transport 8.3 (a dependency of Seneca 3.38), @seneca/user 6.4,
+@seneca/owner 6.4 and seneca-msg-test 4.1, for example. npm then
+installs seneca-entity 28.1.0, and its dependency seneca-mem-store
+9.4.0, next to @seneca/entity. Seneca tries the `seneca-` prefix
+before `@seneca/` when it looks up a plugin name, so
+`seneca.use('entity')` loads seneca-entity 28.1.0 and
+`seneca.use('mem-store')` loads seneca-mem-store 9.4.0. On Seneca 4.0.0
+both stop the process at startup with `plugin_gubu_shape`; on Seneca
+3.38 they load, but they are the old versions. Until those plugins are
+republished, load the plugins by package name, as the examples in this
+documentation do: `seneca.use('@seneca/entity')` (or
+`seneca.use(require('@seneca/entity'))`), which loads @seneca/mem-store
+as the default store, and `seneca.use('@seneca/mem-store', options)`.
 
 ## Quick Example
 
@@ -44,8 +62,8 @@ install only pins the version. Seneca 4 needs Node.js 22 or later.
 const Seneca = require('seneca')
 
 async function main() {
-  // seneca.use('entity') loads mem-store as the default store.
-  const seneca = Seneca({ log: 'warn' }).use('entity')
+  // seneca.use('@seneca/entity') loads mem-store as the default store.
+  const seneca = Seneca({ log: 'warn' }).use('@seneca/entity')
   await new Promise((resolve) => seneca.ready(resolve))
 
   const apple = await seneca
@@ -68,7 +86,9 @@ main()
 To pass options, load the plugin yourself:
 
 ```js
-seneca.use('entity', { mem_store: false }).use('mem-store', { merge: false })
+seneca
+  .use('@seneca/entity', { mem_store: false })
+  .use('@seneca/mem-store', { merge: false })
 ```
 
 ## More Examples
@@ -97,7 +117,7 @@ explained in [How mem-store works](docs/explanation/how-mem-store-works.md).
 
 * Open a [GitHub issue][github issue].
 * Read the [Seneca documentation](https://github.com/senecajs/seneca/blob/master/docs/README.md)
-  and the [seneca-entity][seneca-entity-url] documentation.
+  and the [@seneca/entity][seneca-entity-url] documentation.
 * Commercial support is available from [Voxgig](https://www.voxgig.com).
 
 ## API
@@ -122,7 +142,7 @@ You use the entity API; mem-store answers its messages.
 | ------ | ------- | --------- |
 | `map` | `{}` | [Options](docs/reference/options.md) |
 | `merge` | `true` | [Options](docs/reference/options.md) |
-| `generate_id` | seneca-entity's generator | [Options](docs/reference/options.md) |
+| `generate_id` | @seneca/entity's generator | [Options](docs/reference/options.md) |
 | `idlen`, `prefix`, `web.dump`, `entity-id-exists` | see reference | [Options](docs/reference/options.md) |
 
 Queries: field equality, arrays, `$ne`, `$gte`, `$gt`, `$lt`, `$lte`,
@@ -140,8 +160,9 @@ new features please get in touch.
 
 ### Running tests
 
-The tests need Node.js 22 or 24 and run against the Seneca 4 prerelease
-declared in `devDependencies`:
+The tests need Node.js 22 or 24 and run against the Seneca 4 version
+that the `devDependencies` range `^4.0.0-rc5` installs, with
+@seneca/entity 29:
 
 ```sh
 npm install
@@ -153,8 +174,10 @@ npm test
 file uses `@hapi/lab` and the shared `seneca-store-test` suite inside.
 To run the suite against another Seneca version, install it without
 saving, for example `npm install --no-save seneca@3`, and run `npm test`
-again. `npm run test-lab` runs the same tests with lab's coverage and
-lint report.
+again. The test file loads the entity plugin as `@seneca/entity`, so the
+seneca-entity 28.1.0 that npm adds for seneca-transport, a dependency of
+Seneca 3.38, is not used (see [Install](#install)). `npm run test-lab`
+runs the same tests with lab's coverage and lint report.
 
 The example programs in [docs/examples](docs/examples/README.md) must
 run to completion after a change: `node docs/examples/getting-started.js`.
@@ -168,25 +191,27 @@ them with `git am .patches/*.patch`.
 ## Background
 
 mem-store is one of the oldest Seneca plugins. Earlier Seneca versions
-loaded it as a default plugin; today seneca-entity loads it. Version
+loaded it as a default plugin; today @seneca/entity loads it. Version
 0.4 (2015) aligned it with the seneca-store-test specification, version
 5 (2020) converted it to TypeScript and added the comparison
-constraints, version 6 (2021) added upserts, and 9.4.1 adds Seneca 4
-prerelease support and moves the package to the `@seneca` scope
-(`@seneca/mem-store`; earlier versions are on npm as `seneca-mem-store`).
+constraints, version 6 (2021) added upserts, and version 10 (2026)
+supports Seneca 4.0.0, which validates plugin options with shape, and
+is the first version published in the `@seneca` scope
+(`@seneca/mem-store`; versions up to 9.4.0 are on npm as
+`seneca-mem-store`).
 
-| @seneca/mem-store 9.4 | Supported | Tested |
-| -------------------- | --------- | ------ |
-| Seneca | 3, 4 (peer `>=3 || >=4.0.0-rc2`) | 3.38.0, 4.0.0-rc5, 4.0.0 development version |
-| seneca-entity | 27 or later (peer) | 28.1.0 |
-| Node.js | What your Seneca version supports; Seneca 4 needs 22 or later | 22, 24 |
+| @seneca/mem-store 10.0 | Supported | Tested |
+| ---------------------- | --------- | ------ |
+| Seneca | 3.38 or later, and 4 from 4.0.0-rc5 (peer `>=3.38\|\|>=4.0.0-rc5`) | 3.38.0, 4.0.0-rc5, 4.0.0 |
+| @seneca/entity | 29 or later (peer) | 29.0.0 |
+| Node.js | What your Seneca version supports; Seneca 4.0.0 requires 24 or later | 22, 24 |
 
 Changes are listed in [CHANGES.md](CHANGES.md). Licensed under the
 [MIT][] license.
 
 [MIT]: ./LICENSE
-[npm-badge]: https://badge.fury.io/js/seneca-mem-store.svg
-[npm-url]: https://badge.fury.io/js/seneca-mem-store
+[npm-badge]: https://badge.fury.io/js/%40seneca%2Fmem-store.svg
+[npm-url]: https://badge.fury.io/js/%40seneca%2Fmem-store
 [Senecajs org]: https://github.com/senecajs/
 [Seneca.js]: https://www.npmjs.com/package/seneca
 [github issue]: https://github.com/senecajs/seneca-mem-store/issues

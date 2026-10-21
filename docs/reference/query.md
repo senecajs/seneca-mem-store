@@ -9,15 +9,15 @@ of what mem-store can select. For task oriented examples see
 
 | Form | Meaning |
 | ---- | ------- |
-| `load$('p1')`, `remove$('p1')` | An id. seneca-entity turns it into `{ id: 'p1' }`. Numbers are accepted too. |
+| `load$('p1')`, `remove$('p1')` | An id. @seneca/entity turns it into `{ id: 'p1' }`. Numbers are accepted too. |
 | `load$()` on an entity that has an id | `{ id: ent.id }`: reload the entity. |
 | `load$({ ... })`, `list$({ ... })`, `remove$({ ... })` | A query object: field conditions and directives. |
 | `list$()` or `list$({})` | Every record of the canon. |
-| `load$({})`, `remove$({})` | Nothing: seneca-entity answers `null` without sending a message. |
+| `load$({})`, `remove$({})` | Nothing: @seneca/entity answers `null` without sending a message. |
 
 Keys of the query object whose name contains `$` are directives and are
 never matched against record fields. Keys with an `undefined` value are
-removed by seneca-entity before the message is sent.
+removed by @seneca/entity before the message is sent.
 
 ## Field conditions
 

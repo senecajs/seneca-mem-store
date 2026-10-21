@@ -8,7 +8,7 @@ const Seneca = require('seneca')
 async function main() {
   // One store, restricted to two canons and, for orders, two commands.
   let seneca = Seneca({ log: 'silent' })
-    .use('entity', { mem_store: false })
+    .use('@seneca/entity', { mem_store: false })
     .use(require('../..'), {
       map: {
         '-/shop/product': '*',
@@ -40,7 +40,7 @@ async function main() {
   // Two stores: the default one for everything, and a tagged one that
   // takes over shop/product. The more specific pattern wins.
   seneca = Seneca({ log: 'silent' })
-    .use('entity', { mem_store: false })
+    .use('@seneca/entity', { mem_store: false })
     .use(require('../..'))
     .use(
       { name: 'mem-store', tag: 'cache', define: require('../..') },

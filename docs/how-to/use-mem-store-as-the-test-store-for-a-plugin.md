@@ -38,7 +38,7 @@ messages is decided by the plugins loaded next to it.
 async function makeSeneca(seed) {
   const seneca = Seneca()
     .test()
-    .use('entity')
+    .use('@seneca/entity')
     .use(shop)
 
   await new Promise((resolve) => seneca.ready(resolve))
@@ -51,15 +51,18 @@ async function makeSeneca(seed) {
 }
 ```
 
-* `seneca.use('entity')` loads mem-store by default. If your production
-  configuration loads another store plugin, leave it out of the test
-  instance; mem-store registers the same `sys:entity` patterns.
+* `seneca.use('@seneca/entity')` loads mem-store by default. If your
+  production configuration loads another store plugin, leave it out of
+  the test instance; mem-store registers the same `sys:entity` patterns.
+  Test dependencies such as seneca-msg-test 4.1 can install the older
+  seneca-entity package, which `seneca.use('entity')` would load
+  instead; see [Install](../../README.md#install).
 * A new instance is a new, empty store, so tests do not see each
   other's data.
 * `seneca.test()` turns on test mode: readable logs at warn level and
   caller locations in errors.
 * The repository example loads the plugin from the local build with
-  `.use('entity', { mem_store: false }).use(require('../..'))`.
+  `.use('@seneca/entity', { mem_store: false }).use(require('../..'))`.
 
 ## 3. Seed what the test needs
 
@@ -120,8 +123,8 @@ yourself with a `generate_id` function:
 let n = 0
 const seneca = Seneca()
   .test()
-  .use('entity', { mem_store: false })
-  .use('mem-store', { generate_id: () => 'id' + n++ })
+  .use('@seneca/entity', { mem_store: false })
+  .use('@seneca/mem-store', { generate_id: () => 'id' + n++ })
 ```
 
 ## Testing a store plugin

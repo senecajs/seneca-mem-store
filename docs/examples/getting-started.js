@@ -1,17 +1,17 @@
 // Getting started with @seneca/mem-store.
 //
-// In your own project `seneca.use('entity')` loads mem-store automatically.
-// This file loads the plugin from this repository instead, so that the
-// example exercises the local build.
+// In your own project `seneca.use('@seneca/entity')` loads mem-store
+// automatically. This file loads the plugin from this repository instead,
+// so that the example exercises the local build.
 const Seneca = require('seneca')
 
 async function main() {
   const seneca = Seneca({ log: 'warn' })
-    .use('entity', { mem_store: false })
+    .use('@seneca/entity', { mem_store: false })
     .use(require('../..'))
 
   // Wait until the plugins have loaded. The callback form of ready also
-  // works on Seneca 3 and on the Seneca 4 prerelease.
+  // works on Seneca 3 and on the 4.0.0-rc5 prerelease.
   await new Promise((resolve) => seneca.ready(resolve))
 
   // Create an entity and save it. The store generates the id.

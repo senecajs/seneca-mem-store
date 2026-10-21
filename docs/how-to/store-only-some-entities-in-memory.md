@@ -12,8 +12,8 @@ provides for each:
 
 ```js
 const seneca = Seneca({ log: 'silent' })
-  .use('entity', { mem_store: false })
-  .use('mem-store', {
+  .use('@seneca/entity', { mem_store: false })
+  .use('@seneca/mem-store', {
     map: {
       '-/shop/product': '*',
       '-/shop/order': ['load', 'list'],
@@ -65,17 +65,17 @@ again with a tag:
 const MemStore = require('@seneca/mem-store')
 
 const seneca = Seneca({ log: 'silent' })
-  .use('entity') // default mem-store for everything
+  .use('@seneca/entity') // default mem-store for everything
   .use(
     { name: 'mem-store', tag: 'cache', define: MemStore },
     { map: { '-/shop/product': '*' } },
   )
 ```
 
-On Seneca 3 write `init: MemStore` instead of `define: MemStore`. The
-same arrangement works with any other store plugin in place of the
-first mem-store, which is the usual case: a database for most entities
-and memory for a few.
+Seneca 3.38 accepts `define` as well; `init`, the older name, is
+deprecated in Seneca 4. The same arrangement works with any other store
+plugin in place of the first mem-store, which is the usual case: a
+database for most entities and memory for a few.
 
 ```
 save patterns: [ 'base:shop,cmd:save,name:product,sys:entity', 'cmd:save,sys:entity' ]
@@ -96,7 +96,7 @@ await seneca.entity('shop', 'order').native$()
 ```
 
 The exports are tagged: `seneca.export('mem-store$cache/native')` is
-the cache store. The untagged instance is tagged `1` by seneca-entity,
+the cache store. The untagged instance is tagged `1` by @seneca/entity,
 so it is also available as `seneca.export('mem-store$1/native')`.
 
 The actions `role:mem-store,cmd:dump`, `cmd:export` and `cmd:import`

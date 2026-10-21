@@ -2,10 +2,10 @@
 
 Every action pattern that mem-store answers, with the message fields it
 reads, what it replies, and the errors it can produce. The store
-actions are registered through seneca-entity; the plugin actions are
+actions are registered through @seneca/entity; the plugin actions are
 mem-store's own.
 
-Patterns on Seneca 4, as listed by `seneca.list()`:
+The patterns of mem-store on Seneca 4, as listed by `seneca.list()`:
 
 ```
 sys:entity,cmd:save
@@ -20,9 +20,10 @@ role:mem-store,cmd:import
 
 With a non-empty `map` option the store patterns also carry the canon
 fields `name`, `base` and `zone`, and only the mapped commands are
-registered (see [Options: map](options.md)). seneca-entity translates
-`role:entity,cmd:<cmd>` messages to `sys:entity`; Seneca 3 also lists
-those `role:entity` patterns.
+registered (see [Options: map](options.md)). @seneca/entity translates
+`role:entity,cmd:<cmd>` messages for `save`, `load`, `list` and
+`remove` to `sys:entity`; `seneca.list()` lists those `role:entity`
+patterns as well, on Seneca 3 and Seneca 4.
 
 ## Store actions
 
@@ -83,12 +84,12 @@ the canon, the stored record and the store description
 
 | Field | Type | Meaning |
 | ----- | ---- | ------- |
-| `q` | object | Field conditions and directives, see [Query reference](query.md). An id string is turned into `{ id }` by seneca-entity. |
+| `q` | object | Field conditions and directives, see [Query reference](query.md). An id string is turned into `{ id }` by @seneca/entity. |
 | `qent` | entity | The entity the query was made from; its canon selects the records and the results are entities of that canon. |
 
 Reply: the first matching entity after `sort$`, `skip$`, `limit$` and
 `fields$`, or `null`. An empty query is answered with `null` by
-seneca-entity without sending the message.
+@seneca/entity without sending the message.
 
 Errors: none of its own.
 
@@ -108,7 +109,7 @@ empty.
 
 Reply: the removed entity when `load$` is true and a record was
 removed; otherwise `null`. Removing a record that does not exist is not
-an error. An empty query is answered with `null` by seneca-entity
+an error. An empty query is answered with `null` by @seneca/entity
 without sending the message.
 
 Log: a debug entry `remove/one` or `remove/all` per removed record.
@@ -121,7 +122,7 @@ store.
 
 ### close
 
-seneca-entity adds an action on `sys:seneca,cmd:close` (translated to
+@seneca/entity adds an action on `sys:seneca,cmd:close` (translated to
 `role:seneca,cmd:close` on Seneca 3) that calls the store's `close`
 command once and then continues the close chain. mem-store's `close`
 only writes a debug log entry; there is no connection to release and
@@ -150,7 +151,7 @@ store serialized with `JSON.stringify`. Values that are not JSON
 | Field | Type | Meaning |
 | ----- | ---- | ------- |
 | `json` | string | Required. A JSON string in the store's shape: `{ [base]: { [name]: { [id]: record } } }`. |
-| `merge` | boolean | `true`: deep merge the parsed object into the store (`seneca.util.deepextend`), keeping everything not mentioned. Default: replace the store object. |
+| `merge` | boolean | `true`: deep merge the parsed object into the store (`seneca.util.deep`), keeping everything not mentioned. Default: replace the store object. |
 
 Reply: `null`.
 

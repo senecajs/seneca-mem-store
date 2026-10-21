@@ -2,13 +2,13 @@
 
 mem-store is the smallest possible implementation of a Seneca entity
 store: a JavaScript object, a scan, and no persistence. This page
-explains how it plugs into the seneca-entity store protocol, what that
+explains how it plugs into the @seneca/entity store protocol, what that
 protocol asks of a store, what mem-store keeps and loses, how Seneca 3
 and Seneca 4 differ for it, and where its limits come from.
 
 ## The store protocol
 
-seneca-entity defines the entity API (`seneca.entity`, `make$`,
+@seneca/entity defines the entity API (`seneca.entity`, `make$`,
 `save$`, `load$`, `list$`, `remove$`) as a thin layer over messages.
 Each method sends a message with a `cmd` field and the canon of the
 entity, and whatever action matches that message is the store. A store
@@ -16,7 +16,7 @@ is therefore an ordinary plugin that provides actions for a fixed set
 of commands: `save`, `load`, `list`, `remove`, `native` and `close`.
 
 Rather than adding those actions itself, a store describes them to
-seneca-entity:
+@seneca/entity:
 
 ```js
 const init = seneca.export('entity/init')
@@ -24,7 +24,7 @@ const meta = init(seneca, options, { name: 'mem-store', save, load, list, remove
 ```
 
 `init` registers one action per command, as `sys:entity,cmd:<cmd>`
-(from seneca-entity's `pattern_fix` option), adding the canon fields
+(from @seneca/entity's `pattern_fix` option), adding the canon fields
 `name`, `base` and `zone` when the store's `map` option restricts it to
 some entities. It also wraps each action so that `ent` and `qent` are
 always entity objects even when a message was sent by hand, hooks the
@@ -83,7 +83,7 @@ thousands of records a test or a prototype holds and wrong for a
 production data set.
 
 Ids are produced by the `generate_id` function, by default
-seneca-entity's: six random characters from `0-9a-z`. Collisions are
+@seneca/entity's: six random characters from `0-9a-z`. Collisions are
 possible in theory; `id$` gives you fixed ids when a test needs them.
 
 ## What is and is not persisted
@@ -111,28 +111,28 @@ protocol.
 ## Seneca 3 and Seneca 4
 
 mem-store itself has no code that depends on the Seneca version; the
-differences come from Seneca and seneca-entity:
+differences come from Seneca and @seneca/entity:
 
 | Topic | Seneca 3 | Seneca 4 |
 | ----- | -------- | -------- |
-| Store patterns | `sys:entity,cmd:*`, and `role:entity,cmd:*` patterns are listed as well. | `sys:entity,cmd:*`. `role:entity,cmd:*` messages are translated to them, but not listed. |
-| Close hook | seneca-entity adds `sys:seneca,cmd:close`, which Seneca 3 translates to `role:seneca,cmd:close`. | `sys:seneca,cmd:close` is the close action. |
-| Promises | Entity methods return promises (seneca-entity). `seneca.post` needs seneca-promisify. | Entity methods return promises; `seneca.post`, `seneca.message` and promise returning `ready` and `close` are built in. |
-| `await seneca.ready()` | Needs seneca-promisify. | Built in. In the 4.0.0-rc5 prerelease it does not resolve on an idle instance, so the examples use `seneca.ready(callback)`. |
+| Store patterns | `sys:entity,cmd:*`. @seneca/entity translates `role:entity,cmd:*` messages to them, and `seneca.list()` lists those `role:entity` patterns as well. | Same. |
+| Close hook | @seneca/entity adds `sys:seneca,cmd:close`, which Seneca 3 translates to `role:seneca,cmd:close`. | `sys:seneca,cmd:close` is the close action. |
+| Promises | Entity methods return promises (@seneca/entity). `seneca.post` needs seneca-promisify. | Entity methods return promises; `seneca.post`, `seneca.message` and promise returning `ready` and `close` are built in. |
+| `await seneca.ready()` | Needs seneca-promisify. | Built in. In the 4.0.0-rc5 prerelease it does not resolve on an idle instance (fixed in 4.0.0), so the examples use `seneca.ready(callback)`. |
 | Errors | `entity-id-exists` and `generate-invalid-entity-id` arrive with `code`, `details` and the message `seneca: <code>`. | Same. |
-| Plugin options | From `use`, `options.plugin['mem-store']` and the top level `options['mem-store']`. | From `use` and `options.plugin['mem-store']` only. |
-| Option validation | Gubu 8. | Gubu 9. mem-store's `defaults` are built with its own Gubu 8 and are accepted. |
-| Node.js | Whatever Seneca 3 supports. | 22 or later. |
+| Plugin options | From `use` and `options.plugin['mem-store']`; from a top level `options['mem-store']` as well when the Seneca option `legacy.top_plugins` is `true` (default `false`). | From `use` and `options.plugin['mem-store']` only. |
+| Option validation | Gubu 9 (3.38 bundles Gubu 9.0.0). | [shape](https://github.com/rjrodger/shape) 11 in 4.0.0, Gubu 9 in 4.0.0-rc5. 4.0.0 rejects option defaults built with Gubu (`plugin_gubu_shape`, fatal), so mem-store's `defaults` is a function that builds the shape with the builders Seneca passes to it in `valid`. The options are validated the same way on every version. |
+| Node.js | Whatever Seneca 3 supports. | 24 or later for 4.0.0. |
 
-The test suite of this repository runs against Seneca 3.38, the 4.0.0
-prerelease and the 4.0.0 development version without changes.
+The test suite of this repository runs against Seneca 3.38.0, 4.0.0-rc5
+and 4.0.0 without changes.
 
 ## Limits, and why they are acceptable
 
 * Linear scans and single key sorting: enough for test data sets,
   and simple enough to be obviously correct.
 * Strict equality and the small constraint set: the query language of
-  seneca-entity is deliberately minimal, so that every store can
+  @seneca/entity is deliberately minimal, so that every store can
   implement it; richer queries belong to store specific extensions or
   to `native$()`.
 * Zone ignored in the key: historical, see above.

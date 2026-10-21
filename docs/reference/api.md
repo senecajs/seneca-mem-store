@@ -12,14 +12,16 @@ const MemStore = require('@seneca/mem-store')
 
 `MemStore` is the plugin definition function (`function mem_store(options)`),
 named `mem-store`. Load it with `seneca.use(MemStore, options)`,
-`seneca.use('mem-store', options)` or, with a tag,
+`seneca.use('@seneca/mem-store', options)` or, with a tag,
 `seneca.use({ name: 'mem-store', tag: 'cache', define: MemStore }, options)`.
-It is also loaded for you by `seneca.use('entity')` unless the entity
-option `mem_store` is `false`.
+`seneca.use('mem-store', options)` also works, but it tries the older
+`seneca-mem-store` package first (see [Install](../../README.md#install)).
+It is also loaded for you by @seneca/entity (`seneca.use('@seneca/entity')`)
+unless the entity option `mem_store` is `false`.
 
 | Property | Type | Meaning |
 | -------- | ---- | ------- |
-| `MemStore.defaults` | object | The option shape (Gubu builders and plain default values). See [Options](options.md). |
+| `MemStore.defaults` | function `({ valid }) => object` | Returns the option shape: plain default values and builders from `valid`, which Seneca passes in (shape on Seneca 4.0.0, Gubu on Seneca 3.38 and 4.0.0-rc5). See [Options](options.md). |
 | `MemStore.preload` | function | Plugin preload hook; registers a placeholder `native` export before the plugin is defined. Internal. |
 | `MemStore.intern` | class with static methods | The internal helpers used by the store: `is_new`, `is_upsert`, `find_mement`, `update_mement`, `should_merge`, `listents`, `clean_array`, `is_object`, `is_date`, `eq_dates`. Exposed for the test suite; no compatibility promise. |
 
@@ -28,9 +30,11 @@ the types. `require('@seneca/mem-store')` returns the function directly
 (CommonJS `module.exports`); there is no `.default` property. TypeScript
 `import MemStore from '@seneca/mem-store'` works with `esModuleInterop`.
 
-The plugin requires seneca-entity (peer dependency, 27 or later) to be
+The plugin requires @seneca/entity (peer dependency, 29 or later) to be
 loaded first: it obtains `entity/init` and `entity/generate_id` from
-seneca-entity's exports.
+@seneca/entity's exports. `seneca` is the other peer dependency
+(3.38 or later, or 4 from 4.0.0-rc5); the package has no dependencies
+of its own.
 
 ## Plugin exports
 
@@ -38,7 +42,7 @@ seneca-entity's exports.
 | ---------- | ----- |
 | `seneca.export('mem-store/native')` | The store object of the mem-store instance loaded last. |
 | `seneca.export('mem-store$<tag>/native')` | The store object of a tagged instance. |
-| `seneca.export('mem-store$1/native')` | The store object of the untagged instance: seneca-entity tags untagged stores with a counter, starting at `1`. |
+| `seneca.export('mem-store$1/native')` | The store object of the untagged instance: @seneca/entity tags untagged stores with a counter, starting at `1`. |
 | `seneca.export('mem-store')` | The plugin record kept by Seneca (`name`, `tag`, `options`, `init`, ...). `init` is the definition function. |
 
 The store object is the live map. A replacing
@@ -49,7 +53,7 @@ exports still return the old one; `role:mem-store,cmd:dump` and
 ## Entity API additions
 
 mem-store adds nothing to the entity API. `ent.native$()` (from
-seneca-entity) is answered by the store object, see
+@seneca/entity) is answered by the store object, see
 [Messages: native](messages.md#native).
 
 ## Store object layout

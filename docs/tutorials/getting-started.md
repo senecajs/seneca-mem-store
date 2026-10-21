@@ -7,17 +7,16 @@ finished program is
 
 ## 1. Install
 
-Seneca 4 needs Node.js 22 or later (24 is recommended). In a new
-directory:
+Seneca 4.0.0 requires Node.js 24 or later. In a new directory:
 
 ```sh
 npm init -y
-npm install seneca seneca-entity @seneca/mem-store
+npm install seneca @seneca/entity @seneca/mem-store
 ```
 
-seneca-entity provides the entity API (`seneca.entity`, `save$`,
+@seneca/entity provides the entity API (`seneca.entity`, `save$`,
 `load$`, `list$`, `remove$`); @seneca/mem-store is the store that keeps
-the data. seneca-entity depends on seneca-mem-store and loads it by
+the data. @seneca/entity depends on @seneca/mem-store and loads it by
 default, so the explicit install only pins the version.
 
 ## 2. Save and load an entity
@@ -28,7 +27,7 @@ Create `fruit.js`:
 const Seneca = require('seneca')
 
 async function main() {
-  const seneca = Seneca({ log: 'warn' }).use('entity')
+  const seneca = Seneca({ log: 'warn' }).use('@seneca/entity')
 
   await new Promise((resolve) => seneca.ready(resolve))
 
@@ -59,12 +58,16 @@ loaded: { name: 'apple', price: 0.99, id: 'gwqe17' }
 
 (The id is random, so yours differs.) What happened:
 
-* `seneca.use('entity')` loaded seneca-entity, which loaded mem-store
-  because its `mem_store` option defaults to `true`. To pass options to
-  mem-store, load it yourself instead:
-  `seneca.use('entity', { mem_store: false }).use('mem-store', { merge: false })`.
+* `seneca.use('@seneca/entity')` loaded the entity plugin, which loaded
+  mem-store because its `mem_store` option defaults to `true`. The full
+  package name makes Seneca load @seneca/entity even when another
+  plugin has installed the older seneca-entity package, which
+  `seneca.use('entity')` would find first (see
+  [Install](../../README.md#install)). To pass options to mem-store,
+  load it yourself instead:
+  `seneca.use('@seneca/entity', { mem_store: false }).use('@seneca/mem-store', { merge: false })`.
 * `seneca.ready(callback)` waits until both plugins have loaded. The
-  callback form works on Seneca 3, on Seneca 4 and on the 4.0.0
+  callback form works on Seneca 3, on Seneca 4 and on the 4.0.0-rc5
   prerelease.
 * `seneca.entity('fruit')` made an entity of name `fruit`. Entities
   have a canon of up to three parts, zone, base and name;
@@ -79,8 +82,8 @@ loaded: { name: 'apple', price: 0.99, id: 'gwqe17' }
 
 The example in the repository,
 [getting-started.js](../examples/getting-started.js), loads the plugin
-with `.use('entity', { mem_store: false }).use(require('../..'))` so that
-it exercises the local build. Everything else is the same.
+with `.use('@seneca/entity', { mem_store: false }).use(require('../..'))`
+so that it exercises the local build. Everything else is the same.
 
 ## 3. Update
 
@@ -146,7 +149,7 @@ The store is a JavaScript object inside the plugin. It lives as long as
 the Seneca instance, in that process only. Nothing is written to disk,
 and a new instance starts empty. That is the point of mem-store: it is
 the store for development, prototypes and tests. How it fits the
-seneca-entity store protocol, and what that implies, is explained in
+@seneca/entity store protocol, and what that implies, is explained in
 [How mem-store works](../explanation/how-mem-store-works.md).
 
 ## Complete output
