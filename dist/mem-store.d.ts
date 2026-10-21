@@ -22,15 +22,17 @@ declare namespace mem_store {
             native: () => void;
         };
     };
-    var defaults: {
-        map: import("gubu").Node<{}>;
+    var defaults: ({ valid }: {
+        valid: any;
+    }) => {
+        map: any;
         prefix: string;
         idlen: number;
         web: {
             dump: boolean;
         };
         merge: boolean;
-        generate_id: import("gubu").Node<FunctionConstructor>;
+        generate_id: any;
         'entity-id-exists': string;
     };
     var intern: typeof import("./intern").intern;

@@ -3,11 +3,7 @@
 
 // TODO: use `undefined` as no-error value consistently
 
-import { Gubu } from 'gubu'
-
 import { intern } from './intern'
-
-const { Default, Skip } = Gubu
 
 let internals = {
   name: 'mem-store',
@@ -30,7 +26,7 @@ function mem_store(this: any, options: Options) {
   let init = seneca.export('entity/init')
 
   // merge default options with any provided by the caller
-  options = seneca.util.deepextend(
+  options = seneca.util.deep(
     {
       // prefix: '/mem-store',
       // idlen: 6,
@@ -354,7 +350,7 @@ function mem_store(this: any, options: Options) {
     { role: store.name, cmd: 'import' },
     function (this: any, msg: any, reply: any) {
       let imported = JSON.parse(msg.json)
-      entmap = msg.merge ? this.util.deepextend(entmap, imported) : imported
+      entmap = msg.merge ? this.util.deep(entmap, imported) : imported
       reply()
     },
   )
@@ -404,19 +400,21 @@ mem_store.preload = function (this: any) {
   return meta
 }
 
-mem_store.defaults = {
+// The option shape is built with the builders Seneca passes in `valid`:
+// shape on Seneca 4, Gubu on Seneca 3. Seneca 4 rejects Gubu shapes.
+mem_store.defaults = ({ valid }: { valid: any }) => ({
   // TODO: entity
-  map: Default(undefined, {}),
+  map: valid.Default(undefined, {}),
   prefix: '/mem-store',
   idlen: 6,
   web: {
     dump: false,
   },
   merge: true,
-  generate_id: Skip(Function),
+  generate_id: valid.Skip(Function),
   'entity-id-exists':
     'Entity of type <%=type%> with id = <%=id%> already exists.',
-}
+})
 
 /* NOTE: `intern` serves as a namespace for utility functions used by
  * the mem store.
