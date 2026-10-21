@@ -34,7 +34,7 @@ function makeSenecaForTest(opts = {}) {
   ).test()
 
   const { mem_store_opts = {} } = opts
-  seneca.use('entity', { mem_store: false })
+  seneca.use('@seneca/entity', { mem_store: false })
   seneca.use({ name: '..', tag: '1' }, mem_store_opts)
 
   return seneca
@@ -46,7 +46,7 @@ const seneca = Seneca({
   default_plugins: { 'mem-store': false },
 })
   .test()
-  .use('entity', { mem_store: false })
+  .use('@seneca/entity', { mem_store: false })
 seneca.use({ name: '..', tag: '1' })
 
 const senecaMerge = Seneca({
@@ -54,13 +54,13 @@ const senecaMerge = Seneca({
   log: 'silent',
 })
   .test()
-  .use('entity', { mem_store: false })
+  .use('@seneca/entity', { mem_store: false })
 senecaMerge.use({ name: '..', tag: '1' }, { merge: false })
 
 const seneca_test = Seneca({ legacy: false }) // ({ require })
   .test()
   .use('promisify')
-  .use('entity', { mem_store: false })
+  .use('@seneca/entity', { mem_store: false })
 //.use('..')
 
 const test_opts = {
@@ -76,7 +76,7 @@ describe('mem-store', () => {
     const s0 = await Seneca()
       .test()
       .use('promisify')
-      .use('entity', { mem_store: false })
+      .use('@seneca/entity', { mem_store: false })
       .use('..')
       .ready()
     // console.log(s0.list_plugins())
