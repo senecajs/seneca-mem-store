@@ -2,9 +2,13 @@
 
 Runnable programs used by the tutorial and the how-to guides. Each file
 loads the plugin from this repository with
-`.use('entity', { mem_store: false }).use(require('../..'))`; in your
-own project write `seneca.use('entity')` (which loads mem-store) or
-`seneca.use('entity', { mem_store: false }).use('mem-store', options)`.
+`.use('@seneca/entity', { mem_store: false }).use(require('../..'))`; in
+your own project write `seneca.use('@seneca/entity')` (which loads
+mem-store) or
+`seneca.use('@seneca/entity', { mem_store: false }).use('@seneca/mem-store', options)`.
+The full package names make Seneca load these packages even when
+another plugin has installed the older `seneca-entity` and
+`seneca-mem-store`; see [Install](../../README.md#install).
 
 | File | Used by |
 | ---- | ------- |
@@ -22,6 +26,10 @@ Run them from the repository root after `npm install` and
 ```sh
 node docs/examples/getting-started.js
 ```
+
+On Seneca 3, `seneca.post` and `seneca.message`, which most of the
+programs use, come from seneca-promisify: add `.use('promisify')` before
+the entity plugin.
 
 Generated ids are random, so they differ from the outputs shown in the
 pages.

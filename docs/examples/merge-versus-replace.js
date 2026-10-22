@@ -3,7 +3,7 @@ const Seneca = require('seneca')
 
 async function make(options) {
   const seneca = Seneca({ log: 'warn' })
-    .use('entity', { mem_store: false })
+    .use('@seneca/entity', { mem_store: false })
     .use(require('../..'), options)
   await new Promise((resolve) => seneca.ready(resolve))
   return seneca

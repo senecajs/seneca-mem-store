@@ -3,8 +3,8 @@
 The documentation follows the [Diátaxis](https://diataxis.fr/)
 structure: tutorials to learn, how-to guides for tasks, reference to
 look things up, and explanation to understand the design. The programs
-used in the pages are in [examples](examples/) and were run against the
-Seneca 4 prerelease; the outputs shown are real.
+used in the pages are in [examples](examples/) and were run against
+Seneca 4.0.0 and 4.0.0-rc5; the outputs shown are real.
 
 ## Tutorials
 
@@ -37,7 +37,7 @@ Seneca 4 prerelease; the outputs shown are real.
 
 | Explanation | Topic |
 | ----------- | ----- |
-| [How mem-store works](explanation/how-mem-store-works.md) | The seneca-entity store protocol, the data structure, what is and is not persisted, Seneca 3 versus 4, limits. |
+| [How mem-store works](explanation/how-mem-store-works.md) | The @seneca/entity store protocol, the data structure, what is and is not persisted, Seneca 3 versus 4, limits. |
 
 ## Feature index
 
@@ -78,7 +78,7 @@ flags.
 | Store object layout (`base`, `name`, `id`; zone ignored) | data structure | [API: store object layout](reference/api.md#store-object-layout), [How mem-store works](explanation/how-mem-store-works.md#the-data-structure) |
 | `entity-id-exists` | error code | [Error codes](reference/errors.md) |
 | `generate-invalid-entity-id` | error code | [Error codes](reference/errors.md) |
-| `act_not_found`, `invalid_plugin_option`, `SyntaxError` on import | related errors | [Error codes](reference/errors.md) |
+| `act_not_found`, `invalid_plugin_option`, `plugin_gubu_shape`, `plugin_define_failed`, `SyntaxError` on import | related errors | [Error codes](reference/errors.md) |
 | Debug log entries (`save/insert`, `load`, `remove/all`, ...) | logging | [API: log entries](reference/api.md#log-entries) |
 
 ## Other documents

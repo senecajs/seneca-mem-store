@@ -29,7 +29,7 @@ function shop(options) {
 async function makeSeneca(seed) {
   const seneca = Seneca()
     .test()
-    .use('entity', { mem_store: false })
+    .use('@seneca/entity', { mem_store: false })
     .use(require('../..'))
     .use(shop)
 

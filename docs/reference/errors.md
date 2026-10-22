@@ -31,17 +31,18 @@ try {
 The option `entity-id-exists` holds a message template from earlier
 versions; it is not used to build the message.
 
-## Errors from Seneca and seneca-entity
+## Errors from Seneca and @seneca/entity
 
 | Code | When |
 | ---- | ---- |
 | `act_not_found` | The entity or command is not covered by the `map` option, or no store is loaded for it. The message names the pattern that was not found. |
 | `invalid_plugin_option` | An option is unknown or has the wrong type. Fatal when the plugin loads. |
-| `store_cmd_missing` | Raised by seneca-entity when a store lacks a command; cannot happen with mem-store, which implements all six. |
+| `plugin_gubu_shape` | Seneca 4.0.0: the plugin's option defaults were built with Gubu. Raised for seneca-mem-store 9.4 and seneca-entity 28, which `seneca.use('mem-store')` and `seneca.use('entity')` load when another plugin has installed them (see [Install](../../README.md#install)). Fatal when the plugin loads. |
+| `store_cmd_missing` | Raised by @seneca/entity when a store lacks a command; cannot happen with mem-store, which implements all six. |
 
 ## Errors without a code
 
 | Error | When |
 | ----- | ---- |
 | `SyntaxError` | `role:mem-store,cmd:import` received no `json` or invalid JSON. |
-| `TypeError` from `seneca.export('entity/init')` | mem-store was loaded before seneca-entity, or without it. Load seneca-entity first (the default load does this). |
+| `TypeError: init is not a function`, reported by Seneca as the fatal `plugin_define_failed` | mem-store was loaded before @seneca/entity, or without it, so `seneca.export('entity/init')` is undefined. Load @seneca/entity first (the default load does this). |
