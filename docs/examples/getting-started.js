@@ -10,8 +10,8 @@ async function main() {
     .use('@seneca/entity', { mem_store: false })
     .use(require('../..'))
 
-  // Wait until the plugins have loaded. The callback form of ready also
-  // works on Seneca 3 and on the 4.0.0-rc5 prerelease.
+  // Wait until the plugins have loaded. `await seneca.ready()` does the
+  // same.
   await new Promise((resolve) => seneca.ready(resolve))
 
   // Create an entity and save it. The store generates the id.

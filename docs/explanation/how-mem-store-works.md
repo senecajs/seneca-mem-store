@@ -3,8 +3,8 @@
 mem-store is the smallest possible implementation of a Seneca entity
 store: a JavaScript object, a scan, and no persistence. This page
 explains how it plugs into the @seneca/entity store protocol, what that
-protocol asks of a store, what mem-store keeps and loses, how Seneca 3
-and Seneca 4 differ for it, and where its limits come from.
+protocol asks of a store, what mem-store keeps and loses, what Seneca 4
+changed for it, and where its limits come from.
 
 ## The store protocol
 
@@ -110,22 +110,24 @@ protocol.
 
 ## Seneca 3 and Seneca 4
 
-mem-store itself has no code that depends on the Seneca version; the
-differences come from Seneca and @seneca/entity:
+mem-store 10 supports Seneca 4 only (peer `^4.0.0`); Seneca 3
+applications stay on `seneca-mem-store@9`. mem-store itself has no code
+that depends on the Seneca version; the differences below come from
+Seneca and @seneca/entity, and explain what changed for code that moves
+from Seneca 3:
 
 | Topic | Seneca 3 | Seneca 4 |
 | ----- | -------- | -------- |
 | Store patterns | `sys:entity,cmd:*`. @seneca/entity translates `role:entity,cmd:*` messages to them, and `seneca.list()` lists those `role:entity` patterns as well. | Same. |
 | Close hook | @seneca/entity adds `sys:seneca,cmd:close`, which Seneca 3 translates to `role:seneca,cmd:close`. | `sys:seneca,cmd:close` is the close action. |
 | Promises | Entity methods return promises (@seneca/entity). `seneca.post` needs seneca-promisify. | Entity methods return promises; `seneca.post`, `seneca.message` and promise returning `ready` and `close` are built in. |
-| `await seneca.ready()` | Needs seneca-promisify. | Built in. In the 4.0.0-rc5 prerelease it does not resolve on an idle instance (fixed in 4.0.0), so the examples use `seneca.ready(callback)`. |
+| `await seneca.ready()` | Needs seneca-promisify. | Built in. The examples use the equivalent `seneca.ready(callback)`. |
 | Errors | `entity-id-exists` and `generate-invalid-entity-id` arrive with `code`, `details` and the message `seneca: <code>`. | Same. |
 | Plugin options | From `use` and `options.plugin['mem-store']`; from a top level `options['mem-store']` as well when the Seneca option `legacy.top_plugins` is `true` (default `false`). | From `use` and `options.plugin['mem-store']` only. |
-| Option validation | Gubu 9 (3.38 bundles Gubu 9.0.0). | [shape](https://github.com/rjrodger/shape) 11 in 4.0.0, Gubu 9 in 4.0.0-rc5. 4.0.0 rejects option defaults built with Gubu (`plugin_gubu_shape`, fatal), so mem-store's `defaults` is a function that builds the shape with the builders Seneca passes to it in `valid`. The options are validated the same way on every version. |
-| Node.js | Whatever Seneca 3 supports. | 24 or later for 4.0.0. |
+| Option validation | Gubu 9 (3.38 bundles Gubu 9.0.0). | [shape](https://github.com/rjrodger/shape) 11. Seneca 4 rejects option defaults built with Gubu (`plugin_gubu_shape`, fatal), so mem-store's `defaults` is a function that builds the shape with the builders Seneca passes to it in `valid`. |
+| Node.js | Whatever Seneca 3 supports. | 24 or later. |
 
-The test suite of this repository runs against Seneca 3.38.0, 4.0.0-rc5
-and 4.0.0 without changes.
+The test suite of this repository runs against Seneca 4.0.0.
 
 ## Limits, and why they are acceptable
 

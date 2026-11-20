@@ -21,15 +21,11 @@ another plugin has installed the older `seneca-entity` and
 | [only-some-entities.js](only-some-entities.js) | [Store only some entities in memory](../how-to/store-only-some-entities-in-memory.md) |
 
 Run them from the repository root after `npm install` and
-`npm run build`, with Node.js 22 or later:
+`npm run build`, with Node.js 24 or later:
 
 ```sh
 node docs/examples/getting-started.js
 ```
-
-On Seneca 3, `seneca.post` and `seneca.message`, which most of the
-programs use, come from seneca-promisify: add `.use('promisify')` before
-the entity plugin.
 
 Generated ids are random, so they differ from the outputs shown in the
 pages.

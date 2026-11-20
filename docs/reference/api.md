@@ -21,7 +21,7 @@ unless the entity option `mem_store` is `false`.
 
 | Property | Type | Meaning |
 | -------- | ---- | ------- |
-| `MemStore.defaults` | function `({ valid }) => object` | Returns the option shape: plain default values and builders from `valid`, which Seneca passes in (shape on Seneca 4.0.0, Gubu on Seneca 3.38 and 4.0.0-rc5). See [Options](options.md). |
+| `MemStore.defaults` | function `({ valid }) => object` | Returns the option shape: plain default values and builders from `valid`, which Seneca passes in ([shape](https://github.com/rjrodger/shape) builders). See [Options](options.md). |
 | `MemStore.preload` | function | Plugin preload hook; registers a placeholder `native` export before the plugin is defined. Internal. |
 | `MemStore.intern` | class with static methods | The internal helpers used by the store: `is_new`, `is_upsert`, `find_mement`, `update_mement`, `should_merge`, `listents`, `clean_array`, `is_object`, `is_date`, `eq_dates`. Exposed for the test suite; no compatibility promise. |
 
@@ -30,11 +30,11 @@ the types. `require('@seneca/mem-store')` returns the function directly
 (CommonJS `module.exports`); there is no `.default` property. TypeScript
 `import MemStore from '@seneca/mem-store'` works with `esModuleInterop`.
 
-The plugin requires @seneca/entity (peer dependency, 29 or later) to be
+The plugin requires @seneca/entity (peer dependency `^29.0.0`) to be
 loaded first: it obtains `entity/init` and `entity/generate_id` from
 @seneca/entity's exports. `seneca` is the other peer dependency
-(3.38 or later, or 4 from 4.0.0-rc5); the package has no dependencies
-of its own.
+(`^4.0.0`); the package has no dependencies of its own. It needs
+Node.js 24 or later.
 
 ## Plugin exports
 

@@ -72,8 +72,7 @@ const seneca = Seneca({ log: 'silent' })
   )
 ```
 
-Seneca 3.38 accepts `define` as well; `init`, the older name, is
-deprecated in Seneca 4. The same arrangement works with any other store
+`init`, the older name of `define`, is deprecated in Seneca 4. The same arrangement works with any other store
 plugin in place of the first mem-store, which is the usual case: a
 database for most entities and memory for a few.
 

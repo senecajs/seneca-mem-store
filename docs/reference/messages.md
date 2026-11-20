@@ -23,7 +23,7 @@ fields `name`, `base` and `zone`, and only the mapped commands are
 registered (see [Options: map](options.md)). @seneca/entity translates
 `role:entity,cmd:<cmd>` messages for `save`, `load`, `list` and
 `remove` to `sys:entity`; `seneca.list()` lists those `role:entity`
-patterns as well, on Seneca 3 and Seneca 4.
+patterns as well.
 
 ## Store actions
 
@@ -122,8 +122,8 @@ store.
 
 ### close
 
-@seneca/entity adds an action on `sys:seneca,cmd:close` (translated to
-`role:seneca,cmd:close` on Seneca 3) that calls the store's `close`
+@seneca/entity adds an action on `sys:seneca,cmd:close` that calls the
+store's `close`
 command once and then continues the close chain. mem-store's `close`
 only writes a debug log entry; there is no connection to release and
 the data stays in memory until the process ends.
