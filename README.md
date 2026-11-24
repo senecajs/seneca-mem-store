@@ -16,9 +16,9 @@ implements the [@seneca/entity][seneca-entity-url] store protocol
 (`save$`, `load$`, `list$`, `remove$`) with a plain JavaScript object
 as the database, so data lives only as long as the process. It is the
 store that @seneca/entity loads by default, and it is meant for
-development, prototypes and tests. It works with Seneca 3.38 and
-Seneca 4 (tested with 3.38.0, 4.0.0-rc5 and 4.0.0), @seneca/entity 29
-or later, and Node.js 22 and 24.
+development, prototypes and tests. It works with Seneca 4 (peer
+`^4.0.0`), @seneca/entity 29 (peer `^29.0.0`) and Node.js 24 or later.
+Seneca 3 users stay on `seneca-mem-store@9`.
 
 The documentation is in [docs/](docs/README.md): a
 [tutorial](docs/tutorials/getting-started.md), [how-to guides](docs/README.md#how-to-guides),
@@ -30,7 +30,7 @@ action and error.
 ## Install
 
 ```sh
-npm install seneca @seneca/entity @seneca/mem-store
+npm install seneca@^4 @seneca/entity @seneca/mem-store
 ```
 
 Versions up to 9.4.0 were published as `seneca-mem-store`; 10.0.0 is
@@ -39,19 +39,20 @@ moved the same way: versions up to 28.1.0 were published as
 `seneca-entity`, and 29.0.0, the first version that loads on Seneca
 4.0.0, is `@seneca/entity`. @seneca/entity depends on
 @seneca/mem-store and loads it by default, so the explicit install only
-pins the version. Seneca 4.0.0 requires Node.js 24 or later.
+pins the version. Seneca 4 requires Node.js 24 or later. Write
+`seneca@^4` in the install command: until Seneca 4 is the `latest`
+version on npm, a bare `seneca` installs Seneca 3.
 
 Some published plugins still have a peer dependency on `seneca-entity`:
-seneca-transport 8.3 (a dependency of Seneca 3.38), @seneca/user 6.4,
-@seneca/owner 6.4 and seneca-msg-test 4.1, for example. npm then
+seneca-transport 8.3, @seneca/user 6.4, @seneca/owner 6.4 and
+seneca-msg-test 4.1, for example. npm then
 installs seneca-entity 28.1.0, and its dependency seneca-mem-store
 9.4.0, next to @seneca/entity. Seneca tries the `seneca-` prefix
 before `@seneca/` when it looks up a plugin name, so
 `seneca.use('entity')` loads seneca-entity 28.1.0 and
-`seneca.use('mem-store')` loads seneca-mem-store 9.4.0. On Seneca 4.0.0
-both stop the process at startup with `plugin_gubu_shape`; on Seneca
-3.38 they load, but they are the old versions. Until those plugins are
-republished, load the plugins by package name, as the examples in this
+`seneca.use('mem-store')` loads seneca-mem-store 9.4.0. On Seneca 4
+both stop the process at startup with `plugin_gubu_shape`. Until those
+plugins are republished, load the plugins by package name, as the examples in this
 documentation do: `seneca.use('@seneca/entity')` (or
 `seneca.use(require('@seneca/entity'))`), which loads @seneca/mem-store
 as the default store, and `seneca.use('@seneca/mem-store', options)`.
@@ -160,9 +161,8 @@ new features please get in touch.
 
 ### Running tests
 
-The tests need Node.js 22 or 24 and run against the Seneca 4 version
-that the `devDependencies` range `^4.0.0-rc5` installs, with
-@seneca/entity 29:
+The tests need Node.js 24 or later and run against Seneca 4 (the
+`devDependencies` range `^4.0.0`) with @seneca/entity 29:
 
 ```sh
 npm install
@@ -171,13 +171,11 @@ npm test
 ```
 
 `npm test` runs `test/mem.test.js` with the Node.js test runner; the
-file uses `@hapi/lab` and the shared `seneca-store-test` suite inside.
-To run the suite against another Seneca version, install it without
-saving, for example `npm install --no-save seneca@3`, and run `npm test`
-again. The test file loads the entity plugin as `@seneca/entity`, so the
-seneca-entity 28.1.0 that npm adds for seneca-transport, a dependency of
-Seneca 3.38, is not used (see [Install](#install)). `npm run test-lab`
-runs the same tests with lab's coverage and lint report.
+file uses `@hapi/lab` and the shared `@seneca/store-test` suite inside.
+The test file loads the entity plugin as `@seneca/entity`, so an older
+seneca-entity that another package installs is not used (see
+[Install](#install)). `npm run test-lab` runs the same tests with lab's
+coverage and lint report.
 
 The example programs in [docs/examples](docs/examples/README.md) must
 run to completion after a change: `node docs/examples/getting-started.js`.
@@ -195,16 +193,16 @@ loaded it as a default plugin; today @seneca/entity loads it. Version
 0.4 (2015) aligned it with the seneca-store-test specification, version
 5 (2020) converted it to TypeScript and added the comparison
 constraints, version 6 (2021) added upserts, and version 10 (2026)
-supports Seneca 4.0.0, which validates plugin options with shape, and
-is the first version published in the `@seneca` scope
+supports Seneca 4, which validates plugin options with shape, and is
+the first version published in the `@seneca` scope
 (`@seneca/mem-store`; versions up to 9.4.0 are on npm as
-`seneca-mem-store`).
+`seneca-mem-store`, the line for Seneca 3).
 
 | @seneca/mem-store 10.0 | Supported | Tested |
 | ---------------------- | --------- | ------ |
-| Seneca | 3.38 or later, and 4 from 4.0.0-rc5 (peer `>=3.38\|\|>=4.0.0-rc5`) | 3.38.0, 4.0.0-rc5, 4.0.0 |
-| @seneca/entity | 29 or later (peer) | 29.0.0 |
-| Node.js | What your Seneca version supports; Seneca 4.0.0 requires 24 or later | 22, 24 |
+| Seneca | 4 (peer `^4.0.0`) | 4.0.0 |
+| @seneca/entity | 29 (peer `^29.0.0`) | 29.0.0 |
+| Node.js | 24 or later (`engines.node` `>=24`) | 24, 26 |
 
 Changes are listed in [CHANGES.md](CHANGES.md). Licensed under the
 [MIT][] license.

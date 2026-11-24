@@ -5,8 +5,8 @@ mem-store user is likely to meet.
 
 Errors created with `seneca.fail` carry `code`, `details` and a
 `message` of the form `seneca: <code>`. They reach the `act` callback,
-or reject the promise of an entity method, as shown below, on Seneca 3
-and Seneca 4 alike (the `seneca-store-test` suite asserts on `code`).
+or reject the promise of an entity method, as shown below (the
+`@seneca/store-test` suite asserts on `code`).
 
 ## Codes defined by mem-store
 
@@ -37,7 +37,7 @@ versions; it is not used to build the message.
 | ---- | ---- |
 | `act_not_found` | The entity or command is not covered by the `map` option, or no store is loaded for it. The message names the pattern that was not found. |
 | `invalid_plugin_option` | An option is unknown or has the wrong type. Fatal when the plugin loads. |
-| `plugin_gubu_shape` | Seneca 4.0.0: the plugin's option defaults were built with Gubu. Raised for seneca-mem-store 9.4 and seneca-entity 28, which `seneca.use('mem-store')` and `seneca.use('entity')` load when another plugin has installed them (see [Install](../../README.md#install)). Fatal when the plugin loads. |
+| `plugin_gubu_shape` | Seneca 4: the plugin's option defaults were built with Gubu. Raised for seneca-mem-store 9.4 and seneca-entity 28, which `seneca.use('mem-store')` and `seneca.use('entity')` load when another plugin has installed them (see [Install](../../README.md#install)). Fatal when the plugin loads. |
 | `store_cmd_missing` | Raised by @seneca/entity when a store lacks a command; cannot happen with mem-store, which implements all six. |
 
 ## Errors without a code

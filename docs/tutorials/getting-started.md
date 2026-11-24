@@ -7,11 +7,11 @@ finished program is
 
 ## 1. Install
 
-Seneca 4.0.0 requires Node.js 24 or later. In a new directory:
+Seneca 4 requires Node.js 24 or later. In a new directory:
 
 ```sh
 npm init -y
-npm install seneca @seneca/entity @seneca/mem-store
+npm install seneca@^4 @seneca/entity @seneca/mem-store
 ```
 
 @seneca/entity provides the entity API (`seneca.entity`, `save$`,
@@ -66,9 +66,8 @@ loaded: { name: 'apple', price: 0.99, id: 'gwqe17' }
   [Install](../../README.md#install)). To pass options to mem-store,
   load it yourself instead:
   `seneca.use('@seneca/entity', { mem_store: false }).use('@seneca/mem-store', { merge: false })`.
-* `seneca.ready(callback)` waits until both plugins have loaded. The
-  callback form works on Seneca 3, on Seneca 4 and on the 4.0.0-rc5
-  prerelease.
+* `seneca.ready(callback)` waits until both plugins have loaded.
+  `await seneca.ready()` does the same.
 * `seneca.entity('fruit')` made an entity of name `fruit`. Entities
   have a canon of up to three parts, zone, base and name;
   `'-/-/fruit'` in the output means zone and base are not set.

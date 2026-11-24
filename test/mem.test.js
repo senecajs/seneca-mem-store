@@ -9,7 +9,7 @@ const Util = require('util')
 
 const Assert = require('assert')
 const Seneca = require('seneca')
-const Shared = require('seneca-store-test')
+const Shared = require('@seneca/store-test')
 const MakePluginValidator = require('seneca-plugin-validator')
 
 const Code = require('@hapi/code')
@@ -59,7 +59,6 @@ senecaMerge.use({ name: '..', tag: '1' }, { merge: false })
 
 const seneca_test = Seneca({ legacy: false }) // ({ require })
   .test()
-  .use('promisify')
   .use('@seneca/entity', { mem_store: false })
 //.use('..')
 
@@ -75,7 +74,6 @@ describe('mem-store', () => {
   test('load-plugin', async (fin) => {
     const s0 = await Seneca()
       .test()
-      .use('promisify')
       .use('@seneca/entity', { mem_store: false })
       .use('..')
       .ready()

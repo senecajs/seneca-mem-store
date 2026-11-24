@@ -3,9 +3,8 @@
 Every option accepted by mem-store, with its type, default and effect.
 The defaults are defined by the function `mem_store.defaults`
 (`MemStore.defaults` on the module), which Seneca calls with its
-validation builders as `{ valid }`:
-[shape](https://github.com/rjrodger/shape) on Seneca 4.0.0,
-[Gubu](https://github.com/rjrodger/gubu) on Seneca 3.38 and 4.0.0-rc5.
+validation builders as `{ valid }`, from
+[shape](https://github.com/rjrodger/shape).
 Seneca validates the options you pass against the shape it returns when
 the plugin loads. An unknown key or a value of the wrong type is fatal
 with the code `invalid_plugin_option`; the value of `generate_id` is not
@@ -44,10 +43,8 @@ either way, so the option keys do not change.
 
 For a tagged instance the key is `'mem-store$<tag>'`; see
 [Plugins](https://github.com/senecajs/seneca/blob/master/docs/reference/plugins.md)
-in the Seneca documentation for the full resolution order. Seneca 3 also
-reads a top level `options['mem-store']` object when its option
-`legacy.top_plugins` is `true` (the default is `false`); Seneca 4 does
-not.
+in the Seneca documentation for the full resolution order. Seneca 4
+does not read a top level `options['mem-store']` object.
 
 ## Options of @seneca/entity that affect mem-store
 

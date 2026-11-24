@@ -111,7 +111,7 @@ await seneca.close()
 ```
 
 Otherwise the test process may not exit. The callback form
-`seneca.close(done)` works on Seneca 3.
+`seneca.close(done)` works as well.
 
 ## Predictable ids
 
@@ -130,7 +130,7 @@ const seneca = Seneca()
 ## Testing a store plugin
 
 If what you are testing is itself a store plugin, use the shared
-test suite from [seneca-store-test](https://github.com/senecajs/seneca-store-test),
+test suite from [@seneca/store-test](https://github.com/senecajs/seneca-store-test),
 as this repository does in [test/mem.test.js](../../test/mem.test.js).
 
 ## Output

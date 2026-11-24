@@ -4,7 +4,7 @@ The documentation follows the [Diátaxis](https://diataxis.fr/)
 structure: tutorials to learn, how-to guides for tasks, reference to
 look things up, and explanation to understand the design. The programs
 used in the pages are in [examples](examples/) and were run against
-Seneca 4.0.0 and 4.0.0-rc5; the outputs shown are real.
+Seneca 4.0.0; the outputs shown are real.
 
 ## Tutorials
 
@@ -37,7 +37,7 @@ Seneca 4.0.0 and 4.0.0-rc5; the outputs shown are real.
 
 | Explanation | Topic |
 | ----------- | ----- |
-| [How mem-store works](explanation/how-mem-store-works.md) | The @seneca/entity store protocol, the data structure, what is and is not persisted, Seneca 3 versus 4, limits. |
+| [How mem-store works](explanation/how-mem-store-works.md) | The @seneca/entity store protocol, the data structure, what is and is not persisted, what Seneca 4 changed, limits. |
 
 ## Feature index
 
